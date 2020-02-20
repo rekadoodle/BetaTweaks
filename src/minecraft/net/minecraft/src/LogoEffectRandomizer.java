@@ -11,10 +11,9 @@ import java.util.Random;
 class LogoEffectRandomizer
 {
 
-    public LogoEffectRandomizer(GuiMainMenuCustom guiOldCustomMainMenu, int i, int j)
+    public LogoEffectRandomizer(int i, int j, Random rand)
     {
-        mainMenu = guiOldCustomMainMenu;
-        field_1312_a = field_1311_b = (double)(10 + j) + GuiMainMenuCustom.getRand().nextDouble() * 32D + (double)i;
+    	field_1312_a = field_1311_b = (double)(10 + j) + rand.nextDouble() * 32D + (double)i;
     }
 
     public void func_875_a()
@@ -36,5 +35,4 @@ class LogoEffectRandomizer
     public double field_1312_a;
     public double field_1311_b;
     public double field_1314_c;
-    final GuiMainMenuCustom mainMenu;
 }

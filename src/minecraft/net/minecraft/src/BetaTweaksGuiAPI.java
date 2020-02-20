@@ -53,6 +53,12 @@ public class BetaTweaksGuiAPI {
 		label1.setText("GUI/HUD Settings");
 		clientSideSettingsBase.heightOverrideExceptions.put(label1, 0);
 		clientSideSettingsBase.add(label1);
+		
+		SettingBoolean draggingShortcuts = guiapiSettings.addSetting(clientSideSettingsBase, "Inventory Dragging Shortcuts",
+				"optionsClientDraggingShortcuts", mod_BetaTweaks.optionsClientDraggingShortcuts, "ON", "OFF");
+		((WidgetBoolean) draggingShortcuts.displayWidget).button
+				.setTooltipContent(GuiApiHelper.makeTextArea("Inventory Dragging Shortcuts:" + "\r\n" + "(default:ON)"
+						+ "\r\n\r\n" + "Adds some shortcuts to help spread, collect or transfer items in the inventory.", false));
 
 		SettingMulti logoState = guiapiSettings.addSetting(clientSideSettingsBase, "Title Screen Logo",
 				"optionsClientLogo", 0, "Standard", "Animated", "Custom");

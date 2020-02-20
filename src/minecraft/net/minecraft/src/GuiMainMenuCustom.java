@@ -6,7 +6,12 @@ package net.minecraft.src;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.*;
 import net.minecraft.client.Minecraft;
@@ -31,7 +36,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 	public GuiMainMenuCustom()
     {
 		updateCounter = 0;
-		minecraftLogo = mod_BetaTweaks.getCustomLogo();
+		minecraftLogo = getCustomLogo();
         splashText = "missingno";
         try
         {
@@ -313,22 +318,22 @@ public class GuiMainMenuCustom extends GuiMainMenu
 
 	private void drawLogo(float f)
     {
-    	if (mod_BetaTweaks.customLogoConfigUpdated())
+    	if (customLogoConfigUpdated())
     	{
-    		mod_BetaTweaks.readCustomLogoConfig();
+    		readCustomLogoConfig();
     		//mc.displayGuiScreen(new GuiMainMenuCustom(updateCounter));
     	}
-    	minecraftLogo = mod_BetaTweaks.getCustomLogo();
+    	minecraftLogo = getCustomLogo();
         
         if(logoEffects == null)
         {
         	
-            logoEffects = new LogoEffectRandomizer[mod_BetaTweaks.getCustomLogoWidth()][minecraftLogo.length];
+            logoEffects = new LogoEffectRandomizer[getCustomLogoWidth()][minecraftLogo.length];
             for(int i = 0; i < logoEffects.length; i++)
             {
                 for(int j = 0; j < logoEffects[i].length; j++)
                 {
-                    logoEffects[i][j] = new LogoEffectRandomizer(this, i, j);
+                    logoEffects[i][j] = new LogoEffectRandomizer(i, j, rand);
                 }
 
             }
@@ -406,7 +411,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
                     GL11.glTranslatef(j1, minecraftLogo.length - 1 - i1, f1);
                     GL11.glScalef(f2, f2, f2);
                     GL11.glRotatef(f4, 0.0F, 1.0F, 0.0F);
-                    renderblockslogofunc.func_1238_a(mod_BetaTweaks.getCustomLogoBlock(i1, j1), mod_BetaTweaks.getCustomLogoBlockMetaData(i1, j1), f3);
+                    renderblockslogofunc.func_1238_a(getCustomLogoBlock(i1, j1), getCustomLogoBlockMetaData(i1, j1), f3);
                     }
                     GL11.glPopMatrix();
                     
@@ -435,7 +440,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
             {
                 for(int j = 0; j < logoEffects[i].length; j++)
                 {
-                    logoEffects[i][j] = new LogoEffectRandomizer(this, i, j);
+                    logoEffects[i][j] = new LogoEffectRandomizer(i, j, rand);
                 }
 
             }
@@ -527,15 +532,199 @@ public class GuiMainMenuCustom extends GuiMainMenu
         GL11.glViewport(0, 0, mc.displayWidth, mc.displayHeight);
         GL11.glEnable(2884 /*GL_CULL_FACE*/);
     }
-	
-    static Random getRand()
-    {
-        return rand;
-    }
+    
+	public static String[] getCustomLogo() {
+		String as[] = new String[image.size()];
+		for (int i = 0; i < image.size(); i++) {
+			as[i] = image.get(i);
+		}
+
+		return as;
+	}
+
+	public static int getCustomLogoWidth() {
+		return maxLineLength;
+	}
+
+	public static Block getCustomLogoBlock(int i, int j) {
+		for (int k = 0; k < blockID.size(); k++) {
+			if (image.get(i).charAt(j) == chars.get(k)) {
+				if (blockID.get(k) < 255) {
+					return Block.blocksList[blockID.get(k)];
+				}
+			}
+		}
+		return Block.torchWood;
+	}
+
+	public static int getCustomLogoBlockMetaData(int i, int j) {
+		for (int k = 0; k < blockID.size(); k++) {
+			if (image.get(i).charAt(j) == chars.get(k)) {
+				return metaData.get(k);
+			}
+		}
+		return 0;
+	}
+
+	public static Boolean customLogoConfigUpdated() {
+		if (resetLogo) {
+			resetLogo = false;
+			return true;
+		}
+		if (configLogoFile.lastModified() != timeStamp) {
+			timeStamp = configLogoFile.lastModified();
+			if (!configLogoFile.exists()) {
+				writeCustomLogoConfig();
+			}
+			return true;
+		}
+		return false;
+	}
+
+	public static void readCustomLogoConfig() {
+		maxLineLength = 0;
+		image.clear();
+		chars.clear();
+		blockID.clear();
+		metaData.clear();
+
+		try {
+			BufferedReader configReader = new BufferedReader(new FileReader(configLogoFile));
+			String s;
+			Boolean readImage = false;
+			Boolean readOptions = false;
+			while ((s = configReader.readLine()) != null) {
+				if (s.charAt(0) == '/' && s.charAt(1) == '/') {
+					continue;
+				} // Ignore comments
+				else if (readOptions) {
+					if (s.contains("=")) {
+						String as[] = s.split("=");
+						Field f1 = mod_BetaTweaks.class.getField("logo" + (as[0]));
+
+						if (f1.getType() == float.class) {
+							f1.set(null, Float.parseFloat(as[1]));
+						}
+						if (f1.getType() == Boolean.class) {
+							f1.set(null, Boolean.parseBoolean(as[1]));
+						}
+					}
+				}
+				else if (readImage) {
+					if (s.equals("#")) {
+						readOptions = true;
+					}
+					else {
+						image.add(s);
+						if (s.length() > maxLineLength) {
+							maxLineLength = s.length();
+						}
+					}
+				} else if (s.contains("=")) {
+					String as[] = s.split("=");
+					chars.add(as[0].charAt(0));
+					if (as[1].contains(":")) {
+						String as1[] = as[1].split(":");
+						blockID.add(Integer.parseInt(as1[0]));
+						metaData.add(Integer.parseInt(as1[1]));
+					} else if (as[1].contains("-")) {
+						String as1[] = as[1].split("-");
+						blockID.add(Integer.parseInt(as1[0]));
+						metaData.add(Integer.parseInt(as1[1]));
+					} else {
+						blockID.add(Integer.parseInt(as[1]));
+						metaData.add(0);
+					}
+				} else if (s.equals("#")) {
+					readImage = true;
+				}
+			}
+			configReader.close();
+		} catch (Exception exception) {
+			exception.printStackTrace();
+			
+		}
+	}
+
+	public static void writeCustomLogoConfig() {
+		try {
+			BufferedWriter configWriter = new BufferedWriter(new FileWriter(configLogoFile));
+			configWriter.write(				   "// Config file for customising the animated logo."
+					+ System.lineSeparator() + "// NOTE: The logo will automatically update when this file is saved but you may need to reset it (ESC) for all the blocks to show."
+					+ System.lineSeparator() + "// "
+					+ System.lineSeparator() + "// To customise the logo, first create a key below with block IDs and characters to match the ascii."
+					+ System.lineSeparator() + "// This X=1 means that any block denoted with an X in the image section will be a stone block in the main menu."
+					+ System.lineSeparator() + "X=35:15"
+					+ System.lineSeparator() + "*=82"
+					+ System.lineSeparator() + "R=35:10"
+					+ System.lineSeparator() + "O=35:1"
+					+ System.lineSeparator() + "Y=35:4"
+					+ System.lineSeparator() + "G=35:5"
+					+ System.lineSeparator() + "C=35:3"
+					+ System.lineSeparator() + "B=35:11"
+					+ System.lineSeparator() + "W=80"
+					+ System.lineSeparator() + "P=35:6"
+					+ System.lineSeparator() + "T=12"
+					+ System.lineSeparator() + "M=1"
+					+ System.lineSeparator() + "// You can use blocks with metadata with ':' or '-' so for example: Y=35-6 would attribute Y with pink wool."
+					+ System.lineSeparator() + "// "
+					+ System.lineSeparator() + "#"
+					+ System.lineSeparator() + "// Below this # symbol is where the logo art is recorded."
+					+ System.lineSeparator() + "// If you want to use a blank line you must put at least 1 space in."
+					+ System.lineSeparator() + "// If you use a symbol below that has not been assigned a block, it will give the torch block (which does not look good)."
+					+ System.lineSeparator() + "// "
+					+ System.lineSeparator() + "        RRRRRRRR        RRRRRRRR        RRRRRRRR        RRRRRRRR        RRRRRRRR        RRRRRRRR        RRRRRRRR    "
+					+ System.lineSeparator() + "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRXWWWWWWWWWWWWWWWWWX"
+					+ System.lineSeparator() + "RRRRRRRROOOOOOOORRRRRRRROOOOOOOORRMMMMMOOMMMMMMMMMMMMMRMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMOOOORRRRRRXWWWPPPPPPPPPPPPPWWWX"
+					+ System.lineSeparator() + "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOMTTTMOOMTTTMTTTMTTTMRMTTTMTTTTTTTMTTTTTTTMTTTTTTTMTTTTTTTMTTTTTTTMTTTTTTTMOOOOOOOOOOXWWPPPPPPPRPPXXPPPWWX XXX"
+					+ System.lineSeparator() + "OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOMTTTMMMMTTTMTTTMTTTMMMTTTMTTTTTTTMTTTTTTTMTTTTTTTMTTTTTTTMTTTTTTTMTTTTTTTMOOOOOOOOOOXWPPRPPPPPPPX**XRPPWXX**X"
+					+ System.lineSeparator() + "OOOOOOOOYYYYYYYYOOOOOOOOYYYYYYYYOOMTTTTMMTTTTMTTTMTTTTMMTTTMTTTMMMMMTTTMMMMMTTTTTTTMTTMTMTTMTTTMMMMMMMTTTMMMYYYYOOOOOOXWPPPPPPPPPPX***PPPWX***X"
+					+ System.lineSeparator() + "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYMTTTTMMTTTTMTTTMTTTTMMTTTMTTTMMMMMTTTMYYYMTTTMTTTMTTTMTTTMTTTMMMMYYMTTTMYYYYYYYYXYYYXWPPPPPPPRPPX***XXXX****X"
+					+ System.lineSeparator() + "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYMTTTTTTTTTTMTTTMTTTTTTTTTMTTTTTTMMTTTMYYYMTTTMTTTMTTMMMTTMTTTTTTMYYMTTTMYYYYYYYX*XYYXWPPPPPPPPPPX***********X"
+					+ System.lineSeparator() + "YYYYYYYYGGGGGGGGYYYYYYYYGGGGGGGGYYMTTTTTTTTTTMTTTMTTTTTTTTTMTTTTTTMMTTTMGGGMTTTTTMMMTTMTMTTMTTTTTTMYYMTTTMGGGGGGYX*XXXXWPPPPPPPPPX*************X"
+					+ System.lineSeparator() + "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGMTTTMTTMTTTMTTTMTTTTTTTTTMTTTMMMMMTTTMGGGMTTTTTTTMTTTTTTTMTTTMMMMGGMTTTMGGGGGGGG****XWPPPPPPPPRX***WX****WX**X"
+					+ System.lineSeparator() + "GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGMTTTMMMMTTTMTTTMTTTMMTTTTMTTTMMMMMTTTMGGGMTTTMTTTMTTTMTTTMTTTMGGGGGMTTTMGGGGGGGGXX**XWPRPPPPPPPX***XX**X*XX**X"
+					+ System.lineSeparator() + "GGGGGGGGCCCCCCCCGGGGGGGGCCCCCCCCGGMTTTMCCMTTTMTTTMTTTMMTTTTMTTTMMMMMTTTMMMMMTTTMTTTMTTTMTTTMTTTMGGGGGMTTTMCCCCCCGGGGXXXWPPPPPPPPPX*PP********PPX"
+					+ System.lineSeparator() + "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCMTTTMCCMTTTMTTTMTTTMMMTTTMTTTTTTTMTTTTTTTMTTTMTTTMTTTMTTTMTTTMCCCCCMTTTMCCCCCCCCCCCCXWWPPPPPRPPPX***XXXXXX**X"
+					+ System.lineSeparator() + "CCCCCCCCBBBBBBBBCCCCCCCCBBBBBBBBCCMTTTMBBMTTTMTTTMTTTMCMTTTMTTTTTTTMTTTTTTTMTTTMTTTMTTTMTTTMTTTMCCCCCMTTTMBBBBBBCWCCCXXWWWPPPPPPPPXX*********X"
+					+ System.lineSeparator() + "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBMMMMMBBMMMMMMMMMMMMMCMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMBBBBBMMMMMBBBBBBBBBWX*XXWWWWWWWWWWWXXXXXXXXXX"
+					+ System.lineSeparator() + "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBX***XXXXXXXXXXXXXXXXXX*X"
+					+ System.lineSeparator() + "BBBBBBBB        BBBBBBBB        BBBBBBBB        BBBBBBBB        BBBBBBBB        BBBBBBBB        BBBBBBBB        WBBBX**X X**       X**XX***X"
+					+ System.lineSeparator() + "                                                                                                                    XXX  XXX       XXX  XXXX"
+					+ System.lineSeparator() + "                                                                                                                   W"
+					+ System.lineSeparator() + "                                                                                                                 W"
+					+ System.lineSeparator() + "// "
+					+ System.lineSeparator() + "#"
+					+ System.lineSeparator() + "// Here are some basic settings to change the position of the logo. The light multiplier has a max value of 1.0"
+					+ System.lineSeparator() + "Scale=-30.0"
+					+ System.lineSeparator() + "OffsetX=-23.0"
+					+ System.lineSeparator() + "OffsetY=+1.5"
+					+ System.lineSeparator() + "AxisTilt=0.0"
+					+ System.lineSeparator() + "LightMultiplier=0.8"
+					+ System.lineSeparator() + "SplashTextEnabled=true"
+					+ System.lineSeparator() + "SplashTextOffsetX=-15.0"
+					+ System.lineSeparator() + "SplashTextOffsetY=-10.0");
+			/*
+				Field[] myFields = mod_BetaTweaks.class.getFields();
+				for (int i = 0; i < myFields.length; i++) {
+					if (myFields[i].getName().contains("logo"))
+						try {
+							configWriter.write(System.lineSeparator() + myFields[i].getName().replaceFirst("logo", "")
+									+ "=" + myFields[i].get(null).toString());
+						} catch (Exception exception) {
+							exception.printStackTrace();
+						}
+				}
+				*/
+				configWriter.close();
+		} catch (Exception exception) {
+			exception.printStackTrace();
+		}
+	}
     
     private static final Random rand = new Random();
     private static Boolean undrawn = true;
-    String minecraftLogo[] = mod_BetaTweaks.getCustomLogo();
+    String minecraftLogo[] = getCustomLogo();
     String minecraftLogoVanilla[] = new String[] {
 			  "X   X X X   X XXX XXX XXX XXX XXX XXX",
 			  "XX XX X XX  X X   X   X X X X X    X ",
@@ -545,6 +734,17 @@ public class GuiMainMenuCustom extends GuiMainMenu
     private LogoEffectRandomizer logoEffects[][];
     private float updateCounter;
     private String splashText;
-    private GuiButton multiplayerButton;
+    
+    
+
+	public static File configLogoFile = new File((Minecraft.getMinecraftDir()) + "/config/OldCustomLogo.cfg");
+	private static Long timeStamp = configLogoFile.lastModified();
+	private static List<String> image = new ArrayList<String>();
+	private static List<Integer> blockID = new ArrayList<Integer>();
+	private static List<Integer> metaData = new ArrayList<Integer>();
+	private static List<Character> chars = new ArrayList<Character>();
+	private static int maxLineLength = 0;
+	
+	public static Boolean resetLogo = true;
 
 }

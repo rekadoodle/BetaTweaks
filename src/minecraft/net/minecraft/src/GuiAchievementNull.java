@@ -19,7 +19,6 @@ public class GuiAchievementNull extends GuiAchievement
     	super(null);
     }
 
-
     public void updateAchievementWindow()
     {
   	

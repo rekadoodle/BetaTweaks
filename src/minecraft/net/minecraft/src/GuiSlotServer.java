@@ -5,7 +5,7 @@
 package net.minecraft.src;
 
 import java.util.List;
-import net.minecraft.client.Minecraft;
+
 import org.lwjgl.opengl.GL11;
 
 // Referenced classes of package net.minecraft.src:
@@ -14,106 +14,114 @@ import org.lwjgl.opengl.GL11;
 
 class GuiSlotServer extends GuiSlot
 {
-
-    private int field_35409_k;
-	private int field_35408_l;
+	private int posX;
+    private int posY;
+    private GuiButton buttonScrollUp = new GuiButton(9, 0, 0, null);
+    private GuiButton buttonScrollDown = new GuiButton(10, 0, 0, null);
 
 	public GuiSlotServer(GuiMultiplayerMenu guimultiplayer)
     {
         super(guimultiplayer.mc, guimultiplayer.width, guimultiplayer.height, 32, guimultiplayer.height - 64, 36);
-        field_35410_a = guimultiplayer;
+        menu = guimultiplayer;
+    }
+	
+	public void scroll(int i)
+    {
+		if(i < 0) {
+			actionPerformed(buttonScrollDown);
+		}
+		else if(i > 0) {
+			actionPerformed(buttonScrollUp);
+		}
+		
     }
 
     protected int getSize()
     {
-        return GuiMultiplayerMenu.func_35320_a(field_35410_a).size();
+        return menu.getServerList().size();
     }
 
-    protected void elementClicked(int i, boolean flag)
+    protected void elementClicked(int slotIndex, boolean doubleClick)
     {
-    	GuiMultiplayerMenu.func_35326_a(field_35410_a, i);
-        boolean flag1 = GuiMultiplayerMenu.func_35333_b(field_35410_a) >= 0 && GuiMultiplayerMenu.func_35333_b(field_35410_a) < getSize();
-        GuiMultiplayerMenu.func_35329_c(field_35410_a).enabled = flag1;
-        GuiMultiplayerMenu.func_35334_d(field_35410_a).enabled = flag1;
-        GuiMultiplayerMenu.func_35339_e(field_35410_a).enabled = flag1;
-        if(flag && flag1)
+    	menu.selectedServerIndex = slotIndex;
+        if(menu.onSlotChanged() && doubleClick)
         {
-        	GuiMultiplayerMenu.func_35332_b(field_35410_a, i);
+        	menu.joinServer(((ServerData)menu.getServerList().get(slotIndex)).ip);
         }
     }
 
-    protected boolean isSelected(int i)
+    protected boolean isSelected(int slotIndex)
     {
-        return i == GuiMultiplayerMenu.func_35333_b(field_35410_a);
+        return slotIndex == menu.selectedServerIndex;
     }
 
     protected int getContentHeight()
     {
-        return GuiMultiplayerMenu.func_35320_a(field_35410_a).size() * 36;
+        return menu.getServerList().size() * 36;
     }
 
     protected void drawBackground()
     {
-        field_35410_a.drawDefaultBackground();
+    	menu.drawDefaultBackground();
     }
 
     protected void drawSlot(int i, int j, int k, int l, Tessellator tessellator)
     {
-        ServerNBTStorage servernbtstorage = (ServerNBTStorage)GuiMultiplayerMenu.func_35320_a(field_35410_a).get(i);
-        synchronized(GuiMultiplayerMenu.func_35321_g())
+    	ServerData server = (ServerData)menu.getServerList().get(i);
+        synchronized(GuiMultiplayerMenu.getSync())
         {
-            if(GuiMultiplayerMenu.func_35338_m() < 5 && !servernbtstorage.field_35790_f)
+            if(menu.pingCount < 5 && !server.pinged)
             {
-                servernbtstorage.field_35790_f = true;
-                servernbtstorage.field_35792_e = -2L;
-                servernbtstorage.field_35791_d = "";
-                servernbtstorage.field_35794_c = "";
-                GuiMultiplayerMenu.func_35331_n();
-                (new ThreadPollServers(this, servernbtstorage)).start();
+            	server.pinged = true;
+            	server.ping = -2L;
+            	server.status = "";
+            	server.playerCount = "";
+                menu.pingCount++;
+                (new ThreadPollServers(menu, server)).start();
             }
         }
-        field_35410_a.drawString(field_35410_a.fontRenderer, servernbtstorage.field_35795_a, j + 2, k + 1, 0xffffff);
-        field_35410_a.drawString(field_35410_a.fontRenderer, servernbtstorage.field_35791_d, j + 2, k + 12, 0x808080);
-        field_35410_a.drawString(field_35410_a.fontRenderer, servernbtstorage.field_35794_c, (j + 215) - field_35410_a.fontRenderer.getStringWidth(servernbtstorage.field_35794_c), k + 12, 0x808080);
-        field_35410_a.drawString(field_35410_a.fontRenderer, servernbtstorage.field_35793_b, j + 2, k + 12 + 11, 0x303030);
+        menu.drawString(menu.fontRenderer, server.name, j + 2, k + 1, 0xffffff);
+        menu.drawString(menu.fontRenderer, server.status, j + 2, k + 12, 0x808080);
+        menu.drawString(menu.fontRenderer, server.playerCount, (j + 215) - menu.fontRenderer.getStringWidth(server.playerCount), k + 12, 0x808080);
+        menu.drawString(menu.fontRenderer, server.ip, j + 2, k + 12 + 11, 0x303030);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        field_35410_a.mc.renderEngine.bindTexture(field_35410_a.mc.renderEngine.getTexture("/BetaTweaks/icons.png"));
+        menu.mc.renderEngine.bindTexture(menu.mc.renderEngine.getTexture("/BetaTweaks/icons.png"));
         int i1 = 0;
         int j1 = 0;
         String s = "";
-        if(servernbtstorage.field_35790_f && servernbtstorage.field_35792_e != -2L)
+        if(server.pinged && server.ping != -2L)
         {
             i1 = 0;
             j1 = 0;
-            if(servernbtstorage.field_35792_e < 0L)
+            if(server.ping < 0L)
             {
                 j1 = 5;
             } else
-            if(servernbtstorage.field_35792_e < 150L)
+            if(server.ping < 150L)
             {
                 j1 = 0;
             } else
-            if(servernbtstorage.field_35792_e < 300L)
+            if(server.ping < 300L)
             {
                 j1 = 1;
             } else
-            if(servernbtstorage.field_35792_e < 600L)
+            if(server.ping < 600L)
             {
                 j1 = 2;
             } else
-            if(servernbtstorage.field_35792_e < 1000L)
+            if(server.ping < 1000L)
             {
                 j1 = 3;
             } else
             {
                 j1 = 4;
             }
-            if(servernbtstorage.field_35792_e < 0L)
+            if(server.ping < 0L)
             {
                 s = "(no connection)";
             } else
             {
-                s = (new StringBuilder()).append(servernbtstorage.field_35792_e).append("ms").toString();
+                s = (new StringBuilder()).append(server.ping).append("ms").toString();
             }
         } else
         {
@@ -125,19 +133,18 @@ class GuiSlotServer extends GuiSlot
             }
             s = "Polling..";
         }
-        field_35410_a.drawTexturedModalRect(j + 205, k, 0 + i1 * 10, 176 + j1 * 8, 10, 8);
+        menu.drawTexturedModalRect(j + 205, k, 0 + i1 * 10, 176 + j1 * 8, 10, 8);
         byte byte0 = 4;
-        if(field_35409_k >= (j + 205) - byte0 && field_35408_l >= k - byte0 && field_35409_k <= j + 205 + 10 + byte0 && field_35408_l <= k + 8 + byte0)
+        if(posX >= (j + 205) - byte0 && posY >= k - byte0 && posX <= j + 205 + 10 + byte0 && posY <= k + 8 + byte0)
         {
-        	GuiMultiplayerMenu.func_35327_a(field_35410_a, s);
+        	menu.setTooltip(s);
         }
     }
 
-    final GuiMultiplayerMenu field_35410_a; /* synthetic field */
+    final GuiMultiplayerMenu menu; /* synthetic field */
 
-	public void passvars(int i, int j) {
-		this.field_35408_l = i;
-		this.field_35409_k = j;
-		
+	public void setMousePos(int i, int j) {
+		this.posX = i;
+		this.posY = j;
 	}
 }

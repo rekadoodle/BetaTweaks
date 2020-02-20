@@ -5,29 +5,30 @@ import java.lang.reflect.Modifier;
 
 public class BlockOreStorageIndev extends BlockOreStorage {
 
-	private Block thisBlock;
-
-	public BlockOreStorageIndev(Block block, int field) {
+	private int sideTexture;
+	private int bottomTexture;
+	
+	public BlockOreStorageIndev(Block block, int fieldNo, String sideTexture, String bottomTexture) {
 		super(block.blockID, block.blockIndexInTexture);
 		setHardness(block.getHardness());
         setBlockName(block.getBlockName().replaceFirst("tile.", ""));
 		setResistance(10F);
 		setStepSound(soundMetalFootstep);
-		thisBlock = block;
+        this.sideTexture = ModLoader.addOverride("/terrain.png", sideTexture);
+        this.bottomTexture = ModLoader.addOverride("/terrain.png", bottomTexture);
         try {
-            Field x = Block.class.getDeclaredFields()[field];
-            x.setAccessible(true);
+            Field field = Block.class.getDeclaredFields()[fieldNo];
+            field.setAccessible(true);
             
             Field modifiersField = Field.class.getDeclaredField("modifiers");
             modifiersField.setAccessible(true);
-            modifiersField.setInt(x, x.getModifiers() & ~Modifier.FINAL);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
            
-            x.set(null, this);
-        } catch (Exception e) {e.printStackTrace();}
-        setTickOnLoad(true);
+            field.set(null, this);
+        } 
+        catch (Exception e) {e.printStackTrace();}
     }
     
-    @Override
     public int getBlockTextureFromSide(int i)
     {
     	 if(!mod_BetaTweaks.optionsClientIndevStorageBlocks || i == 1)
@@ -36,10 +37,11 @@ public class BlockOreStorageIndev extends BlockOreStorage {
          }
          if(i == 0)
          {
-        	 return mod_BetaTweaks.getTexture(thisBlock, i);
-         } else
+        	 return bottomTexture;
+         } 
+         else
          {
-        	 return mod_BetaTweaks.getTexture(thisBlock, i);
+        	 return sideTexture;
          }
     }
     
