@@ -26,7 +26,7 @@ import org.lwjgl.opengl.*;
 public class mod_BetaTweaks extends BaseMod {
 
 	public String Version() {
-		return "v1.1.6";
+		return "v1.1.6_2";
 	}
 	
 	//Info for mine_diver's mod menu
@@ -292,9 +292,15 @@ public class mod_BetaTweaks extends BaseMod {
 			mc.displayGuiScreen(new GuiControlsScrollable(parentScreen, mc.gameSettings));
 		} else if (guiscreen instanceof GuiIngameMenu) {
 			if(optionsClientIngameTexturePackButton && (texturePackButtonIndex == -1 || guiscreen.controlList.size() == texturePackButtonIndex)) {
-				redrawGui = true;
+				//redrawGui = true;
 				texturePackButtonIndex = guiscreen.controlList.size();
 				guiscreen.controlList.add(new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs"));
+				ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+		        int i = scaledresolution.getScaledWidth();
+		        int j = scaledresolution.getScaledHeight();
+		        int k = (Mouse.getX() * i) / mc.displayWidth;
+		        int i1 = j - (Mouse.getY() * j) / mc.displayHeight - 1;
+				((GuiButton)(guiscreen.controlList.get(texturePackButtonIndex))).drawButton(mc, k, i1);
 			}
 			if(optionsClientIngameTexturePackButton) {
 				try {
@@ -315,7 +321,7 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 		} else if (guiscreen instanceof GuiOptions && !optionsClientDisableEntityRendererOverride) {
 			if(optionsClientFovSliderVisible && (fovSliderIndex == -1 || guiscreen.controlList.size() == fovSliderIndex)) {
-				redrawGui = true;
+				//redrawGui = true;
 				fovSliderIndex = guiscreen.controlList.size();
 				int x = 5;
 				try {
@@ -323,6 +329,12 @@ public class mod_BetaTweaks extends BaseMod {
 				} 
 				catch (IllegalAccessException e) { e.printStackTrace(); }
 				guiscreen.controlList.add(new GuiSliderFOV(137, guiscreen.width / 2 - 155 + x % 2 * 160, guiscreen.height / 6 + 24 * (x >> 1)));
+				ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+		        int i = scaledresolution.getScaledWidth();
+		        int j = scaledresolution.getScaledHeight();
+		        int k = (Mouse.getX() * i) / mc.displayWidth;
+		        int i1 = j - (Mouse.getY() * j) / mc.displayHeight - 1;
+				((GuiButton)(guiscreen.controlList.get(fovSliderIndex))).drawButton(mc, k, i1);
 			}
 			
 		} else if (guiscreen instanceof GuiTexturePacks) {

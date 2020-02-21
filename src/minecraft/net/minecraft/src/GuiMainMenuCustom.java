@@ -36,6 +36,33 @@ public class GuiMainMenuCustom extends GuiMainMenu
 	private boolean undrawn2 = true;
     private static final String[] panoramaFilePaths = new String[] {"/panorama0.png", "/panorama1.png", "/panorama2.png", "/panorama3.png", "/panorama4.png", "/panorama5.png"};
     
+    public GuiMainMenuCustom()
+    {
+        updateCounter = 0.0F;
+        splashText = "missingno";
+        try
+        {
+            ArrayList arraylist = new ArrayList();
+            BufferedReader bufferedreader = new BufferedReader(new InputStreamReader((net.minecraft.src.GuiMainMenu.class).getResourceAsStream("/title/splashes.txt"), Charset.forName("UTF-8")));
+            String s = "";
+            do
+            {
+                String s1;
+                if((s1 = bufferedreader.readLine()) == null)
+                {
+                    break;
+                }
+                s1 = s1.trim();
+                if(s1.length() > 0)
+                {
+                    arraylist.add(s1);
+                }
+            } while(true);
+            splashText = (String)arraylist.get(rand.nextInt(arraylist.size()));
+        }
+        catch(Exception exception) { }
+    }
+    
     public void updateScreen()
     {
         updateCounter++;
