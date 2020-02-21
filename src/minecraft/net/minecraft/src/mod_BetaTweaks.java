@@ -206,6 +206,33 @@ public class mod_BetaTweaks extends BaseMod {
 		if (firstGuiScreenAfterHijack != null) {
 			mc.displayGuiScreen(firstGuiScreenAfterHijack);
 			firstGuiScreenAfterHijack = null;
+		} else if (guiAPIinstalled && guiscreen instanceof GuiModScreen) {
+			BetaTweaksGuiAPI.instance.handleTooltip((GuiModScreen)guiscreen);
+			if (parentScreen != guiscreen && guiscreen instanceof GuiModSelect && parentScreen instanceof GuiModScreen) {
+				Boolean temp1 = optionsClientIndevStorageBlocks;
+				Boolean temp2 = optionsClientHideLongGrass;
+				Boolean temp3 = optionsClientHideDeadBush;
+				Boolean temp4 = optionsClientDisableAchievementNotifications;
+				BetaTweaksGuiAPI.instance.updateSettings();
+				if (temp2 != optionsClientHideLongGrass) {
+					resetTallGrass = true;
+				}
+				if (temp3 != optionsClientHideDeadBush) {
+					resetDeadBush = true;
+				}
+				if (temp4 != optionsClientDisableAchievementNotifications) {
+					resetAchievements = true;
+				}
+				initSettings(mc);
+				if (temp1 != optionsClientIndevStorageBlocks || temp2 != optionsClientHideLongGrass
+						|| temp3 != optionsClientHideDeadBush) {
+					if (mc.theWorld != null)
+						mc.renderGlobal.loadRenderers();
+				}
+			}
+			if(parentScreen != guiscreen) {
+				parentScreen = guiscreen;
+			}
 		} else if (guiscreen instanceof GuiMainMenu && !(guiscreen instanceof GuiMainMenuCustom)
 				&& (optionsClientLogo != LogoState.STANDARD || optionsClientPanoramaEnabled)) {
 			mc.displayGuiScreen(new GuiMainMenuCustom());
@@ -217,7 +244,7 @@ public class mod_BetaTweaks extends BaseMod {
 		} else if (optionsClientScrollableControls && guiscreen instanceof GuiControls) {
 			mc.displayGuiScreen(new GuiControlsScrollable(parentScreen, mc.gameSettings));
 		} else if (guiscreen instanceof GuiIngameMenu) {
-			if(optionsClientIngameTexturePackButton && texturePackButtonIndex == -1) {
+			if(optionsClientIngameTexturePackButton && (texturePackButtonIndex == -1 || guiscreen.controlList.size() == texturePackButtonIndex)) {
 				texturePackButtonIndex = guiscreen.controlList.size();
 				guiscreen.controlList.add(new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs"));
 			}
@@ -242,33 +269,6 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 			
 		} else if (guiscreen != parentScreen) {
-			if (guiAPIinstalled && guiscreen instanceof GuiModSelect && parentScreen instanceof GuiModScreen) {
-				Boolean temp1 = optionsClientIndevStorageBlocks;
-				Boolean temp2 = optionsClientHideLongGrass;
-				Boolean temp3 = optionsClientHideDeadBush;
-				Boolean temp4 = optionsClientDisableAchievementNotifications;
-
-				BetaTweaksGuiAPI.instance.updateSettings();
-
-				if (temp2 != optionsClientHideLongGrass) {
-					resetTallGrass = true;
-				}
-				if (temp3 != optionsClientHideDeadBush) {
-					resetDeadBush = true;
-				}
-				if (temp4 != optionsClientDisableAchievementNotifications) {
-					resetAchievements = true;
-				}
-
-				initSettings(mc);
-				if (temp1 != optionsClientIndevStorageBlocks || temp2 != optionsClientHideLongGrass
-						|| temp3 != optionsClientHideDeadBush) {
-					mc.renderEngine.updateDynamicTextures();
-					mc.renderEngine.refreshTextures();
-					if (mc.theWorld != null)
-						mc.renderGlobal.loadRenderers();
-				}
-			}
 			parentScreen = guiscreen;
 		}
 		if (mc.theWorld != currentWorld) {
@@ -795,22 +795,28 @@ public class mod_BetaTweaks extends BaseMod {
 		new BlockOreStorageIndev(Block.blockGold, 59, "/BetaTweaks/goldSide.png", "/BetaTweaks/goldBottom.png");
 		new BlockOreStorageIndev(Block.blockDiamond, 75, "/BetaTweaks/diamondSide.png", "/BetaTweaks/diamondBottom.png");
 		
-		Field blocksEffectiveAgainst = ItemTool.class.getDeclaredFields()[0];
-		blocksEffectiveAgainst.setAccessible(true);
-		for(Item item : Item.itemsList) {
-			if(item instanceof ItemPickaxe) {
-				try {
-					Block originalBlocks[] = (Block[])blocksEffectiveAgainst.get(item);
+		try {
+			Class.forName("SAPI");
+		} 
+		catch (ClassNotFoundException e) { 
+			Field blocksEffectiveAgainst = ItemTool.class.getDeclaredFields()[0];
+			blocksEffectiveAgainst.setAccessible(true);
+			for(Item item : Item.itemsList) {
+				if(item instanceof ItemPickaxe) {
+					try {
+						Block originalBlocks[] = (Block[])blocksEffectiveAgainst.get(item);
 
-					Block newBlocks[] = Arrays.copyOf(originalBlocks, originalBlocks.length + 3);
-					newBlocks[originalBlocks.length] = Block.blocksList[Block.blockSteel.blockID];
-					newBlocks[originalBlocks.length + 1] = Block.blocksList[Block.blockGold.blockID];
-					newBlocks[originalBlocks.length + 2] = Block.blocksList[Block.blockDiamond.blockID];
-					blocksEffectiveAgainst.set(item, newBlocks);
-				} 
-				catch (IllegalAccessException e) { e.printStackTrace(); }
+						Block newBlocks[] = Arrays.copyOf(originalBlocks, originalBlocks.length + 3);
+						newBlocks[originalBlocks.length] = Block.blocksList[Block.blockSteel.blockID];
+						newBlocks[originalBlocks.length + 1] = Block.blocksList[Block.blockGold.blockID];
+						newBlocks[originalBlocks.length + 2] = Block.blocksList[Block.blockDiamond.blockID];
+						blocksEffectiveAgainst.set(item, newBlocks);
+					} 
+					catch (IllegalAccessException e1) { e1.printStackTrace(); }
+				}
 			}
 		}
+		
 	}
 
 	public static void writeConfig() {
@@ -822,7 +828,7 @@ public class mod_BetaTweaks extends BaseMod {
 			for (int i = 0; i < myFields.length; i++) {
 				if (myFields[i].getName().contains("options"))
 					try {
-						configWriter.write(System.lineSeparator() + myFields[i].getName().replaceFirst("options", "")
+						configWriter.write(System.getProperty("line.separator") + myFields[i].getName().replaceFirst("options", "")
 								+ "=" + myFields[i].get(null).toString());
 					} catch (Exception exception) {
 						exception.printStackTrace();
