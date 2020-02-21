@@ -17,6 +17,8 @@ import java.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.mod_BetaTweaks.LogoState;
 
+import org.lwjgl.input.Keyboard;
+import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 
@@ -31,7 +33,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 
     private int viewportTexture;
 	private boolean undrawn2 = true;
-    private static final String[] field_73978_o = new String[] {"/BetaTweaks/panorama/panorama0.png", "/BetaTweaks/panorama/panorama1.png", "/BetaTweaks/panorama/panorama2.png", "/BetaTweaks/panorama/panorama3.png", "/BetaTweaks/panorama/panorama4.png", "/BetaTweaks/panorama/panorama5.png"};
+    private static final String[] field_73978_o = new String[] {"/title/bg/panorama/panorama0.png", "/title/bg/panorama/panorama1.png", "/title/bg/panorama/panorama2.png", "/title/bg/panorama/panorama3.png", "/title/bg/panorama/panorama4.png", "/title/bg/panorama/panorama5.png"};
     
 	public GuiMainMenuCustom()
     {
@@ -61,6 +63,8 @@ public class GuiMainMenuCustom extends GuiMainMenu
         catch(Exception exception) { }
     }
 	
+	 
+	
 	
     public void updateScreen()
     {
@@ -85,8 +89,10 @@ public class GuiMainMenuCustom extends GuiMainMenu
         {
     		logoEffects = null;
             //mc.displayGuiScreen(new GuiMainMenuCustom(updateCounter));
-    		
-        }
+    	}
+    	else {
+    		super.keyTyped(c, i);
+    	}
     }
 
     protected void actionPerformed(GuiButton guibutton) {
@@ -99,6 +105,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
     
     public void drawScreen(int i, int j, float f)
     {
+    	
     	if (mod_BetaTweaks.optionsClientPanoramaEnabled) {
     		if (undrawn2) {
     			undrawn2 = false;

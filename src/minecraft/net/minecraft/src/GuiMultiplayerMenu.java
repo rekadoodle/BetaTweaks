@@ -34,7 +34,7 @@ public class GuiMultiplayerMenu extends GuiScreen
             NBTTagList nbttaglist = nbttagcompound.getTagList("servers");
             serverList.clear();
             for(int i = 0; i < nbttaglist.tagCount(); i++) {
-            	serverList.add(ServerData.func_35788_a((NBTTagCompound)nbttaglist.tagAt(i)));
+            	serverList.add(ServerData.loadFromNBT((NBTTagCompound)nbttaglist.tagAt(i)));
             }
         }
         catch(Exception exception) { exception.printStackTrace(); }
@@ -66,7 +66,7 @@ public class GuiMultiplayerMenu extends GuiScreen
             NBTTagList nbttaglist = new NBTTagList();
             for(int i = 0; i < serverList.size(); i++)
             {
-                nbttaglist.setTag(((ServerData)serverList.get(i)).func_35789_a());
+                nbttaglist.setTag(((ServerData)serverList.get(i)).saveToNBT());
             }
 
             NBTTagCompound nbttagcompound = new NBTTagCompound();
@@ -108,12 +108,12 @@ public class GuiMultiplayerMenu extends GuiScreen
         } 
         else if(guibutton.id == 3) {
         	addServer = true;
-            mc.displayGuiScreen(new GuiAddServer(this, server = new ServerData("Minecraft Server", "")));
+            mc.displayGuiScreen(new GuiAddServer(this, server = new ServerData("Minecraft Server", "", false)));
         } 
         else if(guibutton.id == 7) {
         	editServer = true;
             ServerData serverToEdit = (ServerData)serverList.get(selectedServerIndex);
-            mc.displayGuiScreen(new GuiAddServer(this, server = new ServerData(serverToEdit.name, serverToEdit.ip)));
+            mc.displayGuiScreen(new GuiAddServer(this, server = new ServerData(serverToEdit.name, serverToEdit.ip, serverToEdit.shouldPing)));
         } 
         else if(guibutton.id == 0) {
             mc.displayGuiScreen(parentScreen);
@@ -153,9 +153,10 @@ public class GuiMultiplayerMenu extends GuiScreen
         	editServer = false;
             if(flag)
             {
-            	ServerData server = (ServerData)serverList.get(selectedServerIndex);
-                server.name = server.name;
-                server.ip = server.ip;
+            	ServerData newServer = (ServerData)serverList.get(selectedServerIndex);
+            	newServer.name = server.name;
+            	newServer.ip = server.ip;
+            	newServer.shouldPing = server.shouldPing;
                 saveServerList();
             }
             mc.displayGuiScreen(this);

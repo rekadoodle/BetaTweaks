@@ -28,9 +28,18 @@ public class BetaTweaksMP extends BaseModMp {
 	
 	public static List<Integer> options = new ArrayList<Integer>();
 	
-	@Override
 	public String Version() {
 		return "v1";
+	}
+	
+	public String Description() {
+		//For mine_diver's mod menu
+		return "Handles the multiplayer parts of BetaTweaks";
+	}
+	
+	public String Name() {
+		//For mine_diver's mod menu
+		return "Beta Tweaks MP Handler";
 	}
 	
 	public void HandlePacket(Packet230ModLoader packet)

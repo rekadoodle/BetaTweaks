@@ -51,7 +51,13 @@ public class BetaTweaksGuiAPI {
         WidgetBoolean draggingShortcutsWidget = new WidgetBoolean(draggingShortcuts, "Inventory Dragging Shortcuts", "ON", "OFF");
         draggingShortcutsWidget.setTooltipContent(new String[] {
         		"Adds some shortcuts to help spread, collect or transfer",
-        		"items in the inventory."
+        		"items in the inventory, here are the main ones:",
+        		"  Hold LMB to collect or spread items evenly.",
+        		"  Hold RMB to drop 1 item on each slot.",
+        		"  Hold Shift + LMB to shift click lots of items quickly.",
+        		"  Press Shift + LMB on a crafting result to craft a stack.",
+        		"  Press Q to drop 1 of the item held.",
+        		"  Hold Q to quickly drop the item hovered."
         	});
         widgetClientside.add(draggingShortcutsWidget);
 		
@@ -62,8 +68,7 @@ public class BetaTweaksGuiAPI {
 				"  Standard - The normal Minecraft logo",
 				"  Animated - The Beta 1.3 animated logo",
 				"  Custom - A custom version of the Beta 1.3 animated logo",
-				"Go to: '.minecraft/config/OldCustomLogo.cfg'",
-				"to configure this."
+				"Go to: '.minecraft/config/OldCustomLogo.cfg' to configure."
 	        });
 		widgetClientside.add(logoStateWidget);
 
@@ -80,8 +85,7 @@ public class BetaTweaksGuiAPI {
 		settings.append(quitButton);
 		WidgetBoolean quitButtonWidget = new WidgetBoolean(quitButton, "Quit Game Button", "ON", "OFF");
 		quitButtonWidget.setTooltipContent(new String[] {
-				"Enables the Quit Game button in the title screen which is",
-				"usually disabled for some reason."
+				"Adds a button to quit the game on the Title Screen."
         	});
 		widgetClientside.add(quitButtonWidget);
 		
@@ -90,7 +94,11 @@ public class BetaTweaksGuiAPI {
 		WidgetBoolean multiplayerMenuWidget = new WidgetBoolean(multiplayerMenu, "Multiplayer Menu", "ON", "OFF");
 		multiplayerMenuWidget.setTooltipContent(new String[] {
 				"Uses the Beta 1.8 menu which allows multiple servers to",
-				"be saved."
+				"be saved.",
+				"You have the option to ping them but servers with DDOS",
+				"protection can give you End Of Stream when you try to",
+				"join them. To fix this you may have to restart the client",
+				"or wait roughly 5-10 minutes."
         	});
 		widgetClientside.add(multiplayerMenuWidget);
 		
@@ -131,7 +139,8 @@ public class BetaTweaksGuiAPI {
 		WidgetBoolean indevStorageTexturesWidget = new WidgetBoolean(indevStorageTextures, "Indev Storage Block Textures", "ON", "OFF");
 		indevStorageTexturesWidget.setTooltipContent(new String[] {
         		"Replaces the textures on iron, gold and diamond blocks",
-				"with their traditional indev counterparts."
+				"with their traditional indev counterparts.",
+				"(You may need to restart for the textures to load.)"
         	});
 		widgetClientside.add(indevStorageTexturesWidget);
 		
@@ -149,7 +158,8 @@ public class BetaTweaksGuiAPI {
 		WidgetBoolean hideDeadBushWidget = new WidgetBoolean(hideDeadBush, "Disable Dead Shrubs");
 		hideDeadBushWidget.setTooltipContent(new String[] {
 				"Hides dead shrubs that spawn in the desert. Works on",
-				"vanilla servers though you will notice when you break them."
+				"vanilla servers though you will notice when you break",
+				"them."
         	});
 		widgetClientside.add(hideDeadBushWidget);
 

@@ -70,7 +70,7 @@ class GuiSlotServer extends GuiSlot
     	ServerData server = (ServerData)menu.getServerList().get(i);
         synchronized(GuiMultiplayerMenu.getSync())
         {
-            if(menu.pingCount < 5 && !server.pinged)
+            if(server.shouldPing && menu.pingCount < 5 && !server.pinged)
             {
             	server.pinged = true;
             	server.ping = -2L;
@@ -88,7 +88,7 @@ class GuiSlotServer extends GuiSlot
         menu.mc.renderEngine.bindTexture(menu.mc.renderEngine.getTexture("/BetaTweaks/icons.png"));
         int i1 = 0;
         int j1 = 0;
-        String s = "";
+        String s = null;
         if(server.pinged && server.ping != -2L)
         {
             i1 = 0;
@@ -125,14 +125,16 @@ class GuiSlotServer extends GuiSlot
             }
         } else
         {
-            i1 = 1;
-            j1 = (int)(System.currentTimeMillis() / 100L + (long)(i * 2) & 7L);
-            if(j1 > 4)
-            {
-                j1 = 8 - j1;
+        	i1 = 1;
+        	j1 = (int)(System.currentTimeMillis() / 100L + (long)(i * 2) & 7L);
+        	if(j1 > 4)
+        	{	
+            	j1 = 8 - j1;
             }
             s = "Polling..";
+        	
         }
+        if(server.shouldPing)
         menu.drawTexturedModalRect(j + 205, k, 0 + i1 * 10, 176 + j1 * 8, 10, 8);
         byte byte0 = 4;
         if(posX >= (j + 205) - byte0 && posY >= k - byte0 && posX <= j + 205 + 10 + byte0 && posY <= k + 8 + byte0)

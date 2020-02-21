@@ -18,7 +18,7 @@ class ThreadPollServers extends Thread
     	this.menu = menu;
         this.server = server;
     }
-
+Long var1;
     public void run() {
         boolean var27 = false;
 
@@ -30,7 +30,7 @@ class ThreadPollServers extends Thread
                        try {
                           var27 = true;
                           this.server.status = "\u00a78Polling..";
-                          long var1 = System.nanoTime();
+                          var1 = System.nanoTime();
                           menu.pollServer(server);
                           long var3 = System.nanoTime();
                           server.ping = (var3 - var1) / 1000000L;
@@ -51,8 +51,10 @@ class ThreadPollServers extends Thread
                           var27 = false;
                           break label186;
                        } catch (IOException var38) {
-                          server.ping = -1L;
-                          server.status = "\u00a74Communication error";
+                          //server.ping = -1L;
+                    	   long var3 = System.nanoTime();
+                           server.ping = (var3 - var1) / 1000000L;
+                          server.status = "Server Online";
                           var27 = false;
                           break label185;
                        } catch (Exception var39) {

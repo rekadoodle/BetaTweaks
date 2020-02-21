@@ -23,7 +23,17 @@ import org.lwjgl.opengl.GL11;
 public class mod_BetaTweaks extends BaseMod {
 
 	public String Version() {
-		return "v1.1";
+		return "v1.1.2";
+	}
+	
+	public String Description() {
+		//For mine_diver's mod menu
+		return "A collection of quality of life improvements";
+	}
+	
+	public String Name() {
+		//For mine_diver's mod menu
+		return "Beta Tweaks";
 	}
 
 	enum LogoState {
@@ -123,8 +133,7 @@ public class mod_BetaTweaks extends BaseMod {
 
 		if ((optionsClientLogo != LogoState.STANDARD || optionsClientPanoramaEnabled)
 				&& ModLoader.getMinecraftInstance().currentScreen == null)
-			ModLoader.getMinecraftInstance().currentScreen = new GuiInitialHijack(new GuiMainMenu(),
-					ModLoader.getMinecraftInstance().gameSettings);
+			ModLoader.getMinecraftInstance().currentScreen = new GuiInitialHijack();
 
 	}
 
@@ -135,7 +144,7 @@ public class mod_BetaTweaks extends BaseMod {
 		if (optionsGameplayLightTNTwithFist && !TNTinitialised) {
 			TNTinitialised = true;
 			Block.blocksList[Block.tnt.blockID] = null;
-			new BlockTNTPunchable();
+			ModLoader.AddName(new BlockTNTPunchable(), StringTranslate.getInstance().translateNamedKey(Block.tnt.getBlockName()));
 		}
 
 		if (optionsClientIndevStorageBlocks && !storageBlocksInitialised) {
@@ -284,7 +293,6 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 		
 		if (optionsClientDraggingShortcuts && guiscreen instanceof GuiContainer) {
-			//TODO fix dragging
 			GuiContainer container = (GuiContainer)guiscreen;
 			int x = (Mouse.getEventX() * container.width) / mc.displayWidth;
             int y = container.height - (Mouse.getEventY() * container.height) / mc.displayHeight - 1;
@@ -338,10 +346,10 @@ public class mod_BetaTweaks extends BaseMod {
         				}
         			}
         			else if(Mouse.getEventButton() == 0 && !itemClickedOn && !slot.getHasStack()
-        					&& player.inventory.getItemStack() != null /*&&  player.inventory.getItemStack().stackSize > 1*/) {
+        					&& player.inventory.getItemStack() != null) {
         				spreading = true;
         			}
-        			else if(Mouse.getEventButton() == 0 /*&& !itemClickedOn*/
+        			else if(Mouse.getEventButton() == 0
         					&& player.inventory.getItemStack() != null && slot.getHasStack()
         					&& slot.getStack().isItemEqual(player.inventory.getItemStack())) {
         				if(slot instanceof SlotCrafting && shiftClick && slot.getHasStack()) {
@@ -352,6 +360,7 @@ public class mod_BetaTweaks extends BaseMod {
         				else {
         					collecting = true;
             				lastSlotNo = slot.slotNumber;
+            				
             				controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
         				}
         			}
@@ -360,11 +369,13 @@ public class mod_BetaTweaks extends BaseMod {
     					controller.handleMouseClick(windowId, slot.slotNumber, 1, false, player);
     					lastSlotNo = slot.slotNumber;
     	            }
-        			else if(Mouse.getEventButton() == 1 && slot.getHasStack()) {
+        			else if(Mouse.getEventButton() == 1/* && slot.getHasStack()*/) {
     					controller.handleMouseClick(windowId, slot.slotNumber, 1, false, player);
-    					itemClickedOn = true;
-    					lastSlotNo = slot.slotNumber;
-    	            }
+    					if(player.inventory.getItemStack() != null) {
+    						itemClickedOn = true;
+    						lastSlotNo = slot.slotNumber;
+    					}
+    				}
     			} 
     			else
     	        {
@@ -389,7 +400,7 @@ public class mod_BetaTweaks extends BaseMod {
     	        }
     			if(Mouse.isButtonDown(1)) {
     				
-    					if(slot.slotNumber != lastSlotNo && !itemClickedOn
+    					if(slot.slotNumber != lastSlotNo /*&& !itemClickedOn*/
     							&& player.inventory.getItemStack() != null && (!slot.getHasStack() 
     							|| (slot.getStack().isItemEqual(player.inventory.getItemStack()) 
     									&& slot.getStack().getMaxStackSize() > slot.getStack().stackSize))) {
@@ -438,6 +449,8 @@ public class mod_BetaTweaks extends BaseMod {
     					}
     					else if(player.inventory.getItemStack() == null && slot.slotNumber != lastSlotNo && lastSlotNo != -1 && !(slot instanceof SlotCrafting)) {
     						controller.handleMouseClick(windowId, lastSlotNo, 0, false, player);
+    						controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
+    						controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
     					}
     					
     					}
@@ -453,20 +466,20 @@ public class mod_BetaTweaks extends BaseMod {
     				}
     			}
         	}
-            if(Keyboard.isKeyDown(mc.gameSettings.keyBindDrop.keyCode) && player.inventory.getItemStack() != null && counter == -1) {
-            	counter = 20;
-            	controller.handleMouseClick(windowId, -999, shiftClick ? 0 : 1, false, player);
-            }
             if(counter > -1) counter--;
+            if(Keyboard.isKeyDown(mc.gameSettings.keyBindDrop.keyCode) && !droppedItem && (counter == -1 || shiftClick) && player.inventory.getItemStack() == null  && slot.getHasStack()) {
+            	counter = 20;
+            	controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
+            	controller.handleMouseClick(windowId, -999, shiftClick ? 0 : 1, false, player);
+            	controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
+            }
             	
             if(Keyboard.getEventKeyState())
             {
-            	if(player.inventory.getItemStack() == null && Keyboard.getEventKey() == mc.gameSettings.keyBindDrop.keyCode && (!droppedItem || shiftClick) && slot.getHasStack())
+            	if(player.inventory.getItemStack() != null && Keyboard.getEventKey() == mc.gameSettings.keyBindDrop.keyCode && !droppedItem)
                 {
             		droppedItem = true;
-            		controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
-                	controller.handleMouseClick(windowId, -999, shiftClick ? 0 : 1, false, player);
-                	controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
+            		controller.handleMouseClick(windowId, -999, shiftClick ? 0 : 1, false, player);
                 }
             }
             else {
