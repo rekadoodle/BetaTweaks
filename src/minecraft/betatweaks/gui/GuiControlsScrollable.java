@@ -47,7 +47,7 @@ public class GuiControlsScrollable extends GuiScreen
 
 	public GuiControlsScrollable()
 	{
-		parentScreen = mod_BetaTweaks.parentScreen;
+		parentScreen = Utils.getParentScreen();
 		options = Utils.mc.gameSettings;
 		
 		left = 0;

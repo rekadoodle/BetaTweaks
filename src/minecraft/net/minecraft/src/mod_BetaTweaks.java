@@ -19,20 +19,17 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
 import betatweaks.*;
-import betatweaks.Config.LogoState;
 import betatweaks.block.*;
+import betatweaks.config.Config;
 import betatweaks.gui.*;
 import betatweaks.GuiAPIHandler;
 import hmi.GuiRecipeViewer;
 
 
 public class mod_BetaTweaks extends BaseMod {
-
-	//TODO
-	//code cleanup
 	
 	public String Version() {
-		return "v1.2.1";
+		return "v1.2.2";
 	}
 	
 	//Info for mine_diver's mod menu
@@ -47,33 +44,20 @@ public class mod_BetaTweaks extends BaseMod {
 	public String Icon() {
 		return resources + "/modMenu1";
 	}
-
-	public static boolean guiAPIinstalled;
-	public static boolean modloaderMPinstalled;
-	public static boolean HMIinstalled;
-	public static boolean minecolonyInstalled;
-	public static boolean optifineInstalled;
-	public static boolean shaderModInstalled;
-	public static boolean forgeInstalled;
-	public static GuiScreen parentScreen;
-	public static GuiScreen firstGuiScreenAfterHijack;
-	private boolean aetherSheepExist;
-
-	private static boolean TNTinitialised = false;
-	private static boolean storageBlocksInitialised = false;
-	private static boolean customLogoInitialised = false;
-	private static boolean resetTallGrass = true;
-	private static boolean resetDeadBush = true;
-	private static boolean resetAchievements = true;
 	
-	private static World currentWorld = null;
+	public static GuiScreen firstGuiScreenAfterHijack;
 
-	private static int lastTickHoeDamage;
-	private static int lastTickHoeX;
-	private static int lastTickHoeY;
-	private static int lastTickHoeZ;
+	private boolean resetTallGrass = true;
+	private boolean resetDeadBush = true;
+	private boolean resetAchievements = true;
+	
+	private World currentWorld = null;
 
-	protected Random rand;
+	private int lastTickHoeDamage;
+	private int lastTickHoeX;
+	private int lastTickHoeY;
+	private int lastTickHoeZ;
+
 	private final int guiOptionsButtonCount;
 
 	private KeyBinding playerList = new KeyBinding("List Players", Keyboard.KEY_TAB);
@@ -83,38 +67,38 @@ public class mod_BetaTweaks extends BaseMod {
 	private HashMap<Class<? extends GuiScreen>, Class<? extends GuiScreen>> guiOverrides = new HashMap<Class<? extends GuiScreen>, Class<? extends GuiScreen>>();
 	public static boolean dontOverride = false;
 	
+	private betatweaks.config.Config cfg = new betatweaks.config.Config();
+	
 	public mod_BetaTweaks() {
 		
-		if(modloaderMPinstalled = Utils.classExists("ModLoaderMp")) {
+		if(Utils.checkModInstalled("modloadermp", "ModLoaderMp")) {
 			ModLoader.RegisterKey(this, playerList, false);
 			//Load MP handler for BetaTweaks
 			Utils.loadMod("BetaTweaksMP");
 		}
 		
-		if(guiAPIinstalled = Utils.classExists("ModSettings")) {
+		if(Utils.checkModInstalled("guiapi", "ModSettings")) {
 			GuiAPIHandler.instance.init();
 		}
 		
-		optifineInstalled = Utils.classExists("GuiDetailSettingsOF");
-		forgeInstalled = Utils.classExists("forge.ForgeHooksClient");
-		aetherSheepExist = Utils.classExists("EntitySheepuff");
-		shaderModInstalled = Utils.classExists("Shader");
+		Utils.checkModInstalled("optifine", "GuiDetailSettingsOF");
+		Utils.checkModInstalled("forge", "forge.ForgeHooksClient");
+		Utils.checkModInstalled("aethersheep", "EntitySheepuff");
+		Utils.checkModInstalled("shaders", "Shader");
 		
-		betatweaks.Config.init();
-		
-		if (guiAPIinstalled) GuiAPIHandler.instance.loadSettings();
+		if (Utils.modInstalled("guiapi")) GuiAPIHandler.instance.loadSettings();
 
 		initSettings(Utils.mc);
 
 		ModLoader.SetInGameHook(this, true, false);
 		ModLoader.SetInGUIHook(this, true, false);
 
-		if ((betatweaks.Config.clientLogo != LogoState.STANDARD || betatweaks.Config.clientPanoramaEnabled)
+		if ((cfg.logoStyle.getValue() != 0 || cfg.mainmenuPanorama.isEnabled())
 				&& Utils.mc.currentScreen == null)
 			Utils.mc.currentScreen = new GuiInitialHijack();
 		
-		if(!betatweaks.Config.clientDisableEntityRendererOverride) {
-			if(!optifineInstalled) ModLoader.RegisterKey(this, zoom, false);
+		if(!cfg.disableEntityRendererOverride.isEnabled()) {
+			if(!Utils.modInstalled("optifine")) ModLoader.RegisterKey(this, zoom, false);
 			Utils.mc.entityRenderer = new EntityRendererProxyFOV();
 		}
 
@@ -126,7 +110,7 @@ public class mod_BetaTweaks extends BaseMod {
 			guiOptionsButtonCount = 5;
 		}
 		
-		if(betatweaks.Config.clientShowAllResolutionsInConsole) {
+		if(cfg.showAllResolutionsInConsole.isEnabled()) {
 			DisplayMode[] modes;
 			try {
 				modes = Display.getAvailableDisplayModes();
@@ -138,8 +122,8 @@ public class mod_BetaTweaks extends BaseMod {
 			} 
 			catch (LWJGLException e) { e.printStackTrace(); }
 		}
-		if(!betatweaks.Config.clientCustomFullscreenResolution.isEmpty()) {
-			Utils.setCustomRes(betatweaks.Config.clientCustomFullscreenResolution);
+		if(!cfg.customFullscreenRes.getValue().isEmpty()) {
+			Utils.setCustomRes(cfg.customFullscreenRes.getValue());
 			ModLoader.RegisterKey(this, customFullscreen, false);
 		}
 		
@@ -155,28 +139,16 @@ public class mod_BetaTweaks extends BaseMod {
 	public void initSettings(Minecraft minecraft) {
 		overrideIngameChat = true;
 		GuiMainMenuCustom.resetLogo = true;
-		minecraft.hideQuitButton = !betatweaks.Config.clientQuitGameButton;
+		minecraft.hideQuitButton = !cfg.mainmenuQuitButton.isEnabled();
 
-		if (betatweaks.Config.gameplayLightTNTwithFist && !TNTinitialised) {
-			TNTinitialised = true;
-			new BlockTNTPunchable();
-		}
+		if (cfg.lightTNTwithFist.isEnabled() && !(Block.tnt instanceof BlockTNTPunchable)) new BlockTNTPunchable();
+		if (cfg.indevStorageBlocks.isEnabled() && !(Block.blockSteel instanceof BlockOreStorageIndev)) initStorageBlocks();
 
-		if (betatweaks.Config.clientIndevStorageBlocks && !storageBlocksInitialised) {
-			storageBlocksInitialised = true;
-			initStorageBlocks();
-		}
-
-		if ((betatweaks.Config.clientLogo == LogoState.CUSTOM || betatweaks.Config.clientPanoramaEnabled) && !customLogoInitialised) {
-			if (!GuiMainMenuCustom.configLogoFile.exists())
-				GuiMainMenuCustom.writeCustomLogoConfig();
-			GuiMainMenuCustom.readCustomLogoConfig();
-		}
 
 		if (resetTallGrass) {
 			resetTallGrass = false;
 			Utils.clearBlockID(Block.tallGrass);
-			if (betatweaks.Config.clientHideLongGrass) {
+			if (cfg.hideLongGrass.isEnabled()) {
 				Utils.replaceBlock(new BlockTallGrassHidden(), "tallGrass", "Y");
 			} else {
 				Utils.replaceBlock(new BlockTallGrass(31, 39).setHardness(0.0F).setStepSound(Block.soundGrassFootstep).setBlockName("tallgrass"), "tallGrass", "Y");
@@ -186,7 +158,7 @@ public class mod_BetaTweaks extends BaseMod {
 		if (resetDeadBush) {
 			resetDeadBush = false;
 			Utils.clearBlockID(Block.deadBush);
-			if (betatweaks.Config.clientHideDeadBush) {
+			if (cfg.hideDeadBush.isEnabled()) {
 				Utils.replaceBlock(new BlockDeadBushHidden(), "deadBush", "Z");
 			} else {
 				Utils.replaceBlock(new BlockDeadBush(32, 55).setHardness(0.0F).setStepSound(Block.soundGrassFootstep).setBlockName("deadbush"), "deadBush", "Z");
@@ -195,7 +167,7 @@ public class mod_BetaTweaks extends BaseMod {
 
 		if (resetAchievements) {
 			resetAchievements = false;
-			if (betatweaks.Config.clientDisableAchievementNotifications) {
+			if (cfg.hideAchievementNotifications.isEnabled()) {
 				minecraft.guiAchievement = new GuiAchievementNull(minecraft);
 			} else {
 				minecraft.guiAchievement = new GuiAchievement(minecraft);
@@ -203,23 +175,21 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 		
 		guiOverrides.clear();
-		if(betatweaks.Config.clientImprovedChat) {
+		if(cfg.improvedChat.isEnabled()) {
 			guiOverrides.put(GuiChat.class, GuiImprovedChat.class);
 		}
-		if(betatweaks.Config.clientScrollableControls) {
+		if(cfg.scrollableControls.isEnabled()) {
 			guiOverrides.put(GuiControls.class, GuiControlsScrollable.class);
 		}
-		if(betatweaks.Config.clientMultiplayerMenu) {
-			guiOverrides.put(GuiMultiplayer.class, GuiMultiplayerMenu.class);
+		if(cfg.serverList.isEnabled()) {
+			guiOverrides.put(GuiMultiplayer.class, GuiServerList.class);
 		}
-		if (betatweaks.Config.clientLogo != LogoState.STANDARD || betatweaks.Config.clientPanoramaEnabled) {
+		if (cfg.logoStyle.getValue() != 0 || cfg.mainmenuPanorama.isEnabled()) {
 			guiOverrides.put(GuiMainMenu.class, GuiMainMenuCustom.class);
 		}
 		else {
 			guiOverrides.put(GuiMainMenuCustom.class, GuiMainMenu.class);
 		}
-		
-		
 	}
 	private int buttonCount = -1;
 	private int buttonCount2 = -1;
@@ -229,14 +199,14 @@ public class mod_BetaTweaks extends BaseMod {
 	
 	
 	public void ModsLoaded() {
-		HMIinstalled = ModLoader.isModLoaded("mod_HowManyItems");
-		minecolonyInstalled = ModLoader.isModLoaded("mod_MineColony");
+		Utils.checkModInstalled("hmi", ModLoader.isModLoaded("mod_HowManyItems"));
+		Utils.checkModInstalled("minecolony", ModLoader.isModLoaded("mod_MineColony"));
 	}
 	
 	@SuppressWarnings("unchecked")
 	public boolean OnTickInGUI(Minecraft mc, GuiScreen guiscreen) {
-		if(overrideIngameChat) {
-			if(betatweaks.Config.clientImprovedChat) {
+		if(overrideIngameChat || guiscreen instanceof GuiConnecting) {
+			if(cfg.improvedChat.isEnabled()) {
 				if(!(mc.ingameGUI instanceof GuiIngameImprovedChat)) {
 					mc.ingameGUI = new GuiIngameImprovedChat(mc);
 				}
@@ -250,37 +220,37 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 		
 		if(guiOverrides.containsKey(guiscreen.getClass()) && !dontOverride) {
-			Utils.overrideCurrentScreen(mc, guiOverrides.get(guiscreen.getClass()));
+			Utils.overrideCurrentScreen(guiOverrides.get(guiscreen.getClass()));
 		}
 		if (firstGuiScreenAfterHijack != null) {
-			Utils.overrideCurrentScreen(mc, firstGuiScreenAfterHijack);
+			Utils.overrideCurrentScreen(firstGuiScreenAfterHijack);
 			firstGuiScreenAfterHijack = null;
-		} else if (guiAPIinstalled && guiscreen instanceof GuiModScreen) {
+		} else if (Utils.modInstalled("guiapi") && guiscreen instanceof GuiModScreen) {
 			GuiAPIHandler.instance.handleTooltip((GuiModScreen)guiscreen, Utils.cursorX(), Utils.cursorY());
-			if (parentScreen != guiscreen && guiscreen instanceof GuiModSelect && parentScreen instanceof GuiModScreen) {
+			if (Utils.getParentScreen() != guiscreen && guiscreen instanceof GuiModSelect && Utils.getParentScreen() instanceof GuiModScreen) {
 				
-				Boolean temp1 = betatweaks.Config.clientIndevStorageBlocks;
-				Boolean temp2 = betatweaks.Config.clientHideLongGrass;
-				Boolean temp3 = betatweaks.Config.clientHideDeadBush;
-				Boolean temp4 = betatweaks.Config.clientDisableAchievementNotifications;
+				Boolean temp1 = cfg.indevStorageBlocks.isEnabled();
+				Boolean temp2 = cfg.hideLongGrass.isEnabled();
+				Boolean temp3 = cfg.hideDeadBush.isEnabled();
+				Boolean temp4 = cfg.hideAchievementNotifications.isEnabled();
 				GuiAPIHandler.instance.updateSettings();
-				if (temp2 != betatweaks.Config.clientHideLongGrass) {
+				if (temp2 != cfg.hideLongGrass.isEnabled()) {
 					resetTallGrass = true;
 				}
-				if (temp3 != betatweaks.Config.clientHideDeadBush) {
+				if (temp3 != cfg.hideDeadBush.isEnabled()) {
 					resetDeadBush = true;
 				}
-				if (temp4 != betatweaks.Config.clientDisableAchievementNotifications) {
+				if (temp4 != cfg.hideAchievementNotifications.isEnabled()) {
 					resetAchievements = true;
 				}
 				initSettings(mc);
-				if (temp1 != betatweaks.Config.clientIndevStorageBlocks || temp2 != betatweaks.Config.clientHideLongGrass
-						|| temp3 != betatweaks.Config.clientHideDeadBush) {
+				if (temp1 != cfg.indevStorageBlocks.isEnabled() || temp2 != cfg.hideLongGrass.isEnabled()
+						|| temp3 != cfg.hideDeadBush.isEnabled()) {
 					if (mc.theWorld != null)
 						mc.renderGlobal.loadRenderers();
 				}
 			}
-		} else if (betatweaks.Config.clientIngameTexturePackButton && guiscreen instanceof GuiIngameMenu) {
+		} else if (cfg.ingameTexurePackButton.isEnabled() && guiscreen instanceof GuiIngameMenu) {
 			if(buttonCount == -1 || guiscreen.controlList.size() == buttonCount) {
 				buttonCount = guiscreen.controlList.size();
 				texturePackButton = new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs");
@@ -291,10 +261,10 @@ public class mod_BetaTweaks extends BaseMod {
 			if(Utils.buttonClicked(texturePackButton)) {
 				mc.displayGuiScreen(new GuiTexturePacks(guiscreen));
 			}
-		} else if (guiscreen instanceof GuiOptions && !betatweaks.Config.clientDisableEntityRendererOverride) {
-			if(betatweaks.Config.clientFovSliderVisible && (buttonCount2 == -1 || guiscreen.controlList.size() == buttonCount2)) {
+		} else if (guiscreen instanceof GuiOptions && !cfg.disableEntityRendererOverride.isEnabled()) {
+			if(cfg.fovSlider.isEnabled() && (buttonCount2 == -1 || guiscreen.controlList.size() == buttonCount2)) {
 				buttonCount2 = guiscreen.controlList.size();
-				guiscreen.controlList.add(new GuiSliderBT(guiscreen.width / 2 - 155 + guiOptionsButtonCount % 2 * 160, guiscreen.height / 6 + 24 * (guiOptionsButtonCount >> 1), betatweaks.Config.getField("clientFovSliderValue")));
+				guiscreen.controlList.add(new GuiSliderBT(guiscreen.width / 2 - 155 + guiOptionsButtonCount % 2 * 160, guiscreen.height / 6 + 24 * (guiOptionsButtonCount >> 1), cfg.fov));
 				((GuiButton)guiscreen.controlList.get(buttonCount2)).drawButton(mc, Utils.cursorX(), Utils.cursorY());
 			}
 			
@@ -304,25 +274,23 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 			
 		}
-		if (guiscreen != parentScreen) {
-			parentScreen = guiscreen;
-		}
+		Utils.updateParentScreen();
 		if (mc.theWorld != currentWorld) {
-			if (guiAPIinstalled
+			if (Utils.modInstalled("modloadermp") && mc.theWorld == null) {
+				BetaTweaksMP.serverModInstalled = false;
+			}
+			if (Utils.modInstalled("guiapi")
 					&& (currentWorld == null || !currentWorld.multiplayerWorld) != (mc.theWorld == null
 							|| !mc.theWorld.multiplayerWorld)) {
 				GuiAPIHandler.instance.loadSettings();
 			}
-			if (modloaderMPinstalled && mc.theWorld == null) {
-				BetaTweaksMP.serverModInstalled = false;
-			}
 			currentWorld = mc.theWorld;
 		}
 		
-		if (betatweaks.Config.clientDraggingShortcuts && guiscreen instanceof GuiContainer && (!HMIinstalled || !(guiscreen instanceof GuiRecipeViewer))) {
+		if (cfg.draggingShortcuts.isEnabled() && guiscreen instanceof GuiContainer && (!Utils.modInstalled("hmi") || !(guiscreen instanceof GuiRecipeViewer))) {
 			GuiContainer container = (GuiContainer)guiscreen;
 			
-			if(minecolonyInstalled) {
+			if(Utils.modInstalled("minecolony")) {
 				if(container instanceof GuiHut && ((GuiHut)container).page != 0) {
 					return true;
 				}
@@ -587,7 +555,7 @@ public class mod_BetaTweaks extends BaseMod {
 	private boolean rmbHeld;
 
     private final Method getSlot = Utils.getMethod(GuiContainer.class,  new Class<?>[] {int.class, int.class}, "getSlotAtPosition", "a");
-    private int debug;
+    //private int debug;
 	public boolean OnTickInGame(Minecraft minecraft) {
 		
 		//SCROLL TEST
@@ -611,7 +579,7 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 		
 		//Equip armour from hotbar
-		if(betatweaks.Config.clientDraggingShortcuts) {
+		if(cfg.draggingShortcuts.isEnabled()) {
 			if(Mouse.isButtonDown(1) && minecraft.currentScreen == null) {
 				if(!rmbHeld) {
 					rmbHeld = true;
@@ -633,7 +601,7 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 		
 		//Draw playerlist
-		if (modloaderMPinstalled && BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayAllowPlayerList
+		if (Utils.modInstalled("modloadermp") && BetaTweaksMP.serverModInstalled && BetaTweaksMP.playerListAllowed.isEnabled()
 				&& Keyboard.isKeyDown(playerList.keyCode) && minecraft.currentScreen == null) {
 			ScaledResolution scaledresolution = new ScaledResolution(minecraft.gameSettings, minecraft.displayWidth,
 					minecraft.displayHeight);
@@ -666,8 +634,8 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 
 		//laddergaps
-		if ((betatweaks.Config.gameplayLadderGaps && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayLadderGaps)) {
+		if ((cfg.ladderGaps.isEnabled() && !minecraft.theWorld.multiplayerWorld) || (Utils.modInstalled("modloadermp")
+				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.ladderGaps.isEnabled())) {
 
 			for (int z = 0; z < minecraft.theWorld.loadedEntityList.size()
 					+ minecraft.theWorld.playerEntities.size(); z++) {
@@ -716,15 +684,15 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 		
 		//punch sheep for wool
-		if (((betatweaks.Config.gameplayPunchSheepForWool && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayPunchableSheep))
+		if (((cfg.punchSheepForWool.isEnabled() && !minecraft.theWorld.multiplayerWorld) || (Utils.modInstalled("modloadermp")
+				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.punchSheepForWool.isEnabled()))
 				&& minecraft.objectMouseOver != null
 				&& minecraft.objectMouseOver.typeOfHit == EnumMovingObjectType.ENTITY && Mouse.isButtonDown(0)) {
 
 			Entity e = minecraft.objectMouseOver.entityHit;
 			if (e instanceof EntitySheep) {
-				if (minecraft.theWorld.multiplayerWorld && modloaderMPinstalled
-						&& BetaTweaksMP.gameplayPunchableSheep) {
+				if (minecraft.theWorld.multiplayerWorld && Utils.modInstalled("modloadermp")
+						&& BetaTweaksMP.punchSheepForWool.isEnabled()) {
 					BetaTweaksMP.sheepPunched(e.entityId);
 				} else if (e.beenAttacked) {
 					if (!((EntitySheep) e).getSheared()) {
@@ -742,7 +710,7 @@ public class mod_BetaTweaks extends BaseMod {
 					}
 				}
 			}
-			else if(aetherSheepExist && e instanceof EntitySheepuff) {
+			else if(Utils.modInstalled("aethersheep") && e instanceof EntitySheepuff) {
 				if (!minecraft.theWorld.multiplayerWorld && e.beenAttacked) {
 					if (!((EntitySheepuff) e).getSheared()) {
 
@@ -762,7 +730,7 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 
 		//minecraft boosters
-		if (betatweaks.Config.gameplayMinecartBoosters && !minecraft.theWorld.multiplayerWorld) {
+		if (cfg.minecartBoosters.isEnabled() && !minecraft.theWorld.multiplayerWorld) {
 			for (int i = 0; i < minecraft.theWorld.loadedEntityList.size(); i++) {
 				Entity entity = (Entity) minecraft.theWorld.loadedEntityList.get(i);
 				if (entity instanceof EntityMinecart) {
@@ -806,7 +774,7 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 
 		//boat elevators
-		if (betatweaks.Config.gameplayBoatElevators && !minecraft.theWorld.multiplayerWorld) {
+		if (cfg.boatElevators.isEnabled() && !minecraft.theWorld.multiplayerWorld) {
 			for (int i = 0; i < minecraft.theWorld.loadedEntityList.size(); i++) {
 				Entity entity = (Entity) minecraft.theWorld.loadedEntityList.get(i);
 				if (entity instanceof EntityBoat) {
@@ -836,15 +804,15 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 
 		//hoe dirt for seeds
-		if (((betatweaks.Config.gameplayHoeDirtForSeeds && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayHoeDirtSeeds))
+		if (((cfg.hoeGrassForSeeds.isEnabled() && !minecraft.theWorld.multiplayerWorld) || (Utils.modInstalled("modloadermp")
+				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.hoeGrassForSeeds.isEnabled()))
 				&& minecraft.thePlayer.getCurrentEquippedItem() != null
 				&& minecraft.thePlayer.getCurrentEquippedItem().getItem() instanceof ItemHoe
 				&& lastTickHoeDamage == minecraft.thePlayer.getCurrentEquippedItem().getItemDamage() - 1) {
 			lastTickHoeDamage = -1;
 
-			if (minecraft.theWorld.multiplayerWorld && modloaderMPinstalled && BetaTweaksMP.serverModInstalled
-					&& BetaTweaksMP.gameplayHoeDirtSeeds) {
+			if (minecraft.theWorld.multiplayerWorld && Utils.modInstalled("modloadermp") && BetaTweaksMP.serverModInstalled
+					&& BetaTweaksMP.hoeGrassForSeeds.isEnabled()) {
 
 				BetaTweaksMP.grassHoed(lastTickHoeX, lastTickHoeY, lastTickHoeZ);
 			} else {
@@ -865,9 +833,9 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 
 		//handle block placing on invisible blocks
-		if ((betatweaks.Config.clientHideLongGrass || betatweaks.Config.clientHideDeadBush
-				|| ((betatweaks.Config.gameplayHoeDirtForSeeds && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-						&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayHoeDirtSeeds)))
+		if ((cfg.hideLongGrass.isEnabled() || cfg.hideDeadBush.isEnabled()
+				|| ((cfg.hoeGrassForSeeds.isEnabled() && !minecraft.theWorld.multiplayerWorld) || (Utils.modInstalled("modloadermp")
+						&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.hoeGrassForSeeds.isEnabled())))
 				&& Mouse.isButtonDown(1) && minecraft.thePlayer.getCurrentEquippedItem() != null
 				&& minecraft.objectMouseOver != null
 				&& minecraft.objectMouseOver.typeOfHit == EnumMovingObjectType.TILE) {
@@ -876,8 +844,8 @@ public class mod_BetaTweaks extends BaseMod {
 			int y = minecraft.objectMouseOver.blockY;
 			int z = minecraft.objectMouseOver.blockZ;
 
-			if ((betatweaks.Config.gameplayHoeDirtForSeeds && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-					&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayHoeDirtSeeds)
+			if ((cfg.hoeGrassForSeeds.isEnabled() && !minecraft.theWorld.multiplayerWorld) || (Utils.modInstalled("modloadermp")
+					&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.hoeGrassForSeeds.isEnabled())
 					&& minecraft.thePlayer.getCurrentEquippedItem() != null
 					&& minecraft.thePlayer.getCurrentEquippedItem().getItem() instanceof ItemHoe) {
 				int b = minecraft.theWorld.getBlockId(x, y, z);
@@ -909,10 +877,10 @@ public class mod_BetaTweaks extends BaseMod {
 				x++;
 			}
 			int b = minecraft.theWorld.getBlockId(x, y, z);
-			if (((Block.blocksList[b] == Block.tallGrass && betatweaks.Config.clientHideLongGrass)
-					|| (Block.blocksList[b] == Block.deadBush && betatweaks.Config.clientHideDeadBush))) {
+			if (((Block.blocksList[b] == Block.tallGrass && cfg.hideLongGrass.isEnabled())
+					|| (Block.blocksList[b] == Block.deadBush && cfg.hideDeadBush.isEnabled()))) {
 
-				if (minecraft.theWorld.multiplayerWorld && modloaderMPinstalled
+				if (minecraft.theWorld.multiplayerWorld && Utils.modInstalled("modloadermp")
 						&& BetaTweaksMP.serverModInstalled) {
 					BetaTweaksMP.longgrassDestroyed(x, y, z);
 				} else if (minecraft.theWorld.multiplayerWorld) {
@@ -958,7 +926,7 @@ public class mod_BetaTweaks extends BaseMod {
 	
 	public static String resources = "/betatweaks/resources";
 	
-
+	//These methods are used to avoid reflection in classes from the betatweaks package.
 	public static void drawRect(int i, int j, int k, int l, int colour) {
 		Utils.gui.drawRect(i, j, k, l, colour);
 	}
@@ -977,10 +945,6 @@ public class mod_BetaTweaks extends BaseMod {
 	
 	public static float fogColorBlue(EntityRenderer entityrenderer) {
 		return entityrenderer.fogColorBlue;
-	}
-	
-	static {
-		
 	}
 
 }

@@ -23,9 +23,8 @@ import net.minecraft.src.MathHelper;
 import net.minecraft.src.ScaledResolution;
 import net.minecraft.src.Tessellator;
 import net.minecraft.src.mod_BetaTweaks;
-import betatweaks.Config;
 import betatweaks.RenderBlocksLogoFunc;
-import betatweaks.Config.LogoState;
+import betatweaks.config.Config;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
@@ -44,6 +43,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
     private int viewportTexture;
 	private boolean undrawn2 = true;
     private static final String[] panoramaFilePaths = new String[] {"/panorama0.png", "/panorama1.png", "/panorama2.png", "/panorama3.png", "/panorama4.png", "/panorama5.png"};
+    private Config cfg = Config.getInstance();
     
     public GuiMainMenuCustom()
     {
@@ -111,7 +111,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
     public void drawScreen(int i, int j, float f)
     {
     	
-    	if (Config.clientPanoramaEnabled) {
+    	if (cfg.mainmenuPanorama.isEnabled()) {
     		if (undrawn2) {
     			undrawn2 = false;
         		this.viewportTexture = this.mc.renderEngine.allocateAndSetupTexture(new BufferedImage(256, 256, 2));
@@ -126,15 +126,15 @@ public class GuiMainMenuCustom extends GuiMainMenu
     	
     	
         Tessellator tessellator = Tessellator.instance;
-        if (Config.clientLogo != LogoState.STANDARD)  {
-        	if (!modBlockTexturesLoaded && Config.clientLogo == LogoState.CUSTOM && updateCounter > 1) {
+        if (Config.getInstance().logoStyle.getValue() != 0)  {
+        	if (!modBlockTexturesLoaded && Config.getInstance().logoStyle.getValue() == 2 && updateCounter > 1) {
         		mc.renderEngine.updateDynamicTextures();
         		modBlockTexturesLoaded = true;
         	}
         	
         	
         GL11.glEnable(2929 /*GL_DEPTH_TEST*/);
-        if (Config.clientLogo == LogoState.CUSTOM) {
+        if (Config.getInstance().logoStyle.getValue() == 2) {
         	drawLogo(f);
         }
         else {
@@ -154,7 +154,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
         }
         tessellator.setColorOpaque_I(0xffffff);
         GL11.glPushMatrix();
-        if (Config.clientLogo != LogoState.CUSTOM) {
+        if (Config.getInstance().logoStyle.getValue() != 2) {
         	GL11.glTranslatef(width / 2 + 90, (float)(70), 0.0F);
         }
         else {
@@ -164,11 +164,11 @@ public class GuiMainMenuCustom extends GuiMainMenu
         float f1 = 1.8F - MathHelper.abs(MathHelper.sin(((float)(System.currentTimeMillis() % 1000L) / 1000F) * 3.141593F * 2.0F) * 0.1F);
         f1 = (f1 * 100F) / (float)(fontRenderer.getStringWidth(splashText) + 32);
         GL11.glScalef(f1, f1, f1);
-        if (Config.clientLogo != LogoState.CUSTOM || logoSplashTextEnabled) {
+        if (Config.getInstance().logoStyle.getValue() != 2 || logoSplashTextEnabled) {
         	drawCenteredString(fontRenderer, splashText, 0, -8, 0xffff00);
         }
         GL11.glPopMatrix();
-        if (Config.clientPanoramaEnabled) {
+        if (cfg.mainmenuPanorama.isEnabled()) {
         	drawString(this.fontRenderer, "Minecraft Beta 1.7.3", 2, this.height - 10, 16777215);
         }
         else {
@@ -577,15 +577,17 @@ public class GuiMainMenuCustom extends GuiMainMenu
 	}
 
 	public static Boolean customLogoConfigUpdated() {
+		if (!configLogoFile.exists()) {
+			writeCustomLogoConfig();
+			timeStamp = configLogoFile.lastModified();
+			return true;
+		}
 		if (resetLogo) {
 			resetLogo = false;
 			return true;
 		}
 		if (configLogoFile.lastModified() != timeStamp) {
 			timeStamp = configLogoFile.lastModified();
-			if (!configLogoFile.exists()) {
-				writeCustomLogoConfig();
-			}
 			return true;
 		}
 		return false;

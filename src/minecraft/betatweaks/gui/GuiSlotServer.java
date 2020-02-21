@@ -27,7 +27,7 @@ class GuiSlotServer extends GuiSlot
     private GuiButton buttonScrollUp = new GuiButton(9, 0, 0, null);
     private GuiButton buttonScrollDown = new GuiButton(10, 0, 0, null);
 
-	public GuiSlotServer(GuiMultiplayerMenu guimultiplayer)
+	public GuiSlotServer(GuiServerList guimultiplayer)
     {
         super(Utils.mc, guimultiplayer.width, guimultiplayer.height, 32, guimultiplayer.height - 64, 36);
         menu = guimultiplayer;
@@ -76,7 +76,7 @@ class GuiSlotServer extends GuiSlot
     protected void drawSlot(int i, int j, int k, int l, Tessellator tessellator)
     {
     	ServerData server = (ServerData)menu.getServerList().get(i);
-        synchronized(GuiMultiplayerMenu.getSync())
+        synchronized(GuiServerList.getSync())
         {
             if(server.shouldPing && menu.pingCount < 5 && !server.pinged)
             {
@@ -151,7 +151,7 @@ class GuiSlotServer extends GuiSlot
         }
     }
 
-    final GuiMultiplayerMenu menu; /* synthetic field */
+    final GuiServerList menu; /* synthetic field */
 
 	public void setMousePos(int i, int j) {
 		this.posX = i;

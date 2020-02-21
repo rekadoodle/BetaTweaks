@@ -1,7 +1,7 @@
 package betatweaks.block;
 
-import betatweaks.Config;
 import betatweaks.Utils;
+import betatweaks.config.Config;
 import net.minecraft.src.*;
 
 public class BlockOreStorageIndev extends BlockOreStorage {
@@ -22,7 +22,7 @@ public class BlockOreStorageIndev extends BlockOreStorage {
     
     public int getBlockTextureFromSide(int i)
     {
-    	 if(!Config.clientIndevStorageBlocks || i == 1)
+    	 if(!Config.getInstance().indevStorageBlocks.isEnabled() || i == 1)
          {
              return blockIndexInTexture;
          }

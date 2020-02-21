@@ -23,16 +23,17 @@ import org.lwjgl.input.Mouse;
 
 import betatweaks.CompressedStreamToolsMP;
 import betatweaks.ServerData;
+import betatweaks.Utils;
 
-public class GuiMultiplayerMenu extends GuiScreen
+public class GuiServerList extends GuiScreen
 {
 
-    public GuiMultiplayerMenu()
+    public GuiServerList()
     {
-    	this(mod_BetaTweaks.parentScreen);
+    	this(Utils.getParentScreen());
     }
 
-    public GuiMultiplayerMenu(GuiScreen parentScreen) {
+    public GuiServerList(GuiScreen parentScreen) {
     	this.parentScreen = parentScreen;
     	mod_BetaTweaks.dontOverride = true;
 	}
@@ -130,7 +131,7 @@ public class GuiMultiplayerMenu extends GuiScreen
             mc.displayGuiScreen(parentScreen);
         }
         else if(guibutton.id == 8) {
-            mc.displayGuiScreen(new GuiMultiplayerMenu(parentScreen));
+            mc.displayGuiScreen(new GuiServerList(parentScreen));
         } 
         else {
         	slots.actionPerformed(guibutton);

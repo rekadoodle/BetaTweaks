@@ -1,7 +1,7 @@
 package betatweaks.block;
 
-import betatweaks.Config;
 import betatweaks.Utils;
+import betatweaks.config.Config;
 import net.minecraft.src.*;
 
 public class BlockTNTPunchable extends BlockTNT
@@ -22,7 +22,7 @@ public class BlockTNTPunchable extends BlockTNT
         {
             return;
         }
-        if(!Config.gameplayLightTNTwithFist && (l & 1) == 0)
+        if(!Config.getInstance().lightTNTwithFist.isEnabled() && (l & 1) == 0)
         {
             dropBlockAsItem_do(world, i, j, k, new ItemStack(Block.tnt.blockID, 1, 0));
         } else

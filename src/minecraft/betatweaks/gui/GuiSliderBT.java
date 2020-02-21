@@ -6,21 +6,23 @@ import java.lang.reflect.Field;
 
 import org.lwjgl.opengl.GL11;
 
-import betatweaks.Config;
+import betatweaks.config.Config;
+import betatweaks.config.SBase;
+import betatweaks.config.SFloat;
 
 
 public class GuiSliderBT extends GuiButton
 {
-	public GuiSliderBT(int x, int y, Field field)
+	public GuiSliderBT(int x, int y, SBase<?> setting)
     {
-        this(x, y, field, false);
+        this(x, y, setting, false);
     }
 	
-	public GuiSliderBT(int x, int y, Field field, boolean showChatDebugWhenDragging)
+	public GuiSliderBT(int x, int y, SBase<?> setting, boolean showChatDebugWhenDragging)
     {
-        super(-1, x, y, 150, 20, Config.getSliderText(field));
-        this.field = field;
-        sliderValue = Config.getFloatValue(field);
+        super(-1, x, y, 150, 20, Config.getInstance().getSliderText(setting));
+        this.setting = setting;
+        sliderValue = Config.getInstance().getSliderValue(setting);
         dragging = false;
         this.showChatDebugWhenDragging = showChatDebugWhenDragging;
     }
@@ -50,8 +52,9 @@ public class GuiSliderBT extends GuiButton
             {
                 sliderValue = 1.0F;
             }
-            Config.setFloatValue(field, sliderValue);
-            displayString = Config.getSliderText(field);
+            GuiImprovedChat.onChatSettingChanged();
+            cfg.setSliderValue(setting, sliderValue);
+        	displayString = cfg.getSliderText(setting);
         }
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         byte byte0 = 0;
@@ -76,11 +79,12 @@ public class GuiSliderBT extends GuiButton
     public void mouseReleased(int i, int j)
     {
         dragging = false;
-        Config.writeConfig();
+        cfg.writeConfig();
     }
 
+    private Config cfg = Config.getInstance();
     private boolean showChatDebugWhenDragging;
     private float sliderValue;
     private boolean dragging;
-    private Field field;
+    private SBase<?> setting;
 }

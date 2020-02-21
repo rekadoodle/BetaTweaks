@@ -8,14 +8,17 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import betatweaks.*;
-import betatweaks.Config;
+import betatweaks.config.Config;
 import net.minecraft.src.*;
 
 public class GuiImprovedChat extends GuiChat {
 
 	public GuiImprovedChat() {
 		super();
+		cfg = Config.getInstance();
 	}
+	
+	private final Config cfg;
 	
 	//TODO
 	//autocomplete list(scrapped for now waste of time?)
@@ -29,19 +32,20 @@ public class GuiImprovedChat extends GuiChat {
 		int i = 1;
 		options = new GuiButton[] {
 				new GuiButton(10, width - 151, i, 150, 20, "Hide Options"),
-				new GuiSliderBT(width - 151, i+=21, Config.getField("clientImprovedChatFontScaleValue")),
-				new GuiSliderBT(width - 151, i+=21, Config.getField("clientImprovedChatWidthValue"), true),
-				new GuiSliderBT(width - 151, i+=21, Config.getField("clientImprovedChatIngameHeightOffset"), true),
-				new GuiSliderBT(width - 151, i+=21, Config.getField("clientImprovedChatIngameMaxHeight"), true),
-				new GuiSliderBT(width - 151, i+=21, Config.getField("clientImprovedChatMaxMessagesSize")),
-				new GuiButton(11, width - 151, i+=21, 150, 20, "Indicator Style: " + indicatorStyleText()),
+				new GuiSliderBT(width - 151, i+=21, cfg.improvedChatFontScale),
+				new GuiSliderBT(width - 151, i+=21, cfg.improvedChatWidthPercentage, true),
+				new GuiSliderBT(width - 151, i+=21, cfg.improvedChatIngameHeightOffset, true),
+				new GuiSliderBT(width - 151, i+=21, cfg.improvedChatHorizontalGap, true),
+				new GuiSliderBT(width - 151, i+=21, cfg.improvedChatIngameHeightPercentage, true),
+				new GuiSliderBT(width - 151, i+=21, cfg.improvedChatMaxScrollableMessages),
+				new GuiButton(11, width - 151, i+=21, 150, 20, "Indicator Style: " + cfg.improvedChatIndicator),
 		};
 		
 		for(GuiButton button : options) {
 			button.enabled = button.enabled2 = optionsVisible;
 			controlList.add(button);
 		}
-		options[0].enabled = Config.clientImprovedChatMaxInvisibleToggleButton;
+		options[0].enabled = Config.getInstance().improvedChatInvisibleToggleButton.isEnabled();
 		
 		if(Utils.mc.ingameGUI instanceof GuiIngameImprovedChat) {
 			gui = (GuiIngameImprovedChat) Utils.mc.ingameGUI;
@@ -50,27 +54,14 @@ public class GuiImprovedChat extends GuiChat {
 		onChatSettingChanged();
 	}
 	
-	private String indicatorStyleText() {
-		if(Config.clientImprovedChatIndicator == 0) {
-			return "Vanilla";
-		}
-		if(Config.clientImprovedChatIndicator == 1) {
-			return "Vertical";
-		}
-		return "Both";
-	}
-	
 	protected void actionPerformed(GuiButton guibutton)
     {
         if(guibutton.id == 10) {
         	toggleOptions();
         } 
         else if(guibutton.id == 11){
-        	Config.clientImprovedChatIndicator++;
-        	if(Config.clientImprovedChatIndicator > 2) {
-        		Config.clientImprovedChatIndicator = 0;
-        	}
-        	guibutton.displayString = "Indicator Style: " + indicatorStyleText();
+        	cfg.improvedChatIndicator.increment();
+        	guibutton.displayString = "Indicator Style: " + cfg.improvedChatIndicator;
         }
         else {
             super.actionPerformed(guibutton);
@@ -84,14 +75,6 @@ public class GuiImprovedChat extends GuiChat {
             gui.scroll = 0;
         }
     }
-	
-	public static float getFontScaleFactor() {
-		float value = Config.clientImprovedChatFontScaleValue;
-		if(value <= 0.5F) {
-			return  Utils.round2dp(value / 0.5f);
-		}
-		return Utils.round1dp(18f * value - 8f);
-	}
 
 	public static void onChatSettingChanged() {
 		try {
@@ -109,7 +92,7 @@ public class GuiImprovedChat extends GuiChat {
 	}
 
 	public void init() {
-		sf = getFontScaleFactor();
+		sf = cfg.improvedChatFontScale.getValue();
 		markerX = getCharPosByIndex(markerIndex);
 		if (textSelected()) {
 			selectionX = getCharPosByIndex(selectionIndex);
@@ -154,7 +137,7 @@ public class GuiImprovedChat extends GuiChat {
 		for(GuiButton button : options) {
 			button.enabled = button.enabled2 = optionsVisible;
 		}
-		options[0].enabled = Config.clientImprovedChatMaxInvisibleToggleButton;
+		options[0].enabled =  Config.getInstance().improvedChatInvisibleToggleButton.isEnabled();
 	}
 
 	protected void keyTyped(char charId, int keyId) {
@@ -406,9 +389,9 @@ public class GuiImprovedChat extends GuiChat {
 
 		GL11.glPushMatrix();
 		GL11.glScaled(sf, sf, 1.0F);
-		drawRect(2 / sf, (height - 2) / sf - 12, (width - 2) / sf, (height - 2) / sf, 0x80000000);
+		drawRect(cfg.improvedChatHorizontalGap.getValue() / sf, (height - 2) / sf - 12, (width - 2) / sf, (height - 2) / sf, 0x80000000);
 		GL11.glEnable(3042 /* GL_BLEND */);
-		drawString((new StringBuilder()).append("> ").append(message).toString(), 2 / sf + 2, (height - 2) / sf - 10, 0xe0e0e0);
+		drawString((new StringBuilder()).append("> ").append(message).toString(), cfg.improvedChatHorizontalGap.getValue() / sf + 2, (height - 2) / sf - 10, 0xe0e0e0);
 		if (dragging) {
 			if (lastX != cursorX || lastY != cursorY) {
 				lastX = cursorX;
@@ -417,10 +400,10 @@ public class GuiImprovedChat extends GuiChat {
 			}
 		}
 		if (!textSelected()) {
-			if(Config.clientImprovedChatIndicator != 0) {
+			if(cfg.improvedChatIndicator.getValue() != 0) {
 				drawString((updateCounter / 6) % 2 != 0 ? "" : "|", markerX / sf, (height - 2) / sf - 10, 0xe0e0e0);
 			}
-			if(Config.clientImprovedChatIndicator != 1) {
+			if(cfg.improvedChatIndicator.getValue() != 1) {
 				drawString((updateCounter / 6) % 2 != 0 ? "" : "_", markerX / sf, (height - 2) / sf - 10, 0xe0e0e0);
 			}
 			
@@ -468,7 +451,7 @@ public class GuiImprovedChat extends GuiChat {
 	}
 
 	private int xOffset() {
-		return (int) (2 + (getWidth("> ") + 2) * sf);
+		return (int) (cfg.improvedChatHorizontalGap.getValue() + (getWidth("> ") + 2) * sf);
 	}
 
 	private int getCharIndex(int cursorX) {

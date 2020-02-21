@@ -7,7 +7,7 @@ package betatweaks;
 import java.io.IOException;
 import java.net.*;
 
-import betatweaks.gui.GuiMultiplayerMenu;
+import betatweaks.gui.GuiServerList;
 
 // Referenced classes of package net.minecraft.src:
 //            ServerNBTStorage, GuiSlotServer, GuiMultiplayer
@@ -15,7 +15,7 @@ import betatweaks.gui.GuiMultiplayerMenu;
 public class ThreadPollServers extends Thread
 {
 
-    public ThreadPollServers(GuiMultiplayerMenu menu, ServerData server)
+    public ThreadPollServers(GuiServerList menu, ServerData server)
     {
     	this.menu = menu;
         this.server = server;
@@ -66,48 +66,48 @@ Long var1;
                           break label184;
                        } finally {
                           if(var27) {
-                             synchronized(GuiMultiplayerMenu.getSync()) {
+                             synchronized(GuiServerList.getSync()) {
                             	 menu.pingCount--;
                              }
                           }
                        }
 
-                       synchronized(GuiMultiplayerMenu.getSync()) {
+                       synchronized(GuiServerList.getSync()) {
                     	   menu.pingCount--;
                           return;
                        }
                     }
 
-                    synchronized(GuiMultiplayerMenu.getSync()) {
+                    synchronized(GuiServerList.getSync()) {
                     	menu.pingCount--;
                        return;
                     }
                  }
 
-                 synchronized(GuiMultiplayerMenu.getSync()) {
+                 synchronized(GuiServerList.getSync()) {
                 	 menu.pingCount--;
                     return;
                  }
               }
 
-              synchronized(GuiMultiplayerMenu.getSync()) {
+              synchronized(GuiServerList.getSync()) {
             	  menu.pingCount--;
                  return;
               }
            }
 
-           synchronized(GuiMultiplayerMenu.getSync()) {
+           synchronized(GuiServerList.getSync()) {
         	   menu.pingCount--;
               return;
            }
         }
 
-        synchronized(GuiMultiplayerMenu.getSync()) {
+        synchronized(GuiServerList.getSync()) {
         	menu.pingCount--;
         }
 
      }
 
     final ServerData server;
-    final GuiMultiplayerMenu menu;
+    final GuiServerList menu;
 }

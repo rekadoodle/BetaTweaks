@@ -1,7 +1,3 @@
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) braces deadcode 
-
 package betatweaks;
 
 import java.lang.reflect.Field;
@@ -18,6 +14,8 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.*;
 import org.lwjgl.util.glu.GLU;
 
+import betatweaks.config.Config;
+
 public class EntityRendererProxyFOV extends EntityRendererProxy
 {
 
@@ -29,35 +27,41 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
 	
 	private final Field rendererUpdateCountField = Utils.getField(EntityRenderer.class, "rendererUpdateCount", "l");
 	
-    public EntityRendererProxyFOV()
+	public EntityRendererProxyFOV() {
+		this(Utils.mc);
+	}
+	
+    public EntityRendererProxyFOV(Minecraft minecraft)
     {
-    	super(Utils.mc);
+    	super(minecraft);
         farPlaneDistance = 0.0F;
         pointedEntity = null;
         cloudFog = false;
         cameraZoom = 1.0D;
         cameraYaw = 0.0D;
         cameraPitch = 0.0D;
-        mc = Utils.mc;
-        if(mod_BetaTweaks.shaderModInstalled) {
+        mc = minecraft;
+        optifine = Utils.modInstalled("optifine");
+        if(shadersInstalled = Utils.modInstalled("shaders")) {
         	shaderHandler = new ShaderFOVHandler(this);
         	second_renderpass = shaderHandler.second_renderpass;
         	matrixbuffer = ByteBuffer.allocateDirect(64);
             projectionmatrixbuffer = ByteBuffer.allocateDirect(64);
         }
     }
-
-    private float getFOVModifier(float f)
-    {
-        EntityLiving entityliving = mc.renderViewEntity;
-        float fov = 70F + Config.clientFovSliderValue * 40.0F;
-        
+    
+    private float getFOVModifier(float f, boolean isHand) {
+    	EntityLiving entityliving = mc.renderViewEntity;
+        float fov = Config.getInstance().fov.getValue();
+        if(isHand) {
+        	fov = 70F;
+        }
 		
         if(entityliving.isInsideOfMaterial(Material.water))
         {
         	fov *= 60.0F / 70.0F;
         }
-        boolean optifine = mod_BetaTweaks.optifineInstalled;
+        boolean optifine = Utils.modInstalled("optifine");
         if((!optifine && (mc.gameSettings.smoothCamera = Keyboard.isKeyDown(mod_BetaTweaks.zoom.keyCode) && ModLoader.isGUIOpen(null)))
         		|| (optifine && Keyboard.isKeyDown(mc.gameSettings.ofKeyBindZoom.keyCode)))
         {
@@ -78,7 +82,12 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             float f2 = (float)entityliving.deathTime + f;
             fov /= (1.0F - 500F / (f2 + 500F)) * 2.0F + 1.0F;
         }
-        return fov * Config.clientFovMultiplier;
+        return fov;
+    }
+
+    private float getFOVModifier(float f)
+    {
+        return getFOVModifier(f, false);
     }
     
     private boolean zoomMode;
@@ -132,8 +141,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
     
     public void renderWorld(float f, long l)
     {
-    	boolean optifine = mod_BetaTweaks.optifineInstalled;
-    	boolean shader = mod_BetaTweaks.shaderModInstalled && optifine && net.minecraft.src.Config.isWaterFancy();
+    	boolean shader = shadersInstalled && optifine && net.minecraft.src.Config.isWaterFancy();
     	second_renderpass = shader;
         GL11.glEnable(2884 /*GL_CULL_FACE*/);
         GL11.glEnable(2929 /*GL_DEPTH_TEST*/);
@@ -336,7 +344,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                 {
                 	EntityPlayer entityplayer = (EntityPlayer)entityliving;
                     GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                    if(!mod_BetaTweaks.forgeInstalled || !ForgeHooksClient.onBlockHighlight(renderglobal,entityplayer,
+                    if(!Utils.modInstalled("forge") || !ForgeHooksClient.onBlockHighlight(renderglobal,entityplayer,
                 			mc.objectMouseOver,0,
                 			entityplayer.inventory.getCurrentItem(),f)) {
                         renderglobal.drawBlockBreaking(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
@@ -432,7 +440,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             {
                 EntityPlayer entityplayer1 = (EntityPlayer)entityliving;
                 GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                if(!mod_BetaTweaks.forgeInstalled || !ForgeHooksClient.onBlockHighlight(renderglobal,entityplayer1,
+                if(!Utils.modInstalled("forge") || !ForgeHooksClient.onBlockHighlight(renderglobal,entityplayer1,
             			mc.objectMouseOver,0,
             			entityplayer1.inventory.getCurrentItem(),f)) {
                     renderglobal.drawBlockBreaking(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
@@ -644,10 +652,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
     {
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
         GL11.glLoadIdentity();
-        float temp = Config.clientFovSliderValue;
-        Config.clientFovSliderValue = 0.0F;
-        GLU.gluPerspective(getFOVModifier(f), (float)this.mc.displayWidth / (float)this.mc.displayHeight, 0.05F, this.farPlaneDistance * 2.0F);
-        Config.clientFovSliderValue = temp;
+        GLU.gluPerspective(getFOVModifier(f, true), (float)this.mc.displayWidth / (float)this.mc.displayHeight, 0.05F, this.farPlaneDistance * 2.0F);
         GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		try {
 			renderHandMethod.invoke(this, new Object[] {f, i});
@@ -901,6 +906,8 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         return af2;
     }
 
+	private boolean optifine;
+	private boolean shadersInstalled;
     private ByteBuffer matrixbuffer;
     private ByteBuffer projectionmatrixbuffer;
 	private double last_water_height = 0.0D;

@@ -8,7 +8,7 @@ import java.util.ListIterator;
 import org.lwjgl.opengl.GL11;
 
 import betatweaks.ChatLineImproved;
-import betatweaks.Config;
+import betatweaks.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.ChatLine;
 import net.minecraft.src.EnumOptions;
@@ -23,8 +23,11 @@ public class GuiIngameImprovedChat extends GuiIngame {
 		mc = minecraft;
 		chatMessageList = new ArrayList<ChatLineImproved>();
 		notifications = new ArrayList<ChatLine>();
+		cfg = Config.getInstance();
 		init();
 	}
+	
+	private final Config cfg;
 	
 	public void init() {
 		ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
@@ -36,12 +39,13 @@ public class GuiIngameImprovedChat extends GuiIngame {
         	scrollAtTop = true;
         }
         
-        sf = GuiImprovedChat.getFontScaleFactor();
-		chatHeightOffset = Math.min(Math.round((0.5f - Config.clientImprovedChatIngameHeightOffset) * 200), (int) (46 / sf) - 21);
+        sf = cfg.improvedChatFontScale.getValue();
+		chatHeightOffset = Math.min(-cfg.improvedChatIngameHeightOffset.getValue(), (int) (46 / sf) - 21);
+		chatWidthOffset = cfg.improvedChatHorizontalGap.getValue();
 		chatHeight = Math.round((height + chatHeightOffset - 48 - 6 * sf) / (sf * 9)) + 1; //full height
-		chatWidth = (int) (Config.clientImprovedChatWidthValue * width);
-		ingameChatHeight = (int) (Config.clientImprovedChatIngameMaxHeight * chatHeight);
-		maxMessageListSize = 50 + (int) (Config.clientImprovedChatMaxMessagesSize * 950);
+		chatWidth = (int) (cfg.improvedChatWidthPercentage.getValue() * width);
+		ingameChatHeight = (int) (cfg.improvedChatIngameHeightPercentage.getValue() * chatHeight);
+		maxMessageListSize = cfg.improvedChatMaxScrollableMessages.getValue();
         
 		for(; chatMessageList.size() > maxMessageListSize; chatMessageList.remove(chatMessageList.size() - 1)) { }
 		totalChatLines = chatMessageList.size();
@@ -80,6 +84,7 @@ public class GuiIngameImprovedChat extends GuiIngame {
 	private int chatWidth;
 	private int ingameChatHeight;
 	private int chatHeightOffset;
+	private int chatWidthOffset;
 	private int maxMessageListSize;
 	private int width;
 	private int height;
@@ -163,7 +168,7 @@ public class GuiIngameImprovedChat extends GuiIngame {
         	GL11.glScaled(1.0F, sf, 1.0F);
         	 for(int i5 = 0; i5 < ingameChatHeight; i5++)
  	        {
- 	        	byte byte1 = 2;
+ 	        	int byte1 = chatWidthOffset;
  	            int k6 = -i5 * 9;
  	        	drawRect(byte1, k6 - 1 + chatHeightOffset, byte1 + chatWidth, k6 + 8 + chatHeightOffset, 0x80ffffff);
  	        }
@@ -220,7 +225,7 @@ public class GuiIngameImprovedChat extends GuiIngame {
 	}
 	
 	private void drawLine(int index, String text, int fade, float sf, int width) {
-		byte byte1 = 2;
+		int byte1 = chatWidthOffset;
         int k6 = -index * 9;
         
         
@@ -230,7 +235,7 @@ public class GuiIngameImprovedChat extends GuiIngame {
         //drawRect(byte1, (int) (46 / sf) - 12, byte1 + width, k6 + 8 + bigChatOffset, 0x80E50000);
         GL11.glEnable(3042 /*GL_BLEND*/);
         GL11.glScaled(sf, 1.0F, 1.0F);
-        mc.fontRenderer.drawStringWithShadow(text, byte1, k6 + chatHeightOffset, 0xffffff + (fade << 24));
+        mc.fontRenderer.drawStringWithShadow(text, (int)(byte1 / sf), k6 + chatHeightOffset, 0xffffff + (fade << 24));
         //GL11.glScaled(2.0F, 2.0F, 1.0F);
         GL11.glPopMatrix();
 	}

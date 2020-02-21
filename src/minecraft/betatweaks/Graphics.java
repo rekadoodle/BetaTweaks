@@ -5,13 +5,16 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 
+// Used to draw graphics without a Gui object
 public class Graphics {
 	
 	public static final Gui gui = new Gui();
 	public static final RenderItem itemRenderer = new RenderItem();
 	private static final Minecraft mc = Utils.mc;
+	private static boolean itemLighting;
+	private static boolean preRender;
+	public static Boolean lighting;
 	
-	// Used to draw graphics without a Gui object
 	public static void drawRect(int i, int j, int k, int l, int colour) {
 		disableLighting();
 		mod_BetaTweaks.drawRect(i, j, k, l, colour);
@@ -25,27 +28,8 @@ public class Graphics {
 		drawRect(x, y, x + 18, y + 18, colour);
 	}
 	
-	public static void drawTooltip(String s, int x, int y) {
-		//stores tooltip info, to be drawn after overlay
-		tooltipText = s;
-		tooltipX = x;
-		tooltipY = y;
-	}
-	
-	public static void drawStoredToolTip() {
-		if(tooltipText != null) {
-			disableLighting();
-			int k1 = tooltipX + 12;
-			int i2 = tooltipY - 12;
-			int j2 = mc.fontRenderer.getStringWidth(tooltipText);
-			drawRect(k1 - 3, i2 - 3, k1 + j2 + 3, i2 + 8 + 3, 0xc0000000);
-			mc.fontRenderer.drawStringWithShadow(tooltipText, k1, i2, -1);
-			tooltipText = null;
-			postRender();
-		}
-	}
-	
 	public static void disableLighting() {
+		preRender();
 		if(lighting != Boolean.FALSE) {
 			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			GL11.glDisable(2896 /*GL_LIGHTING*/);
@@ -54,7 +38,28 @@ public class Graphics {
 		}
 	}
 	
+	public static void drawMultiLineTooltip(String... s) {
+		if(s == null) return;
+		int i = mc.currentScreen.width / 2 - 150;
+        int j = mc.currentScreen.height / 6 - 30;
+        if(Utils.cursorY() <= mc.currentScreen.height / 2)
+        {
+        	//j += 105;
+            j = mc.currentScreen.height - j - s.length * 11;
+        }
+        int j1 = i + 150 + 150;
+        int k1 = j + 11 * s.length + 6;
+        
+        drawRect(i, j, j1, k1, 0xe0000000);
+        for(int l1 = 0; l1 < s.length; l1++)
+        {
+            drawString(s[l1], i + 5, j - 6 + (l1 + 1) * 11);
+        }
+        postRender();
+	}
+	
 	private static void enableLighting() {
+		preRender();
 		if(lighting != Boolean.TRUE) {
 			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 			GL11.glEnable(2896 /*GL_LIGHTING*/);
@@ -64,6 +69,7 @@ public class Graphics {
 	}
 	
 	public static void bindTexture(String texturePath) {
+		preRender();
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 		mc.renderEngine.bindTexture(mc.renderEngine.getTexture(texturePath));
 	}
@@ -81,6 +87,7 @@ public class Graphics {
 	}
 	
 	private static void enableItemLighting() {
+		preRender();
 		enableLighting();
 		if(!itemLighting) {
 			GL11.glEnable(32826 /*GL_RESCALE_NORMAL_EXT*/);
@@ -92,26 +99,22 @@ public class Graphics {
 		}
 	}
 	
-	private static boolean itemLighting;
-	public static Boolean lighting;
-	private static String tooltipText;
-	private static int tooltipX;
-	private static int tooltipY;
-	
 	public static void drawString(String s, int x, int y) {
 		disableLighting();
-		int k1 = (x) + 12;
-		int i2 = y - 12;
-		mc.fontRenderer.drawStringWithShadow(s, k1, i2, -1);
+		mc.fontRenderer.drawStringWithShadow(s, x, y, -1);
 	}
 	
 	public static void preRender() {
-		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		lighting = null;
-		itemLighting = false;
+		if(!preRender) {
+			preRender = true;
+			GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+			lighting = null;
+			itemLighting = false;
+		}
 	}
 
 	public static void postRender() {
+		preRender = false;
 		lighting = null;
 		RenderHelper.disableStandardItemLighting();
 		enableLighting();

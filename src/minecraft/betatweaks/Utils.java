@@ -1,5 +1,9 @@
 package betatweaks;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -13,6 +17,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
+import betatweaks.config.SBase;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 
@@ -20,12 +25,19 @@ public class Utils {
 
 	public static final Minecraft mc = ModLoader.getMinecraftInstance();
 	public static final Gui gui = new Gui();
+	private static ArrayList<String> installedMods = new ArrayList<String>();
+	private static GuiScreen parentScreen;
+	private static BufferedWriter bufferedWriter;
 	private static final Field modifiersField = getField(Field.class, "modifiers");
 	private static final Field timerField = Utils.getField(Minecraft.class, "timer", "T");
 	private static final Field selectedButtonField = Utils.getField(GuiScreen.class, "selectedButton", "a");
 	private static Timer timer;
 	private static boolean isFullscreen;
 	private static DisplayMode customResolution;
+	private static int lastMouseX;
+    private static int lastMouseY;
+    private static long mouseStillTime;
+    private static GuiScreen currentScreen;
 
 	// Used for easy reflection with obfuscated or regular fields
 	public static final Field getField(Class<?> target, String ...names) {
@@ -74,16 +86,39 @@ public class Utils {
 	}
 
 	// Used to load a mod without it being called mod_XXX
-	public static void loadMod(String modPath) {
+	@SuppressWarnings("unchecked")
+	public static BaseMod loadMod(String modPath) {
 		try {
 			if(!classExists(modPath)) {
 				modPath = "net.minecraft.src." + modPath;
 			}
-			Class modToLoadClass = ModLoader.class.getClassLoader().loadClass(modPath);
+			Class<?> modToLoadClass = ModLoader.class.getClassLoader().loadClass(modPath);
 			getMethod(ModLoader.class, new Class<?>[] { Class.class }, "setupProperties").invoke(null, new Object[] { modToLoadClass });
-			((LinkedList) getField(ModLoader.class, "modList").get(null)).add(modToLoadClass.newInstance());
+			BaseMod mod = (BaseMod) modToLoadClass.newInstance();
+			((LinkedList<BaseMod>) getField(ModLoader.class, "modList").get(null)).add(mod);
+			return mod;
 		} 
-		catch (Exception e) { e.printStackTrace(); }
+		catch (Exception e) { e.printStackTrace(); return null; }
+	}
+	
+	public static boolean modInstalled(String name) {
+		return installedMods.contains(name);
+	}
+	
+	public static boolean checkModInstalled(String name, boolean modLoaded) {
+		if(modLoaded) {
+			installedMods.add(name);
+			return true;
+		}
+		return false;
+	}
+	
+	public static boolean checkModInstalled(String name, String classToCheck) {
+		if(classExists(classToCheck)) {
+			installedMods.add(name);
+			return true;
+		}
+		return false;
 	}
 	
 	public static boolean classExists(String className) {
@@ -96,7 +131,13 @@ public class Utils {
 		}
 	}
 	
+	public static void updateParentScreen() {
+		parentScreen = mc.currentScreen;
+	}
 	
+	public static GuiScreen getParentScreen() {
+		return parentScreen;
+	}
 	
 	public static int clearBlockID(Block block) {
 		return clearBlockID(block.blockID);
@@ -135,15 +176,15 @@ public class Utils {
 	}
 	
 	//Used to draw a screen on the first frame it is overrided
-	public static void overrideCurrentScreen(Minecraft mc, GuiScreen guiscreen) {
+	public static void overrideCurrentScreen(GuiScreen guiscreen) {
 		mc.displayGuiScreen(guiscreen);
 		GL11.glClear(256);
 		guiscreen.drawScreen(Utils.cursorY(), Utils.cursorX(), Utils.renderPartialTicks());
 	}
 		
-	public static void overrideCurrentScreen(Minecraft mc, Class<? extends GuiScreen> guiscreenClass) {
+	public static void overrideCurrentScreen(Class<? extends GuiScreen> guiscreenClass) {
 		try {
-			overrideCurrentScreen(mc, guiscreenClass.newInstance());
+			overrideCurrentScreen(guiscreenClass.newInstance());
 		} 
 		catch (Exception e) { e.printStackTrace(); }
 	}
@@ -162,6 +203,70 @@ public class Utils {
 	
 	public static float round2dp(float f) {
 		return ((int)(f * 100f)) / 100f;
+	}
+	
+	public static int toPercentage(Object object) {
+		return toPercentage(((Float)object).floatValue());
+	}
+	
+	public static int toPercentage(float f) {
+		return Math.round(f * 100f);
+	}
+	
+	public static SBase[] mergeSettingArrays(Object[] input1, Object[] input2) {
+		SBase[] output = new SBase[input1.length + input2.length];
+		System.arraycopy(input1, 0, output, 0, input1.length);
+	    System.arraycopy(input2, 0, output, input1.length, input2.length);
+	    return output;
+	}
+	
+	public static void openFile(File file) {
+		try {
+			if(bufferedWriter != null) {
+				bufferedWriter.close();
+			}
+			bufferedWriter = new BufferedWriter(new FileWriter(file));
+		} 
+		catch (IOException e) { e.printStackTrace(); }
+	}
+	
+	public static void print(String text) {
+		try {
+			if(bufferedWriter != null) {
+				bufferedWriter.write(text);
+			}
+			else {
+				System.out.print(text);
+			}
+		} 
+		catch (IOException e) { e.printStackTrace(); }
+	}
+	
+	public static void printLn() {
+		printLn("");
+	}
+	
+	public static void printLn(String text) {
+		try {
+			if(bufferedWriter != null) {
+				bufferedWriter.write(text);
+				bufferedWriter.write(System.getProperty("line.separator"));
+			}
+			else {
+				System.out.println(text);
+			}
+		} 
+		catch (IOException e) { e.printStackTrace(); }
+	}
+	
+	public static void closeFile() {
+		try {
+			if(bufferedWriter != null) {
+				bufferedWriter.close();
+				bufferedWriter = null;
+			}
+		} 
+		catch (IOException e) { e.printStackTrace(); }
 	}
 	
 	public static void setCustomRes(String resolution) {
@@ -227,5 +332,26 @@ public class Utils {
 	
 	public static void toggleFullscreen() {
 		setFullscreen(!isFullscreen);
+	}
+	
+	public static boolean mouseIsStill(int cursorX, int cursorY) {
+		if(Math.abs(cursorX - lastMouseX) > 5 || Math.abs(cursorY - lastMouseY) > 5 || mc.currentScreen != currentScreen)
+        {
+            lastMouseX = cursorX;
+            lastMouseY = cursorY;
+            
+            resetMouseStillTime();
+            currentScreen = mc.currentScreen;
+            return false;
+        }
+        if(System.currentTimeMillis() < mouseStillTime + (long)700)
+        {
+            return false;
+        }
+        return true;
+	}
+	
+	public static void resetMouseStillTime() {
+		mouseStillTime = System.currentTimeMillis();
 	}
 }

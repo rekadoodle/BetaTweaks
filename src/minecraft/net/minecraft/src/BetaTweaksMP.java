@@ -1,23 +1,24 @@
 package net.minecraft.src;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
 import betatweaks.GuiAPIHandler;
 import betatweaks.Utils;
+import betatweaks.config.*;
 
 public class BetaTweaksMP extends BaseModMp {
 
-	public static boolean gameplayPunchableSheep = false;
-	public static boolean gameplayLadderGaps = false;
-	public static boolean gameplayLightTNTwithFist = false;
-	public static boolean gameplayHoeDirtSeeds = false;
-	public static boolean gameplayMinecartBoosters = false;
-	public static boolean gameplayElevatorBoats = false;
-	public static boolean gameplayAllowPlayerList = false;
+	public static SBoolean punchSheepForWool = new SBoolean("punchSheepForWool", false);
+	public static SBoolean ladderGaps = new SBoolean("ladderGaps", false);
+	public static SBoolean lightTNTwithFist = new SBoolean("lightTNTwithFist", false);
+	public static SBoolean hoeGrassForSeeds = new SBoolean("hoeGrassForSeeds", false);
+	public static SBoolean minecartBoosters = new SBoolean("minecartBoosters", false);
+	public static SBoolean boatElevators = new SBoolean("boatElevators", false);
 	
-	public static String motd = "A Minecraft Server";
+	public static SBoolean playerListAllowed = new SBoolean("playerList", false, true);
+	public static SString motd = new SString("motd", "A Minecraft Server", true);
+	
 	
 	public static boolean isOp = false;
 	public static boolean serverModInstalled = false;
@@ -25,9 +26,13 @@ public class BetaTweaksMP extends BaseModMp {
 	public static List<String> playerList = new ArrayList<String>();
 	public static int maxPlayers;
 	
-	public static List<Integer> options1 = new ArrayList<Integer>();
+	public static final SBase<?>[] options = new SBase[] {
+			punchSheepForWool, ladderGaps, lightTNTwithFist, hoeGrassForSeeds, minecartBoosters, boatElevators, playerListAllowed, motd
+	};
 	
-	public static final ArrayList<Field> options = Utils.getFieldsStartingWith(BetaTweaksMP.class, "gameplay");
+	public static final SBase<?>[] opOptions = new SBase[] {
+			playerListAllowed, motd
+	};
 	
 	public String Version() {
 		return "v1";
@@ -53,19 +58,12 @@ public class BetaTweaksMP extends BaseModMp {
 			case 0:
 			{
 				serverModInstalled = true;
-				Field[] myFields = BetaTweaksMP.class.getFields();
 				for (int i = 0; i < packet.dataInt.length - 1; i++) {
-						try {
-							myFields[i].set(this, packet.dataInt[i] == 1);
-							options1.add(packet.dataInt[i]);
-						} catch (IllegalAccessException e) {
-							e.printStackTrace();
-						}
-					
+					((SBoolean)options[i]).setValue(packet.dataInt[i] == 1);
 				}
+				motd.setValue(packet.dataString[0]);
 				maxPlayers = packet.dataInt[packet.dataInt.length - 1];
-				motd = packet.dataString[0];
-				if (mod_BetaTweaks.guiAPIinstalled) {
+				if (Utils.modInstalled("guiapi")) {
 					GuiAPIHandler.instance.loadSettings();
 				}
 				break;
@@ -73,7 +71,7 @@ public class BetaTweaksMP extends BaseModMp {
 			case 1:
 			{
 				isOp = packet.dataInt[0] == 1;
-				if (mod_BetaTweaks.guiAPIinstalled) {
+				if (Utils.modInstalled("guiapi")) {
 					GuiAPIHandler.instance.loadSettings();
 				}
 				break;
@@ -103,21 +101,18 @@ public class BetaTweaksMP extends BaseModMp {
 
 	}
 	
-	public static void updateServerSettings(String newMOTD) {
-		int[] dataInt = new int[options1.size()];
-		for (int i = 0; i < options1.size(); i++) {
-			dataInt[i] = options1.get(i);
+	public static void updateServerSettings(boolean[] newOptions, String newMOTD) {
+		int[] dataInt = new int[newOptions.length];
+		for (int i = 0; i < dataInt.length; i++) {
+			dataInt[i] = newOptions[i] ? 1 : 0;
 		}
-		String[] dataString = new String[1];
-		
-		dataString[0] = newMOTD;
-		
+		String[] dataString = new String[] { newMOTD };
 		Packet230ModLoader packet = new Packet230ModLoader();
 		packet.packetType = 0;
 		packet.dataInt = dataInt;
 		packet.dataString = dataString;
 		
-		ModLoaderMp.SendPacket(ModLoaderMp.GetModInstance(BetaTweaksMP.class), packet);
+		ModLoaderMp.SendPacket(getThis(), packet);
 	}
 
 	public static void longgrassDestroyed(int x, int y, int z) {
@@ -129,7 +124,7 @@ public class BetaTweaksMP extends BaseModMp {
 			packet.packetType = 1;
 			packet.dataInt = dataInt;
 			
-			ModLoaderMp.SendPacket(ModLoaderMp.GetModInstance(BetaTweaksMP.class), packet);
+			ModLoaderMp.SendPacket(getThis(), packet);
 	}
 	
 	public static void sheepPunched(int sheepID) {
@@ -139,7 +134,7 @@ public class BetaTweaksMP extends BaseModMp {
 		packet.packetType = 2;
 		packet.dataInt = dataInt;
 		
-		ModLoaderMp.SendPacket(ModLoaderMp.GetModInstance(BetaTweaksMP.class), packet);
+		ModLoaderMp.SendPacket(getThis(), packet);
 	}
 
 
@@ -152,10 +147,12 @@ public class BetaTweaksMP extends BaseModMp {
 		packet.packetType = 3;
 		packet.dataInt = dataInt;
 		
-		ModLoaderMp.SendPacket(ModLoaderMp.GetModInstance(BetaTweaksMP.class), packet);
+		ModLoaderMp.SendPacket(getThis(), packet);
 	}
 
-
+	private static BaseModMp getThis() {
+		return ModLoaderMp.GetModInstance(BetaTweaksMP.class);
+	}
 	
 	
 
