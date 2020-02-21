@@ -1,7 +1,10 @@
 package net.minecraft.src;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import net.minecraft.src.betatweaks.JsonServer;
 
 public class mod_BetaTweaks extends BaseModMp{
 
@@ -11,6 +14,8 @@ public class mod_BetaTweaks extends BaseModMp{
 	}
 
 	mod_BetaTweaks(){
+		
+		//JsonServer.main();
 			ClassLoader classloader = (net.minecraft.src.ModLoader.class).getClassLoader();
 			Method addmodMethod;
 			try {
@@ -20,20 +25,13 @@ public class mod_BetaTweaks extends BaseModMp{
 					addmodMethod.invoke(null, new Object[] {
 							classloader, "BetaTweaksMP.class"
 						});
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-				}
-			} catch (NoSuchMethodException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (SecurityException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+				} 
+				catch (IllegalAccessException e) { e.printStackTrace(); } 
+				catch (IllegalArgumentException e) { e.printStackTrace(); }
+				catch (InvocationTargetException e) { e.printStackTrace(); }
+			} 
+			catch (NoSuchMethodException e1) { e1.printStackTrace(); } 
+			catch (SecurityException e1) { e1.printStackTrace(); }
 			
 	}
 	

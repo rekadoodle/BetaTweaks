@@ -1,0 +1,66 @@
+***************
+*** 445,450 ****
+                      interruptedexception1.printStackTrace();
+                  }
+              }
+              try
+              {
+                  func_6013_g();
+--- 445,453 ----
+                      interruptedexception1.printStackTrace();
+                  }
+              }
++         }
++         finally
++         {
+              try
+              {
+                  func_6013_g();
+***************
+*** 458,495 ****
+              {
+                  System.exit(0);
+              }
+-             break MISSING_BLOCK_LABEL_346;
+-         }
+-         try
+-         {
+-             func_6013_g();
+-             field_6032_g = true;
+-         }
+-         catch(Throwable throwable)
+-         {
+-             throwable.printStackTrace();
+-         }
+-         finally
+-         {
+-             System.exit(0);
+-         }
+-         break MISSING_BLOCK_LABEL_346;
+-         Exception exception2;
+-         exception2;
+-         try
+-         {
+-             func_6013_g();
+-             field_6032_g = true;
+-         }
+-         catch(Throwable throwable3)
+-         {
+-             throwable3.printStackTrace();
+-         }
+-         finally
+-         {
+-             System.exit(0);
+          }
+-         throw exception2;
+      }
+  
+      private void func_6018_h()
+--- 461,467 ----
+              {
+                  System.exit(0);
+              }
+          }
+      }
+  
+      private void func_6018_h()
