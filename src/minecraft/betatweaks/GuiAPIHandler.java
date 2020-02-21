@@ -110,7 +110,9 @@ public class GuiAPIHandler {
 				"  Scroll to view previous chat messages.",
 				"  Copy, cut, paste, undo, etc. (Only in typing area).",
 				"  Tab to autocomplete playername (If server allows).",
-				"  Access previous inputs with up/down."
+				"  Access previous inputs with up/down.",
+				"Click in the top right with chat open",
+				"or use '/chatoptions' to configure."
         	});
 		widgetClientside.add(improvedChatWidget);
 		
@@ -377,7 +379,7 @@ public class GuiAPIHandler {
             //int k1 = j + 84 + 10;
             int k1 = j + 11 * tooltip.length + 17;
             
-            Utils.drawRect(i, j, j1, k1, 0xe0000000);
+            Graphics.drawRect(i, j, j1, k1, 0xe0000000);
             Utils.mc.fontRenderer.drawStringWithShadow(getTooltipHeader(setting), i + 5, j + 5, 0xdddddd);
             for(int l1 = 0; l1 < tooltip.length; l1++)
             {

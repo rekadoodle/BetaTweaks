@@ -12,22 +12,11 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
+import net.minecraft.src.forge.ForgeHooksClient;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.*;
 import org.lwjgl.util.glu.GLU;
-
-// Referenced classes of package net.minecraft.src:
-//            MouseFilter, GLAllocation, ItemRenderer, EntityLiving, 
-//            MathHelper, World, GameSettings, PlayerController, 
-//            MovingObjectPosition, Vec3D, PlayerControllerTest, AxisAlignedBB, 
-//            Entity, Material, EntityPlayer, Block, 
-//            RenderGlobal, EntityPlayerSP, MouseHelper, ScaledResolution, 
-//            GuiIngame, GuiScreen, GuiParticle, ChunkProviderLoadOrGenerate, 
-//            ClippingHelperImpl, Frustrum, ICamera, RenderEngine, 
-//            RenderHelper, EffectRenderer, InventoryPlayer, WorldChunkManager, 
-//            BiomeGenBase, EntitySmokeFX, EntityRainFX, Tessellator, 
-//            WorldProvider
 
 public class EntityRendererProxyFOV extends EntityRendererProxy
 {
@@ -68,9 +57,22 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         {
         	fov *= 60.0F / 70.0F;
         }
-        if(mc.gameSettings.smoothCamera = Keyboard.isKeyDown(mod_BetaTweaks.zoom.keyCode) && ModLoader.isGUIOpen(null)) {
-        	fov /= 4F;
-		}
+        boolean optifine = mod_BetaTweaks.optifineInstalled;
+        if((!optifine && (mc.gameSettings.smoothCamera = Keyboard.isKeyDown(mod_BetaTweaks.zoom.keyCode) && ModLoader.isGUIOpen(null)))
+        		|| (optifine && Keyboard.isKeyDown(mc.gameSettings.ofKeyBindZoom.keyCode)))
+        {
+            if(!zoomMode)
+            {
+                zoomMode = true;
+                mc.gameSettings.smoothCamera = true;
+            }
+            fov /= 4F;
+        } 
+        else if(zoomMode)
+        {
+            zoomMode = false;
+            mc.gameSettings.smoothCamera = false;
+        }
         if(entityliving.health <= 0)
         {
             float f2 = (float)entityliving.deathTime + f;
@@ -78,6 +80,8 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         }
         return fov * Config.clientFovMultiplier;
     }
+    
+    private boolean zoomMode;
    
     private void setupCameraTransform(float f, int i)
     {
@@ -332,7 +336,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                 {
                 	EntityPlayer entityplayer = (EntityPlayer)entityliving;
                     GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                    if(!mod_BetaTweaks.forgeInstalled || !BetaTweaksForgeHandler.ForgeHooksClient_onBlockHighlight(renderglobal,entityplayer,
+                    if(!mod_BetaTweaks.forgeInstalled || !ForgeHooksClient.onBlockHighlight(renderglobal,entityplayer,
                 			mc.objectMouseOver,0,
                 			entityplayer.inventory.getCurrentItem(),f)) {
                         renderglobal.drawBlockBreaking(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
@@ -396,7 +400,8 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                         }
                         if(i1 > 0)
                         {
-                            renderglobal.renderAllRenderLists(1, f);
+                        	if(optifine) renderglobal.renderAllSortedRenderers(1, f);
+                        	else renderglobal.renderAllRenderLists(1, f);
                         }
                         GL11.glShadeModel(7424 /*GL_FLAT*/);
                     } 
@@ -427,7 +432,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             {
                 EntityPlayer entityplayer1 = (EntityPlayer)entityliving;
                 GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                if(!mod_BetaTweaks.forgeInstalled || !BetaTweaksForgeHandler.ForgeHooksClient_onBlockHighlight(renderglobal,entityplayer1,
+                if(!mod_BetaTweaks.forgeInstalled || !ForgeHooksClient.onBlockHighlight(renderglobal,entityplayer1,
             			mc.objectMouseOver,0,
             			entityplayer1.inventory.getCurrentItem(),f)) {
                     renderglobal.drawBlockBreaking(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);

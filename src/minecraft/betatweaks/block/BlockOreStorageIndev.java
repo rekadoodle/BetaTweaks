@@ -10,7 +10,7 @@ public class BlockOreStorageIndev extends BlockOreStorage {
 	private int bottomTexture;
 	
 	public BlockOreStorageIndev(Block block, String[] fields, String sideTexture, String bottomTexture) {
-		super(Utils.clearBlockID(block.blockID), block.blockIndexInTexture);
+		super(Utils.clearBlockID(block), block.blockIndexInTexture);
 		setHardness(block.getHardness());
         setBlockName(block.getBlockName().replaceFirst("tile.", ""));
 		setResistance(10F);

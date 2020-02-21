@@ -28,6 +28,7 @@ public class Config {
 	public static float clientImprovedChatIngameMaxHeight = 0.5F;
 	public static float clientImprovedChatMaxMessagesSize = 0.053F;
 	public static int clientImprovedChatIndicator = 0;
+	public static boolean clientImprovedChatMaxInvisibleToggleButton = true;
 	public static boolean clientScrollableControls = true;
 	public static boolean clientIngameTexturePackButton = false;
 	public static boolean clientDisableAchievementNotifications = false;

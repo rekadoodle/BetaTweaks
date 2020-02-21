@@ -38,9 +38,10 @@ public class GuiImprovedChat extends GuiChat {
 		};
 		
 		for(GuiButton button : options) {
-			button.enabled2 = optionsVisible;
+			button.enabled = button.enabled2 = optionsVisible;
 			controlList.add(button);
 		}
+		options[0].enabled = Config.clientImprovedChatMaxInvisibleToggleButton;
 		
 		if(Utils.mc.ingameGUI instanceof GuiIngameImprovedChat) {
 			gui = (GuiIngameImprovedChat) Utils.mc.ingameGUI;
@@ -79,7 +80,9 @@ public class GuiImprovedChat extends GuiChat {
 	public void onGuiClosed()
     {
         super.onGuiClosed();
-        gui.scroll = 0;
+        if(gui != null) {
+            gui.scroll = 0;
+        }
     }
 	
 	public static float getFontScaleFactor() {
@@ -149,8 +152,9 @@ public class GuiImprovedChat extends GuiChat {
 	private void toggleOptions() {
 		optionsVisible = !optionsVisible;
 		for(GuiButton button : options) {
-			button.enabled2 = optionsVisible;
+			button.enabled = button.enabled2 = optionsVisible;
 		}
+		options[0].enabled = Config.clientImprovedChatMaxInvisibleToggleButton;
 	}
 
 	protected void keyTyped(char charId, int keyId) {
@@ -274,7 +278,7 @@ public class GuiImprovedChat extends GuiChat {
 		else if (charId == '\003') { // CTRL C
 			if (textSelected()) {
 				setClipboardString(getSelectedText());
-				gui.addNotification("Selection copied");
+				addNotification("Selection copied");
 			}
 		}
 		else if (charId == '\026') // CTRL V
@@ -292,18 +296,18 @@ public class GuiImprovedChat extends GuiChat {
 		if(s == null) return;
 		for (int i = 0; i < s.length(); i++) {
 			if (ChatAllowedCharacters.allowedCharacters.indexOf(s.charAt(i)) < 0) {
-				gui.addNotification("Cannot enter illegal character(s)");
+				addNotification("Cannot enter illegal character(s)");
 				return;
 			}
 		}
 		int remainingSpace = 100 - message.length() + getSelectedText().length();
 		if(remainingSpace == 0) {
-			gui.addNotification("Chat full.");
+			addNotification("Chat full.");
 			return;
 		}
 		if(remainingSpace < s.length()) {
 			s = s.substring(0, remainingSpace);
-			gui.addNotification("Text cropped");
+			addNotification("Text cropped");
 		}
 		
 		int selectionStart = Math.min(selectionIndex, markerIndex);
@@ -333,6 +337,12 @@ public class GuiImprovedChat extends GuiChat {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	private void addNotification(String s) {
+		if(gui != null) {
+			gui.addNotification(s);
 		}
 	}
 

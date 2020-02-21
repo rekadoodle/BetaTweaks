@@ -16,7 +16,7 @@ import net.minecraft.src.GuiChat;
 import net.minecraft.src.GuiIngame;
 import net.minecraft.src.ScaledResolution;
 
-public class GuiIngameImprovedChat extends GuiIngame{
+public class GuiIngameImprovedChat extends GuiIngame {
 
 	public GuiIngameImprovedChat(Minecraft minecraft) {
 		super(minecraft);
@@ -117,10 +117,10 @@ public class GuiIngameImprovedChat extends GuiIngame{
         GL11.glPushMatrix();
         GL11.glTranslatef(0.0F, height - 48, 0.0F);
         
-        if(scroll > 0) {
+        if(scrollAmount > 0) {
         	int chatPixelHeight = chatHeight * 9;
         	int scrollbarHeight = (int) Math.round((chatHeight / (double) totalChatLines) * chatPixelHeight);
-        	int scrollbarY = (int) (chatHeightOffset - scrollbarHeight + 9 - ((chatPixelHeight - scrollbarHeight) * (scroll / (double)(totalChatLines - chatHeight))));
+        	int scrollbarY = (int) (chatHeightOffset - scrollbarHeight + 9 - ((chatPixelHeight - scrollbarHeight) * (scrollAmount / (double)(totalChatLines - chatHeight))));
         	GL11.glPushMatrix();
             GL11.glScaled(1.0F, sf, 1.0F);
         	drawRect(chatWidth - 4, scrollbarY, chatWidth, scrollbarHeight + scrollbarY, 0x80ffffff);

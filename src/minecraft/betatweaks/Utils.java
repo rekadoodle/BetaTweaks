@@ -1,5 +1,6 @@
 package betatweaks;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -8,6 +9,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
@@ -21,6 +24,8 @@ public class Utils {
 	private static final Field timerField = Utils.getField(Minecraft.class, "timer", "T");
 	private static final Field selectedButtonField = Utils.getField(GuiScreen.class, "selectedButton", "a");
 	private static Timer timer;
+	private static boolean isFullscreen;
+	private static DisplayMode customResolution;
 
 	// Used for easy reflection with obfuscated or regular fields
 	public static final Field getField(Class<?> target, String ...names) {
@@ -35,6 +40,7 @@ public class Utils {
 		return null;
 	}
 	
+	// Used to get a value of a hidden field
 	public static Object getStaticFieldValue(Class<?> target, String ...names) {
 		final Field field = getField(target, names);
 		try {
@@ -43,6 +49,7 @@ public class Utils {
 		catch(Exception e) { return null; }
 	}
 	
+	// Used to group fields as you cannot do this without reflection *shakes fist at cloud*
 	public static final ArrayList<Field> getFieldsStartingWith(Class<?> target, String text) {
 		ArrayList<Field> fieldList = new ArrayList<Field>();
 		for (Field field : target.getDeclaredFields()) {
@@ -69,6 +76,9 @@ public class Utils {
 	// Used to load a mod without it being called mod_XXX
 	public static void loadMod(String modPath) {
 		try {
+			if(!classExists(modPath)) {
+				modPath = "net.minecraft.src." + modPath;
+			}
 			Class modToLoadClass = ModLoader.class.getClassLoader().loadClass(modPath);
 			getMethod(ModLoader.class, new Class<?>[] { Class.class }, "setupProperties").invoke(null, new Object[] { modToLoadClass });
 			((LinkedList) getField(ModLoader.class, "modList").get(null)).add(modToLoadClass.newInstance());
@@ -86,8 +96,10 @@ public class Utils {
 		}
 	}
 	
-	public static void drawRect(int i, int j, int k, int l, int colour) {
-		mod_BetaTweaks.drawRect(i, j, k, l, colour);
+	
+	
+	public static int clearBlockID(Block block) {
+		return clearBlockID(block.blockID);
 	}
 	
 	public static int clearBlockID(int id) {
@@ -150,5 +162,70 @@ public class Utils {
 	
 	public static float round2dp(float f) {
 		return ((int)(f * 100f)) / 100f;
+	}
+	
+	public static void setCustomRes(String resolution) {
+		String[] resProps = resolution.split(",");
+		setCustomRes(resProps[0], resProps[1], resProps[2], resProps[3]);
+	}
+	
+	public static void setCustomRes(String width, String height, String bitsPerPixel, String refreshRate) {
+		setCustomRes(Integer.parseInt(width), Integer.parseInt(height), Integer.parseInt(bitsPerPixel), Integer.parseInt(refreshRate));
+	}
+	
+	public static void setCustomRes(int width, int height, int bitsPerPixel, int refreshRate) {
+		Constructor<?> displayconstructor;
+		try {
+			displayconstructor = DisplayMode.class.getDeclaredConstructor(int.class, int.class, int.class, int.class);
+			displayconstructor.setAccessible(true);
+			customResolution = (DisplayMode) displayconstructor.newInstance(width, height, bitsPerPixel, refreshRate);
+		} 
+		catch (Exception e) { e.printStackTrace(); }
+	}
+	
+	public static void setFullscreen(boolean fullscreen) {
+		if(isFullscreen != fullscreen) {
+			isFullscreen = fullscreen;
+			try
+			{
+				if(fullscreen) {
+					if(customResolution != null) {
+						Display.setDisplayMode(customResolution);
+					}
+					else {
+						Display.setDisplayMode(Display.getDesktopDisplayMode());
+					}
+					mc.displayWidth = Math.max(Display.getDisplayMode().getWidth(), 1);
+					mc.displayHeight = Math.max(Display.getDisplayMode().getHeight(), 1);
+				}
+				else {
+	                if(mc.mcCanvas != null)
+	                {
+	                	mc.displayWidth = Math.max(mc.mcCanvas.getWidth(), 1);
+	                	mc.displayHeight = Math.max(mc.mcCanvas.getHeight(), 1);
+	                } else
+	                {
+	                	mc.displayWidth = 1;
+	                    mc.displayHeight = 1;
+	                }
+	            }
+	            if(mc.currentScreen != null)
+	            {
+	            	ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+	                mc.currentScreen.setWorldAndResolution(mc, scaledresolution.getScaledWidth(), scaledresolution.getScaledHeight());
+	            }
+				Display.setFullscreen(fullscreen);
+	            Display.update();
+				
+			}
+			catch(Exception exception)
+	        {
+	            exception.printStackTrace();
+	        }
+		}
+	}
+	
+	public static void toggleFullscreen() {
+		setFullscreen(!isFullscreen);
 	}
 }

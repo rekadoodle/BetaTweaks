@@ -1,7 +1,3 @@
-// Decompiled by Jad v1.5.8g. Copyright 2001 Pavel Kouznetsov.
-// Jad home page: http://www.kpdus.com/jad.html
-// Decompiler options: packimports(3) braces deadcode 
-
 package betatweaks.gui;
 
 import java.io.*;
@@ -27,12 +23,6 @@ import org.lwjgl.input.Mouse;
 
 import betatweaks.CompressedStreamToolsMP;
 import betatweaks.ServerData;
-
-// Referenced classes of package net.minecraft.src:
-//            GuiScreen, GuiSlotServer, CompressedStreamTools, NBTTagCompound, 
-//            NBTTagList, ServerNBTStorage, StringTranslate, GuiButton, 
-//            GuiYesNo, GuiScreenServerList, StatCollector, GuiScreenAddServer, 
-//            GuiConnecting, Packet, ChatAllowedCharacters, FontRenderer
 
 public class GuiMultiplayerMenu extends GuiScreen
 {

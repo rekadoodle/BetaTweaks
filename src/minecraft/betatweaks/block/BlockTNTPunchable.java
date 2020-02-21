@@ -9,7 +9,7 @@ public class BlockTNTPunchable extends BlockTNT
 
     public BlockTNTPunchable()
     {
-    	super(Utils.clearBlockID(Block.tnt.blockID), Block.tnt.blockIndexInTexture);
+    	super(Utils.clearBlockID(Block.tnt), Block.tnt.blockIndexInTexture);
     	setHardness(Block.tnt.getHardness());
     	setStepSound(soundGrassFootstep);
     	setBlockName(Block.tnt.getBlockName().replaceFirst("tile.", ""));

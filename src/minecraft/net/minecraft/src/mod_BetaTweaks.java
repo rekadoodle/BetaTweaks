@@ -1,6 +1,5 @@
 package net.minecraft.src;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.FloatBuffer;
@@ -31,21 +30,9 @@ public class mod_BetaTweaks extends BaseMod {
 
 	//TODO
 	//code cleanup
-	//improve selected dragging item slot graphics
-	
-	//DONE
-	//custom fullscreen res
-	//imprvoed chat
-	//crazee fov multiplier
-	//minecolony dragging shortcuts fix
-	//boat lag NOT fixed (known issue)
-	//package
-	//watershader fov fix
-	//fixed fov slider not showing up sometimes
-	//fix crash on mp when guiapi not installed
 	
 	public String Version() {
-		return "v1.2.0";
+		return "v1.2.1";
 	}
 	
 	//Info for mine_diver's mod menu
@@ -88,8 +75,6 @@ public class mod_BetaTweaks extends BaseMod {
 
 	protected Random rand;
 	private final int guiOptionsButtonCount;
-	
-	private DisplayMode customRes;
 
 	private KeyBinding playerList = new KeyBinding("List Players", Keyboard.KEY_TAB);
 	private KeyBinding customFullscreen = new KeyBinding("Custom Fullscreen", Keyboard.KEY_F8);
@@ -103,7 +88,6 @@ public class mod_BetaTweaks extends BaseMod {
 		if(modloaderMPinstalled = Utils.classExists("ModLoaderMp")) {
 			ModLoader.RegisterKey(this, playerList, false);
 			//Load MP handler for BetaTweaks
-			//Use net.minecraft.src.BetaTweaksMP in eclipse
 			Utils.loadMod("BetaTweaksMP");
 		}
 		
@@ -155,75 +139,16 @@ public class mod_BetaTweaks extends BaseMod {
 			catch (LWJGLException e) { e.printStackTrace(); }
 		}
 		if(!betatweaks.Config.clientCustomFullscreenResolution.isEmpty()) {
-			String[] s = betatweaks.Config.clientCustomFullscreenResolution.split(",");
-			Constructor<?> displayconstructor;
-			try {
-				displayconstructor = DisplayMode.class.getDeclaredConstructor(int.class, int.class, int.class, int.class);
-				displayconstructor.setAccessible(true);
-				customRes = (DisplayMode) displayconstructor.newInstance(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]), Integer.parseInt(s[3]));
-			} 
-			catch (Exception e) { e.printStackTrace(); }
+			Utils.setCustomRes(betatweaks.Config.clientCustomFullscreenResolution);
 			ModLoader.RegisterKey(this, customFullscreen, false);
 		}
 		
 	}
 	
-	private boolean fullscreen;
-	
 	public void KeyboardEvent(KeyBinding keybinding)
     {
 		if(keybinding == customFullscreen) {
-			Minecraft mc = Utils.mc;
-			try
-	        {
-	            fullscreen = !fullscreen;
-	            if(fullscreen)
-	            {
-	            	Display.setDisplayMode(customRes);
-	                mc.displayWidth = Display.getDisplayMode().getWidth();
-	                mc.displayHeight = Display.getDisplayMode().getHeight();
-	                if(mc.displayWidth <= 0)
-	                {
-	                	mc.displayWidth = 1;
-	                }
-	                if(mc.displayHeight <= 0)
-	                {
-	                	mc.displayHeight = 1;
-	                }
-	            } else
-	            {
-	                if(mc.mcCanvas != null)
-	                {
-	                	mc.displayWidth = mc.mcCanvas.getWidth();
-	                	mc.displayHeight = mc.mcCanvas.getHeight();
-	                } else
-	                {
-	                	mc.displayWidth = 0;
-	                    mc.displayHeight = 0;
-	                }
-	                if(mc.displayWidth <= 0)
-	                {
-	                	mc.displayWidth = 1;
-	                }
-	                if(mc.displayHeight <= 0)
-	                {
-	                	mc.displayHeight = 1;
-	                }
-	            }
-	            if(mc.currentScreen != null)
-	            {
-	            	ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
-	                int k = scaledresolution.getScaledWidth();
-	                int l = scaledresolution.getScaledHeight();
-	                mc.currentScreen.setWorldAndResolution(mc, k, l);
-	            }
-	            Display.setFullscreen(fullscreen);
-	            Display.update();
-	        }
-	        catch(Exception exception)
-	        {
-	            exception.printStackTrace();
-	        }
+			Utils.toggleFullscreen();
 		}
     }
 
@@ -250,7 +175,7 @@ public class mod_BetaTweaks extends BaseMod {
 
 		if (resetTallGrass) {
 			resetTallGrass = false;
-			Utils.clearBlockID(Block.tallGrass.blockID);
+			Utils.clearBlockID(Block.tallGrass);
 			if (betatweaks.Config.clientHideLongGrass) {
 				Utils.replaceBlock(new BlockTallGrassHidden(), "tallGrass", "Y");
 			} else {
@@ -260,7 +185,7 @@ public class mod_BetaTweaks extends BaseMod {
 
 		if (resetDeadBush) {
 			resetDeadBush = false;
-			Utils.clearBlockID(Block.deadBush.blockID);
+			Utils.clearBlockID(Block.deadBush);
 			if (betatweaks.Config.clientHideDeadBush) {
 				Utils.replaceBlock(new BlockDeadBushHidden(), "deadBush", "Z");
 			} else {
@@ -623,45 +548,30 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 		}
 			if(spreadSlots.size() > 1) {
+				GL11.glPushMatrix();
+				Graphics.preRender();
 				GL11.glTranslatef((container.width - container.xSize) / 2, (container.height - container.ySize) / 2, 0.0F);
 				for(int slotNo : spreadSlots) {
 					
 					for(Object obj : container.inventorySlots.slots) {
 						Slot currentSlot = (Slot)obj;
 						if(currentSlot.slotNumber == slotNo && currentSlot != slot) {
-							GL11.glEnable(32826 /*GL_RESCALE_NORMAL_EXT*/);
-					        
-					                GL11.glDisable(2896 /*GL_LIGHTING*/);
-					                GL11.glDisable(2929 /*GL_DEPTH_TEST*/);
-					                int j1 = currentSlot.xDisplayPosition;
-					                int l1 = currentSlot.yDisplayPosition;
-					                guiscreen.drawRect(j1, l1, j1 + 16, l1 + 16, 0x80ffffff);
-					                GL11.glEnable(2896 /*GL_LIGHTING*/);
-					                GL11.glEnable(2929 /*GL_DEPTH_TEST*/);
-					                
-				            		GL11.glPushMatrix();
-				            		GL11.glRotatef(120F, 1.0F, 0.0F, 0.0F);
-				            		RenderHelper.enableStandardItemLighting();
-				            		GL11.glPopMatrix();
-					                itemRenderer.renderItemIntoGUI(container.fontRenderer, mc.renderEngine, currentSlot.getStack(), currentSlot.xDisplayPosition, currentSlot.yDisplayPosition);
-					                itemRenderer.renderItemOverlayIntoGUI(container.fontRenderer, mc.renderEngine, currentSlot.getStack(), currentSlot.xDisplayPosition, currentSlot.yDisplayPosition);
-					                
+							Graphics.drawSlotBackground(currentSlot.xDisplayPosition, currentSlot.yDisplayPosition, 0x80ffffff);
+					        Graphics.drawItemStack(currentSlot.xDisplayPosition, currentSlot.yDisplayPosition, currentSlot.getStack());
 						}
 					}
 				}
-				
 				InventoryPlayer inventoryplayer = mc.thePlayer.inventory;
 		        if(inventoryplayer.getItemStack() != null)
 		        {
 		        	int k = (container.width - container.xSize) / 2;
 		            int l = (container.height - container.ySize) / 2;
 		            GL11.glTranslatef(0.0F, 0.0F, 32F);
-		            itemRenderer.renderItemIntoGUI(container.fontRenderer, mc.renderEngine, inventoryplayer.getItemStack(), x - k - 8, y - l - 8);
-		            itemRenderer.renderItemOverlayIntoGUI(container.fontRenderer, mc.renderEngine, inventoryplayer.getItemStack(), x - k - 8, y - l - 8);
+		            Graphics.drawItemStack(x - k - 8, y - l - 8, inventoryplayer.getItemStack());
 		            GL11.glTranslatef(0.0F, 0.0F, -32F);
 		        }
-		        GL11.glDisable(32826 /*GL_RESCALE_NORMAL_EXT*/);
-        		RenderHelper.disableStandardItemLighting();
+        		Graphics.postRender();
+        		GL11.glPopMatrix();
 			}
 		}
 		return true;
@@ -675,7 +585,6 @@ public class mod_BetaTweaks extends BaseMod {
 	private int lastSlotNo;
 	private ArrayList<Integer> spreadSlots = new ArrayList<Integer>();
 	private boolean rmbHeld;
-    private static RenderItem itemRenderer = new RenderItem();
 
     private final Method getSlot = Utils.getMethod(GuiContainer.class,  new Class<?>[] {int.class, int.class}, "getSlotAtPosition", "a");
     private int debug;
