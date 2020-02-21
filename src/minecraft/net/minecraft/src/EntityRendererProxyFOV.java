@@ -74,13 +74,14 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         EntityLiving entityliving = mc.renderViewEntity;
         float f1 = 70F + mod_BetaTweaks.optionsClientFovSliderValue * 40.0F;
         
-		if(mc.gameSettings.smoothCamera = Keyboard.isKeyDown(mod_BetaTweaks.zoom.keyCode)) {
-			f1 /= 4F;
-		}
+		
         if(entityliving.isInsideOfMaterial(Material.water))
         {
-            f1 = 60F;
+            f1 *= 60.0F / 70.0F;
         }
+        if(mc.gameSettings.smoothCamera = Keyboard.isKeyDown(mod_BetaTweaks.zoom.keyCode)) {
+			f1 /= 4F;
+		}
         if(entityliving.health <= 0)
         {
             float f2 = (float)entityliving.deathTime + f;
@@ -136,9 +137,16 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         orientCamera(f);
     }
 
-   
+    public void renderWorld(float f, long l) {
+    	if(mod_BetaTweaks.optifineInstalled) {
+    		renderWorldOptifine(f, l);
+    	}
+    	else {
+    		renderWorldVanilla(f, l);
+    	}
+    }
     
-    public void renderWorld(float f, long l)
+    public void renderWorldVanilla(float f, long l)
     {
         GL11.glEnable(2884 /*GL_CULL_FACE*/);
         GL11.glEnable(2929 /*GL_DEPTH_TEST*/);
@@ -275,6 +283,166 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             renderRainSnow(f);
             GL11.glDisable(2912 /*GL_FOG*/);
             if(pointedEntity == null);
+            setupFog(0, f);
+            GL11.glEnable(2912 /*GL_FOG*/);
+            renderglobal.renderClouds(f);
+            GL11.glDisable(2912 /*GL_FOG*/);
+            setupFog(1, f);
+            if(cameraZoom == 1.0D)
+            {
+                GL11.glClear(256);
+                renderHand(f, i);
+            }
+            if(!mc.gameSettings.anaglyph)
+            {
+                return;
+            }
+        }
+
+        GL11.glColorMask(true, true, true, false);
+    }
+    
+    public void renderWorldOptifine(float f, long l)
+    {
+        GL11.glEnable(2884 /*GL_CULL_FACE*/);
+        GL11.glEnable(2929 /*GL_DEPTH_TEST*/);
+        if(mc.renderViewEntity == null)
+        {
+            mc.renderViewEntity = mc.thePlayer;
+        }
+        getMouseOver(f);
+        EntityLiving entityliving = mc.renderViewEntity;
+        RenderGlobal renderglobal = mc.renderGlobal;
+        EffectRenderer effectrenderer = mc.effectRenderer;
+        double d = entityliving.lastTickPosX + (entityliving.posX - entityliving.lastTickPosX) * (double)f;
+        double d1 = entityliving.lastTickPosY + (entityliving.posY - entityliving.lastTickPosY) * (double)f;
+        double d2 = entityliving.lastTickPosZ + (entityliving.posZ - entityliving.lastTickPosZ) * (double)f;
+        IChunkProvider ichunkprovider = mc.theWorld.getIChunkProvider();
+        if(ichunkprovider instanceof ChunkProviderLoadOrGenerate)
+        {
+            ChunkProviderLoadOrGenerate chunkproviderloadorgenerate = (ChunkProviderLoadOrGenerate)ichunkprovider;
+            int j = MathHelper.floor_float((int)d) >> 4;
+            int k = MathHelper.floor_float((int)d2) >> 4;
+            chunkproviderloadorgenerate.setCurrentChunkOver(j, k);
+        }
+        for(int i = 0; i < 2; i++)
+        {
+            if(mc.gameSettings.anaglyph)
+            {
+                anaglyphField = i;
+                if(anaglyphField == 0)
+                {
+                    GL11.glColorMask(false, true, true, false);
+                } else
+                {
+                    GL11.glColorMask(true, false, false, false);
+                }
+            }
+            GL11.glViewport(0, 0, mc.displayWidth, mc.displayHeight);
+            updateFogColor(f);
+            GL11.glClear(16640);
+            GL11.glEnable(2884 /*GL_CULL_FACE*/);
+            setupCameraTransform(f, i);
+            ClippingHelperImpl.getInstance();
+            if(mc.gameSettings.renderDistance < 2 || Config.isFarView())
+            {
+                setupFog(-1, f);
+                renderglobal.renderSky(f);
+            }
+            GL11.glEnable(2912 /*GL_FOG*/);
+            setupFog(1, f);
+            if(mc.gameSettings.ambientOcclusion)
+            {
+                GL11.glShadeModel(7425 /*GL_SMOOTH*/);
+            }
+            Frustrum frustrum = new Frustrum();
+            frustrum.setPosition(d, d1, d2);
+            mc.renderGlobal.clipRenderersByFrustrum(frustrum, f);
+            long l1;
+            if(i == 0)
+            {
+                do
+                {
+                    if(mc.renderGlobal.updateRenderers(entityliving, false) || l == 0L)
+                    {
+                        break;
+                    }
+                    l1 = l - System.nanoTime();
+                } while(l1 >= 0L && (double)l1 <= 1000000000D);
+            }
+            setupFog(0, f);
+            GL11.glEnable(2912 /*GL_FOG*/);
+            GL11.glBindTexture(3553 /*GL_TEXTURE_2D*/, mc.renderEngine.getTexture("/terrain.png"));
+            RenderHelper.disableStandardItemLighting();
+            if(Config.isUseAlphaFunc())
+            {
+                GL11.glAlphaFunc(516, Config.getAlphaFuncLevel());
+            }
+            renderglobal.sortAndRender(entityliving, 0, f);
+            GL11.glShadeModel(7424 /*GL_FLAT*/);
+            RenderHelper.enableStandardItemLighting();
+            renderglobal.renderEntities(entityliving.getPosition(f), frustrum, f);
+            effectrenderer.renderLitParticles(entityliving, f);
+            RenderHelper.disableStandardItemLighting();
+            setupFog(0, f);
+            effectrenderer.renderParticles(entityliving, f);
+            if(mc.objectMouseOver != null && entityliving.isInsideOfMaterial(Material.water) && (entityliving instanceof EntityPlayer))
+            {
+                EntityPlayer entityplayer = (EntityPlayer)entityliving;
+                GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
+                renderglobal.drawBlockBreaking(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
+                renderglobal.drawSelectionBox(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
+                GL11.glEnable(3008 /*GL_ALPHA_TEST*/);
+            }
+            GL11.glBlendFunc(770, 771);
+            setupFog(0, f);
+            GL11.glEnable(3042 /*GL_BLEND*/);
+            GL11.glDisable(2884 /*GL_CULL_FACE*/);
+            GL11.glBindTexture(3553 /*GL_TEXTURE_2D*/, mc.renderEngine.getTexture("/terrain.png"));
+            if(Config.isWaterFancy())
+            {
+                if(mc.gameSettings.ambientOcclusion)
+                {
+                    GL11.glShadeModel(7425 /*GL_SMOOTH*/);
+                }
+                GL11.glColorMask(false, false, false, false);
+                int i1 = renderglobal.renderAllSortedRenderers(1, f);
+                if(mc.gameSettings.anaglyph)
+                {
+                    if(anaglyphField == 0)
+                    {
+                        GL11.glColorMask(false, true, true, true);
+                    } else
+                    {
+                        GL11.glColorMask(true, false, false, true);
+                    }
+                } else
+                {
+                    GL11.glColorMask(true, true, true, true);
+                }
+                if(i1 > 0)
+                {
+                    renderglobal.renderAllSortedRenderers(1, f);
+                }
+                GL11.glShadeModel(7424 /*GL_FLAT*/);
+            } else
+            {
+                renderglobal.sortAndRender(entityliving, 1, f);
+            }
+            GL11.glDepthMask(true);
+            GL11.glEnable(2884 /*GL_CULL_FACE*/);
+            GL11.glDisable(3042 /*GL_BLEND*/);
+            if(cameraZoom == 1.0D && (entityliving instanceof EntityPlayer) && mc.objectMouseOver != null && !entityliving.isInsideOfMaterial(Material.water))
+            {
+                EntityPlayer entityplayer1 = (EntityPlayer)entityliving;
+                GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
+                renderglobal.drawBlockBreaking(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
+                renderglobal.drawSelectionBox(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
+                GL11.glEnable(3008 /*GL_ALPHA_TEST*/);
+            }
+            renderRainSnow(f);
+            GL11.glDisable(2912 /*GL_FOG*/);
+            if(pointedEntity != null);
             setupFog(0, f);
             GL11.glEnable(2912 /*GL_FOG*/);
             renderglobal.renderClouds(f);

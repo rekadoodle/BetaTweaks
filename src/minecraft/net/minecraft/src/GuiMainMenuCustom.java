@@ -35,35 +35,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
     private int viewportTexture;
 	private boolean undrawn2 = true;
     private static final String[] panoramaFilePaths = new String[] {"/panorama0.png", "/panorama1.png", "/panorama2.png", "/panorama3.png", "/panorama4.png", "/panorama5.png"};
-    public GuiMainMenuCustom()
-    {
-		
-		updateCounter = 0;
-		minecraftLogo = getCustomLogo();
-        splashText = "missingno";
-        try
-        {
-            ArrayList arraylist = new ArrayList();
-            BufferedReader bufferedreader = new BufferedReader(new InputStreamReader((net.minecraft.src.GuiMainMenuCustom.class).getResourceAsStream("/title/splashes.txt"), Charset.forName("UTF-8")));
-            String s = "";
-            do
-            {
-                String s1;
-                if((s1 = bufferedreader.readLine()) == null)
-                {
-                    break;
-                }
-                s1 = s1.trim();
-                if(s1.length() > 0)
-                {
-                    arraylist.add(s1);
-                }
-            } while(true);
-            splashText = (String)arraylist.get(rand.nextInt(arraylist.size()));
-        }
-        catch(Exception exception) { }
-    }
-
+    
     public void updateScreen()
     {
         updateCounter++;
@@ -77,7 +49,6 @@ public class GuiMainMenuCustom extends GuiMainMenu
                 }
 
             }
-
         }
     }
 
@@ -86,21 +57,10 @@ public class GuiMainMenuCustom extends GuiMainMenu
     	if(i == 1)
         {
     		logoEffects = null;
-            //mc.displayGuiScreen(new GuiMainMenuCustom(updateCounter));
-    	}
-    	else {
-    		super.keyTyped(c, i);
     	}
     }
 
-    protected void actionPerformed(GuiButton guibutton) {
-    	undrawn = true;
-    	super.actionPerformed(guibutton);
-    }
 
-  
-
-    
     public void drawScreen(int i, int j, float f)
     {
     	
@@ -110,6 +70,8 @@ public class GuiMainMenuCustom extends GuiMainMenu
         		this.viewportTexture = this.mc.renderEngine.allocateAndSetupTexture(new BufferedImage(256, 256, 2));
     		}
     		renderSkybox(i, j, f);
+    		drawGradientRect(0, 0, this.width, this.height, -2130706433, 16777215);
+            drawGradientRect(0, 0, this.width, this.height, 0, Integer.MIN_VALUE);
     	} 
     	else {
     		drawDefaultBackground();
@@ -118,9 +80,9 @@ public class GuiMainMenuCustom extends GuiMainMenu
     	
         Tessellator tessellator = Tessellator.instance;
         if (mod_BetaTweaks.optionsClientLogo != LogoState.STANDARD)  {
-        	if (undrawn && mod_BetaTweaks.optionsClientLogo == LogoState.CUSTOM && updateCounter > 1) {
+        	if (!modBlockTexturesLoaded && mod_BetaTweaks.optionsClientLogo == LogoState.CUSTOM && updateCounter > 1) {
         		mc.renderEngine.updateDynamicTextures();
-        		undrawn = false;
+        		modBlockTexturesLoaded = true;
         	}
         	
         	
@@ -181,22 +143,18 @@ public class GuiMainMenuCustom extends GuiMainMenu
         this.drawPanorama(i, j, f);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        this.rotateAndBlurSkybox(f);
-        this.rotateAndBlurSkybox(f);
-        this.rotateAndBlurSkybox(f);
-        this.rotateAndBlurSkybox(f);
-        this.rotateAndBlurSkybox(f);
-        this.rotateAndBlurSkybox(f);
-        this.rotateAndBlurSkybox(f);
-        this.rotateAndBlurSkybox(f);
+        for (int q = 0; q < 8; q++) {
+            rotateAndBlurSkybox(f);
+        }
         GL11.glViewport(0, 0, this.mc.displayWidth, this.mc.displayHeight);
         Tessellator var4 = Tessellator.instance;
         var4.startDrawingQuads();
         float var5 = this.width > this.height ? 120.0F / (float)this.width : 120.0F / (float)this.height;
         float var6 = (float)this.height * var5 / 256.0F;
         float var7 = (float)this.width * var5 / 256.0F;
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
-        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
+        //moved these lines below .draw() to 'fix' optifine issues
+        //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        //GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
         var4.setColorRGBA_F(1.0F, 1.0F, 1.0F, 1.0F);
         int var8 = this.width;
         int var9 = this.height;
@@ -205,6 +163,8 @@ public class GuiMainMenuCustom extends GuiMainMenu
         var4.addVertexWithUV((double)var8, 0.0D, (double)this.zLevel, (double)(0.5F + var6), (double)(0.5F - var7));
         var4.addVertexWithUV(0.0D, 0.0D, (double)this.zLevel, (double)(0.5F + var6), (double)(0.5F + var7));
         var4.draw();
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 	}
 
 	private void rotateAndBlurSkybox(float f) {
@@ -730,7 +690,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 	}
     
     private static final Random rand = new Random();
-    private static Boolean undrawn = true;
+    private static Boolean modBlockTexturesLoaded = false;
     String minecraftLogo[] = getCustomLogo();
     String minecraftLogoVanilla[] = new String[] {
 			  "X   X X X   X XXX XXX XXX XXX XXX XXX",

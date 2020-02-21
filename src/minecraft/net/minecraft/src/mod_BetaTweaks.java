@@ -26,7 +26,7 @@ import org.lwjgl.opengl.*;
 public class mod_BetaTweaks extends BaseMod {
 
 	public String Version() {
-		return "v1.1.5_3";
+		return "v1.1.6";
 	}
 	
 	//Info for mine_diver's mod menu
@@ -71,6 +71,7 @@ public class mod_BetaTweaks extends BaseMod {
 	public static Boolean guiAPIinstalled;
 	public static Boolean modloaderMPinstalled;
 	public static Boolean HMIinstalled;
+	public static Boolean optifineInstalled;
 	public static GuiScreen parentScreen;
 	public static GuiScreen firstGuiScreenAfterHijack;
 	private boolean aetherSheepExist;
@@ -127,6 +128,12 @@ public class mod_BetaTweaks extends BaseMod {
 			BetaTweaksGuiAPI.instance.init();
 		} 
 		catch (ClassNotFoundException e) { guiAPIinstalled = false; }
+		
+		try {
+			Class.forName("GuiDetailSettingsOF");
+			optifineInstalled = true;
+		} 
+		catch (ClassNotFoundException e) { optifineInstalled = false; }
 		
 		try {
 			Class.forName("EntitySheepuff");
@@ -323,7 +330,8 @@ public class mod_BetaTweaks extends BaseMod {
 				initialTexturePack = ModLoader.getMinecraftInstance().texturePackList.selectedTexturePack;
 			}
 			
-		} else if (guiscreen != parentScreen) {
+		}
+		if (guiscreen != parentScreen) {
 			parentScreen = guiscreen;
 		}
 		if(redrawGui) {
@@ -338,10 +346,10 @@ public class mod_BetaTweaks extends BaseMod {
 				f = ((Timer)timerField.get(mc)).renderPartialTicks;
 			} 
 	        catch (IllegalAccessException e) { e.printStackTrace(); }
-            guiscreen.drawScreen(k, i1, f);
-            if(guiscreen.guiParticles != null)
+            mc.currentScreen.drawScreen(k, i1, f);
+            if(mc.currentScreen.guiParticles != null)
             {
-                guiscreen.guiParticles.draw(f);
+            	mc.currentScreen.guiParticles.draw(f);
             }
 		}
 		if (mc.theWorld != currentWorld) {
