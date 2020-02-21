@@ -26,7 +26,7 @@ import org.lwjgl.opengl.*;
 public class mod_BetaTweaks extends BaseMod {
 
 	public String Version() {
-		return "v1.1.6_2";
+		return "v1.1.6_3";
 	}
 	
 	//Info for mine_diver's mod menu
@@ -72,7 +72,8 @@ public class mod_BetaTweaks extends BaseMod {
 	public static Boolean modloaderMPinstalled;
 	public static Boolean HMIinstalled;
 	public static Boolean optifineInstalled;
-	public static GuiScreen parentScreen;
+	public static Boolean forgeInstalled;
+	private GuiScreen parentScreen;
 	public static GuiScreen firstGuiScreenAfterHijack;
 	private boolean aetherSheepExist;
 
@@ -103,7 +104,7 @@ public class mod_BetaTweaks extends BaseMod {
 			modloaderMPinstalled = true;
 			ModLoader.RegisterKey(this, playerList, false);
 			
-			
+			//Load MP code for BetaTweaks
 			ClassLoader classloader = (net.minecraft.src.ModLoader.class).getClassLoader();
 			Method addmodMethod;
 			try {
@@ -122,6 +123,7 @@ public class mod_BetaTweaks extends BaseMod {
 			catch (SecurityException e1) { e1.printStackTrace(); }
 		} 
 		catch (ClassNotFoundException e) { modloaderMPinstalled = false; }
+		
 		try {
 			Class.forName("ModSettings");
 			guiAPIinstalled = true;
@@ -136,11 +138,16 @@ public class mod_BetaTweaks extends BaseMod {
 		catch (ClassNotFoundException e) { optifineInstalled = false; }
 		
 		try {
+			Class.forName("forge.ForgeHooksClient");
+			forgeInstalled = true;
+		} 
+		catch (ClassNotFoundException e) { forgeInstalled = false; }
+		
+		try {
 			Class.forName("EntitySheepuff");
 			aetherSheepExist = true;
-		} catch (ClassNotFoundException e) {
-			aetherSheepExist = false;
-		}
+		} 
+		catch (ClassNotFoundException e) { aetherSheepExist = false; }
 		
 		if (!configFile.exists()) writeConfig();
 		readConfig();
@@ -156,7 +163,7 @@ public class mod_BetaTweaks extends BaseMod {
 			ModLoader.getMinecraftInstance().currentScreen = new GuiInitialHijack();
 		
 		if(!optionsClientDisableEntityRendererOverride) {
-			ModLoader.RegisterKey(this, zoom, false);
+			if(!optifineInstalled) ModLoader.RegisterKey(this, zoom, false);
 			ModLoader.getMinecraftInstance().entityRenderer = new EntityRendererProxyFOV(ModLoader.getMinecraftInstance());
 		}
 
@@ -242,11 +249,41 @@ public class mod_BetaTweaks extends BaseMod {
 	private Field optionsTopBitArrayField = getObfuscatedPrivateField(GuiOptions.class, new String[] {"field_22135_k", "l"});
 	private Field timerField = getObfuscatedPrivateField(Minecraft.class, new String[] {"timer", "T"});
 	
+	public void ModsLoaded() {
+		HMIinstalled = ModLoader.isModLoaded("mod_HowManyItems");
+	}
+	
+	//Used to draw the button on the first frame it is created
+	private GuiButton drawButton(Minecraft mc, GuiButton button) {
+		ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+        int posX = (Mouse.getX() * scaledresolution.getScaledWidth()) / mc.displayWidth;
+        int posY = scaledresolution.getScaledHeight() - (Mouse.getY() * scaledresolution.getScaledHeight()) / mc.displayHeight - 1;
+		button.drawButton(mc, posX, posY);
+		return button;
+	}
+	
+	//Used to draw a screen on the first frame it is overrided
+	private void overrideCurrentScreen(Minecraft mc, GuiScreen guiscreen) {
+		mc.displayGuiScreen(guiscreen);
+		GL11.glClear(256);
+		ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+        int posX = (Mouse.getX() * scaledresolution.getScaledWidth()) / mc.displayWidth;
+        int posY = scaledresolution.getScaledHeight() - (Mouse.getY() * scaledresolution.getScaledHeight()) / mc.displayHeight - 1;
+        float f = 0.0F;
+        try {
+			f = ((Timer)timerField.get(mc)).renderPartialTicks;
+		} 
+        catch (IllegalAccessException e) { e.printStackTrace(); }
+        mc.currentScreen.drawScreen(posX, posY, f);
+        if(mc.currentScreen.guiParticles != null)
+        {
+        	mc.currentScreen.guiParticles.draw(f);
+        }
+	}
+	
 	public boolean OnTickInGUI(Minecraft mc, GuiScreen guiscreen) {
-		boolean redrawGui = false;
 		if (firstGuiScreenAfterHijack != null) {
-			redrawGui = true;
-			mc.displayGuiScreen(firstGuiScreenAfterHijack);
+			overrideCurrentScreen(mc, firstGuiScreenAfterHijack);
 			firstGuiScreenAfterHijack = null;
 		} else if (guiAPIinstalled && guiscreen instanceof GuiModScreen) {
 			BetaTweaksGuiAPI.instance.handleTooltip((GuiModScreen)guiscreen);
@@ -278,29 +315,19 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 		} else if (guiscreen instanceof GuiMainMenu && !(guiscreen instanceof GuiMainMenuCustom)
 				&& (optionsClientLogo != LogoState.STANDARD || optionsClientPanoramaEnabled)) {
-			redrawGui = true;
-			mc.displayGuiScreen(new GuiMainMenuCustom());
+			overrideCurrentScreen(mc, new GuiMainMenuCustom());
 		} else if (guiscreen instanceof GuiMainMenuCustom && !(guiscreen instanceof GuiMainMenu)
 				&& (optionsClientLogo == LogoState.STANDARD && !optionsClientPanoramaEnabled)) {
-			redrawGui = true;
-			mc.displayGuiScreen(new GuiMainMenu());
+			overrideCurrentScreen(mc, new GuiMainMenu());
 		} else if (optionsClientMultiplayerMenu && guiscreen instanceof GuiMultiplayer && !(parentScreen instanceof GuiMultiplayerMenu || parentScreen instanceof GuiMultiplayer)) {
-			redrawGui = true;
-			mc.displayGuiScreen(new GuiMultiplayerMenu(parentScreen));
+			overrideCurrentScreen(mc, new GuiMultiplayerMenu(parentScreen));
 		} else if (optionsClientScrollableControls && guiscreen instanceof GuiControls) {
-			redrawGui = true;
-			mc.displayGuiScreen(new GuiControlsScrollable(parentScreen, mc.gameSettings));
+			overrideCurrentScreen(mc, new GuiControlsScrollable(parentScreen, mc.gameSettings));
 		} else if (guiscreen instanceof GuiIngameMenu) {
 			if(optionsClientIngameTexturePackButton && (texturePackButtonIndex == -1 || guiscreen.controlList.size() == texturePackButtonIndex)) {
-				//redrawGui = true;
 				texturePackButtonIndex = guiscreen.controlList.size();
-				guiscreen.controlList.add(new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs"));
-				ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
-		        int i = scaledresolution.getScaledWidth();
-		        int j = scaledresolution.getScaledHeight();
-		        int k = (Mouse.getX() * i) / mc.displayWidth;
-		        int i1 = j - (Mouse.getY() * j) / mc.displayHeight - 1;
-				((GuiButton)(guiscreen.controlList.get(texturePackButtonIndex))).drawButton(mc, k, i1);
+				guiscreen.controlList.add(drawButton(mc, new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs")));
+				
 			}
 			if(optionsClientIngameTexturePackButton) {
 				try {
@@ -321,20 +348,13 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 		} else if (guiscreen instanceof GuiOptions && !optionsClientDisableEntityRendererOverride) {
 			if(optionsClientFovSliderVisible && (fovSliderIndex == -1 || guiscreen.controlList.size() == fovSliderIndex)) {
-				//redrawGui = true;
 				fovSliderIndex = guiscreen.controlList.size();
 				int x = 5;
 				try {
 					x = ((EnumOptions[])optionsTopBitArrayField.get(guiscreen)).length;
 				} 
 				catch (IllegalAccessException e) { e.printStackTrace(); }
-				guiscreen.controlList.add(new GuiSliderFOV(137, guiscreen.width / 2 - 155 + x % 2 * 160, guiscreen.height / 6 + 24 * (x >> 1)));
-				ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
-		        int i = scaledresolution.getScaledWidth();
-		        int j = scaledresolution.getScaledHeight();
-		        int k = (Mouse.getX() * i) / mc.displayWidth;
-		        int i1 = j - (Mouse.getY() * j) / mc.displayHeight - 1;
-				((GuiButton)(guiscreen.controlList.get(fovSliderIndex))).drawButton(mc, k, i1);
+				guiscreen.controlList.add(drawButton(mc, new GuiSliderFOV(137, guiscreen.width / 2 - 155 + x % 2 * 160, guiscreen.height / 6 + 24 * (x >> 1))));
 			}
 			
 		} else if (guiscreen instanceof GuiTexturePacks) {
@@ -345,24 +365,6 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 		if (guiscreen != parentScreen) {
 			parentScreen = guiscreen;
-		}
-		if(redrawGui) {
-			GL11.glClear(256);
-			ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
-	        int i = scaledresolution.getScaledWidth();
-	        int j = scaledresolution.getScaledHeight();
-	        int k = (Mouse.getX() * i) / mc.displayWidth;
-	        int i1 = j - (Mouse.getY() * j) / mc.displayHeight - 1;
-	        float f = 0.0F;
-	        try {
-				f = ((Timer)timerField.get(mc)).renderPartialTicks;
-			} 
-	        catch (IllegalAccessException e) { e.printStackTrace(); }
-            mc.currentScreen.drawScreen(k, i1, f);
-            if(mc.currentScreen.guiParticles != null)
-            {
-            	mc.currentScreen.guiParticles.draw(f);
-            }
 		}
 		if (mc.theWorld != currentWorld) {
 			if (guiAPIinstalled
@@ -375,17 +377,7 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 			currentWorld = mc.theWorld;
 		}
-		if(HMIinstalled == null) {
-			HMIinstalled = false;
-			List modList = ModLoader.getLoadedMods();
-			for (Object obj : modList) {
-				BaseMod mod = (BaseMod)obj;
-				if (mod.getClass().getName() == "mod_HowManyItems") {
-					HMIinstalled = true;
-					break;
-				}
-			}
-		}
+		
 		if (optionsClientDraggingShortcuts && guiscreen instanceof GuiContainer && (!HMIinstalled || !(guiscreen instanceof GuiRecipeViewer))) {
 			GuiContainer container = (GuiContainer)guiscreen;
 			int x = (Mouse.getX() * container.width) / mc.displayWidth;
@@ -689,6 +681,7 @@ public class mod_BetaTweaks extends BaseMod {
 		
 		
 
+		//Equip armour from hotbar
 		if(optionsClientDraggingShortcuts) {
 			if(Mouse.isButtonDown(1) && minecraft.currentScreen == null) {
 				if(!rmbHeld) {
@@ -1007,6 +1000,8 @@ public class mod_BetaTweaks extends BaseMod {
 		new BlockOreStorageIndev(Block.blockSteel, new String[] {"blockSteel", "aj"}, "/BetaTweaks/steelSide.png", "/BetaTweaks/steelBottom.png");
 		new BlockOreStorageIndev(Block.blockGold, new String[] {"blockGold", "ai"}, "/BetaTweaks/goldSide.png", "/BetaTweaks/goldBottom.png");
 		new BlockOreStorageIndev(Block.blockDiamond, new String[] {"blockDiamond", "ay"}, "/BetaTweaks/diamondSide.png", "/BetaTweaks/diamondBottom.png");
+		
+		ModLoader.RegisterAllTextureOverrides(ModLoader.getMinecraftInstance().renderEngine);
 		
 		Field blocksEffectiveAgainst = getObfuscatedPrivateField(ItemTool.class, new String[] {"blocksEffectiveAgainst", "bk"});
 		if (blocksEffectiveAgainst != null) {

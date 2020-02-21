@@ -5,34 +5,31 @@ package net.minecraft.src;
 
 import java.util.Random;
 
-// Referenced classes of package net.minecraft.src:
-//            GuiMainMenu
-
 class LogoEffectRandomizer
 {
 
     public LogoEffectRandomizer(int i, int j, Random rand)
     {
-    	field_1312_a = field_1311_b = (double)(10 + j) + rand.nextDouble() * 32D + (double)i;
+    	a = b = (double)(10 + j) + rand.nextDouble() * 32D + (double)i;
     }
 
-    public void func_875_a()
+    public void update()
     {
-        field_1311_b = field_1312_a;
-        if(field_1312_a > 0.0D)
+        b = a;
+        if(a > 0.0D)
         {
-            field_1314_c -= 0.59999999999999998D;
+            c -= 0.59999999999999998D;
         }
-        field_1312_a += field_1314_c;
-        field_1314_c *= 0.90000000000000002D;
-        if(field_1312_a < 0.0D)
+        a += c;
+        c *= 0.90000000000000002D;
+        if(a < 0.0D)
         {
-            field_1312_a = 0.0D;
-            field_1314_c = 0.0D;
+            a = 0.0D;
+            c = 0.0D;
         }
     }
 
-    public double field_1312_a;
-    public double field_1311_b;
-    public double field_1314_c;
+    public double a;
+    public double b;
+    private double c;
 }

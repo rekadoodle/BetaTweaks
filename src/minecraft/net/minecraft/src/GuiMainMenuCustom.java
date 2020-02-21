@@ -72,7 +72,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
             {
                 for(int j = 0; j < logoEffects[i].length; j++)
                 {
-                    logoEffects[i][j].func_875_a();
+                    logoEffects[i][j].update();
                 }
 
             }
@@ -190,6 +190,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
         var4.addVertexWithUV((double)var8, 0.0D, (double)this.zLevel, (double)(0.5F + var6), (double)(0.5F - var7));
         var4.addVertexWithUV(0.0D, 0.0D, (double)this.zLevel, (double)(0.5F + var6), (double)(0.5F + var7));
         var4.draw();
+        //new lines for optifine fix
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 	}
@@ -388,7 +389,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
                     GL11.glPushMatrix();
                     if(j1 < logoEffects.length && i1 < logoEffects[j1].length) {
                     LogoEffectRandomizer logoeffectrandomizer = logoEffects[j1][i1];
-                    float f1 = (float)(logoeffectrandomizer.field_1311_b + (logoeffectrandomizer.field_1312_a - logoeffectrandomizer.field_1311_b) * (double)f);
+                    float f1 = (float)(logoeffectrandomizer.b + (logoeffectrandomizer.a - logoeffectrandomizer.b) * (double)f);
                     float f2 = 1.0F;
                     float f3 = 1.0F;
                     float f4 = 0.0F;
@@ -492,7 +493,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
                     }
                     GL11.glPushMatrix();
                     LogoEffectRandomizer logoeffectrandomizer = logoEffects[j1][i1];
-                    float f1 = (float)(logoeffectrandomizer.field_1311_b + (logoeffectrandomizer.field_1312_a - logoeffectrandomizer.field_1311_b) * (double)f);
+                    float f1 = (float)(logoeffectrandomizer.b + (logoeffectrandomizer.a - logoeffectrandomizer.b) * (double)f);
                     float f2 = 1.0F;
                     float f3 = 1.0F;
                     float f4 = 0.0F;

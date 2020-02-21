@@ -79,7 +79,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         {
             f1 *= 60.0F / 70.0F;
         }
-        if(mc.gameSettings.smoothCamera = Keyboard.isKeyDown(mod_BetaTweaks.zoom.keyCode)) {
+        if(mc.gameSettings.smoothCamera = Keyboard.isKeyDown(mod_BetaTweaks.zoom.keyCode) && ModLoader.isGUIOpen(null)) {
 			f1 /= 4F;
 		}
         if(entityliving.health <= 0)
@@ -230,8 +230,12 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             {
                 EntityPlayer entityplayer = (EntityPlayer)entityliving;
                 GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                renderglobal.drawBlockBreaking(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
-                renderglobal.drawSelectionBox(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
+                if(!mod_BetaTweaks.forgeInstalled || !BetaTweaksForgeHandler.ForgeHooksClient_onBlockHighlight(renderglobal,entityplayer,
+            			mc.objectMouseOver,0,
+            			entityplayer.inventory.getCurrentItem(),f)) {
+                    renderglobal.drawBlockBreaking(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
+                    renderglobal.drawSelectionBox(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
+                }
                 GL11.glEnable(3008 /*GL_ALPHA_TEST*/);
             }
             GL11.glBlendFunc(770, 771);
@@ -276,8 +280,12 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             {
                 EntityPlayer entityplayer1 = (EntityPlayer)entityliving;
                 GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                renderglobal.drawBlockBreaking(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
-                renderglobal.drawSelectionBox(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
+                if(!mod_BetaTweaks.forgeInstalled || !BetaTweaksForgeHandler.ForgeHooksClient_onBlockHighlight(renderglobal,entityplayer1,
+            			mc.objectMouseOver,0,
+            			entityplayer1.inventory.getCurrentItem(),f)) {
+                    renderglobal.drawBlockBreaking(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
+                    renderglobal.drawSelectionBox(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
+                }
                 GL11.glEnable(3008 /*GL_ALPHA_TEST*/);
             }
             renderRainSnow(f);
@@ -390,8 +398,12 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             {
                 EntityPlayer entityplayer = (EntityPlayer)entityliving;
                 GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                renderglobal.drawBlockBreaking(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
-                renderglobal.drawSelectionBox(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
+                if(!mod_BetaTweaks.forgeInstalled || !BetaTweaksForgeHandler.ForgeHooksClient_onBlockHighlight(renderglobal,entityplayer,
+            			mc.objectMouseOver,0,
+            			entityplayer.inventory.getCurrentItem(),f)) {
+                    renderglobal.drawBlockBreaking(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
+                    renderglobal.drawSelectionBox(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
+                }
                 GL11.glEnable(3008 /*GL_ALPHA_TEST*/);
             }
             GL11.glBlendFunc(770, 771);
@@ -436,8 +448,12 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             {
                 EntityPlayer entityplayer1 = (EntityPlayer)entityliving;
                 GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                renderglobal.drawBlockBreaking(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
-                renderglobal.drawSelectionBox(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
+                if(!mod_BetaTweaks.forgeInstalled || !BetaTweaksForgeHandler.ForgeHooksClient_onBlockHighlight(renderglobal,entityplayer1,
+            			mc.objectMouseOver,0,
+            			entityplayer1.inventory.getCurrentItem(),f)) {
+                    renderglobal.drawBlockBreaking(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
+                    renderglobal.drawSelectionBox(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
+                }
                 GL11.glEnable(3008 /*GL_ALPHA_TEST*/);
             }
             renderRainSnow(f);
