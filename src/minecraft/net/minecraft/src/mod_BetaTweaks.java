@@ -26,7 +26,7 @@ import org.lwjgl.opengl.*;
 public class mod_BetaTweaks extends BaseMod {
 
 	public String Version() {
-		return "v1.1.5_2";
+		return "v1.1.5_3";
 	}
 	
 	//Info for mine_diver's mod menu
@@ -162,7 +162,7 @@ public class mod_BetaTweaks extends BaseMod {
 		if (optionsGameplayLightTNTwithFist && !TNTinitialised) {
 			TNTinitialised = true;
 			Block.blocksList[Block.tnt.blockID] = null;
-			ModLoader.AddName(new BlockTNTPunchable(), StringTranslate.getInstance().translateNamedKey(Block.tnt.getBlockName()));
+			new BlockTNTPunchable();
 		}
 
 		if (optionsClientIndevStorageBlocks && !storageBlocksInitialised) {

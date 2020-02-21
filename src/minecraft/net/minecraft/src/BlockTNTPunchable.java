@@ -20,7 +20,7 @@ public class BlockTNTPunchable extends BlockTNT
     	super(Block.tnt.blockID, Block.tnt.blockIndexInTexture);
     	setHardness(Block.tnt.getHardness());
     	setStepSound(soundGrassFootstep);
-    	setBlockName(Block.tnt.getBlockName());
+    	setBlockName(Block.tnt.getBlockName().replaceFirst("tile.", ""));
     	
     	try {
     		Field x = mod_BetaTweaks.getObfuscatedPrivateField(Block.class, new String[] {"tnt", "an"});
