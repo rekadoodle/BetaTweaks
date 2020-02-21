@@ -4,6 +4,7 @@
 
 package net.minecraft.src;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -37,6 +38,8 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
 	private final Method setupViewBobbingMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"setupViewBobbing", "f"}, new Class<?>[] {float.class});
 	private final Method orientCameraMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"orientCamera", "g"}, new Class<?>[] {float.class});
 	private final Method updateFogColorMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"updateFogColor", "h"}, new Class<?>[] {float.class});
+	
+	private final Field rendererUpdateCountField = mod_BetaTweaks.getObfuscatedPrivateField(EntityRenderer.class, new String[] {"rendererUpdateCount", "l"});
 	
 	public static final Method getObfuscatedPrivateMethod(Class<?> target, String names[], Class<?> types[]) {
 		for (String name : names) {
@@ -119,11 +122,16 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         float f2 = mc.thePlayer.prevTimeInPortal + (mc.thePlayer.timeInPortal - mc.thePlayer.prevTimeInPortal) * f;
         if(f2 > 0.0F)
         {
+        	int renderUpdateCount = 0;
+        	try {
+				renderUpdateCount = rendererUpdateCountField.getInt(this);
+			} 
+        	catch (IllegalAccessException e) { e.printStackTrace(); }
             float f3 = 5F / (f2 * f2 + 5F) - f2 * 0.04F;
             f3 *= f3;
-            GL11.glRotatef(((float)rendererUpdateCount + f) * 20F, 0.0F, 1.0F, 1.0F);
+            GL11.glRotatef(((float)renderUpdateCount + f) * 20F, 0.0F, 1.0F, 1.0F);
             GL11.glScalef(1.0F / f3, 1.0F, 1.0F);
-            GL11.glRotatef(-((float)rendererUpdateCount + f) * 20F, 0.0F, 1.0F, 1.0F);
+            GL11.glRotatef(-((float)renderUpdateCount + f) * 20F, 0.0F, 1.0F, 1.0F);
         }
         orientCamera(f);
     }
@@ -428,7 +436,6 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
     private Minecraft mc;
     private float farPlaneDistance;
     public ItemRenderer itemRenderer;
-    private int rendererUpdateCount;
     private Entity pointedEntity;
     private float debugCamFOV;
     private float prevDebugCamFOV;
