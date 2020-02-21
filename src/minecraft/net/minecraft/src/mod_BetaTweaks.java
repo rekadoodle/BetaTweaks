@@ -26,7 +26,7 @@ import org.lwjgl.opengl.*;
 public class mod_BetaTweaks extends BaseMod {
 
 	public String Version() {
-		return "v1.1.3";
+		return "v1.1.5_2";
 	}
 	
 	//Info for mine_diver's mod menu

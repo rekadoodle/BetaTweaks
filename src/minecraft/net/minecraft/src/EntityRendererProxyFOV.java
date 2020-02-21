@@ -6,6 +6,7 @@ package net.minecraft.src;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.nio.FloatBuffer;
 import java.util.List;
 import java.util.Random;
@@ -31,19 +32,22 @@ import org.lwjgl.util.glu.GLU;
 public class EntityRendererProxyFOV extends EntityRendererProxy
 {
 
-	private final Method renderHandMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"renderHand", "b"});
-	private final Method hurtCameraEffectMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"hurtCameraEffect", "e"});
-	private final Method setupViewBobbingMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"setupViewBobbing", "f"});
-	private final Method orientCameraMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"orientCamera", "g"});
-	private final Method updateFogColorMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"updateFogColor", "h"});
+	private final Method renderHandMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"renderHand", "b", "func_4135_b"}, new Class<?>[] {float.class, int.class});
+	private final Method hurtCameraEffectMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"hurtCameraEffect", "e"}, new Class<?>[] {float.class});
+	private final Method setupViewBobbingMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"setupViewBobbing", "f"}, new Class<?>[] {float.class});
+	private final Method orientCameraMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"orientCamera", "g"}, new Class<?>[] {float.class});
+	private final Method updateFogColorMethod = getObfuscatedPrivateMethod(EntityRenderer.class, new String[] {"updateFogColor", "h"}, new Class<?>[] {float.class});
 	
-	public static final Method getObfuscatedPrivateMethod(Class<?> target, String names[]) {
-        for (Method field : target.getDeclaredMethods())
-            for (String name : names)
-                if (field.getName() == name) {
-                    field.setAccessible(true);
-                    return field;
-                }
+	public static final Method getObfuscatedPrivateMethod(Class<?> target, String names[], Class<?> types[]) {
+		for (String name : names) {
+			try {
+				Method method = target.getDeclaredMethod(name, types);
+				method.setAccessible(true);
+				return method;
+			}  
+			catch (NoSuchMethodException e) { }
+        }
+		System.out.println("ERROR: Turns out that wasn't a fart.");
         return null;
     }
 	
