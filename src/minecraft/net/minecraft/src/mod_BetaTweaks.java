@@ -23,17 +23,20 @@ import org.lwjgl.opengl.GL11;
 public class mod_BetaTweaks extends BaseMod {
 
 	public String Version() {
-		return "v1.1.2";
+		return "v1.1.3";
 	}
 	
+	//Info for mine_diver's mod menu
 	public String Description() {
-		//For mine_diver's mod menu
-		return "A collection of quality of life improvements";
+		return "Beta but better";
 	}
 	
 	public String Name() {
-		//For mine_diver's mod menu
 		return "Beta Tweaks";
+	}
+	
+	public String Icon() {
+		return "/BetaTweaks/modMenu1";
 	}
 
 	enum LogoState {
@@ -72,15 +75,6 @@ public class mod_BetaTweaks extends BaseMod {
 	private static Boolean resetAchievements = true;
 	
 	private static World currentWorld = null;
-	
-	public static float logoScale = 0;
-	public static float logoOffsetX = 0;
-	public static float logoOffsetY = 0;
-	public static float logoAxisTilt= 15;
-	public static float logoLightMultiplier = 1;
-	public static Boolean logoSplashTextEnabled = true;
-	public static float logoSplashTextOffsetX = 0;
-	public static float logoSplashTextOffsetY = 0;
 
 	private static int lastTickHoeDamage;
 	private static int lastTickHoeX;
@@ -152,7 +146,7 @@ public class mod_BetaTweaks extends BaseMod {
 			initStorageBlocks();
 		}
 
-		if (optionsClientLogo == LogoState.CUSTOM && !customLogoInitialised) {
+		if ((optionsClientLogo == LogoState.CUSTOM || optionsClientPanoramaEnabled) && !customLogoInitialised) {
 			if (!GuiMainMenuCustom.configLogoFile.exists())
 				GuiMainMenuCustom.writeCustomLogoConfig();
 			GuiMainMenuCustom.readCustomLogoConfig();

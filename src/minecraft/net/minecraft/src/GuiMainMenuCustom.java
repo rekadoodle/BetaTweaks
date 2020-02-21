@@ -10,6 +10,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -33,10 +34,10 @@ public class GuiMainMenuCustom extends GuiMainMenu
 
     private int viewportTexture;
 	private boolean undrawn2 = true;
-    private static final String[] field_73978_o = new String[] {"/title/bg/panorama/panorama0.png", "/title/bg/panorama/panorama1.png", "/title/bg/panorama/panorama2.png", "/title/bg/panorama/panorama3.png", "/title/bg/panorama/panorama4.png", "/title/bg/panorama/panorama5.png"};
-    
-	public GuiMainMenuCustom()
+    private static final String[] panoramaFilePaths = new String[] {"/panorama0.png", "/panorama1.png", "/panorama2.png", "/panorama3.png", "/panorama4.png", "/panorama5.png"};
+    public GuiMainMenuCustom()
     {
+		
 		updateCounter = 0;
 		minecraftLogo = getCustomLogo();
         splashText = "missingno";
@@ -62,10 +63,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
         }
         catch(Exception exception) { }
     }
-	
-	 
-	
-	
+
     public void updateScreen()
     {
         updateCounter++;
@@ -151,13 +149,13 @@ public class GuiMainMenuCustom extends GuiMainMenu
         	GL11.glTranslatef(width / 2 + 90, (float)(70), 0.0F);
         }
         else {
-        	GL11.glTranslatef(width / 2 + 90 + mod_BetaTweaks.logoSplashTextOffsetX, (float)(70) - mod_BetaTweaks.logoSplashTextOffsetY, 0.0F);
+        	GL11.glTranslatef(width / 2 + 90 + logoSplashTextOffsetX, (float)(70) - logoSplashTextOffsetY, 0.0F);
         }
         GL11.glRotatef(-20F, 0.0F, 0.0F, 1.0F);
         float f1 = 1.8F - MathHelper.abs(MathHelper.sin(((float)(System.currentTimeMillis() % 1000L) / 1000F) * 3.141593F * 2.0F) * 0.1F);
         f1 = (f1 * 100F) / (float)(fontRenderer.getStringWidth(splashText) + 32);
         GL11.glScalef(f1, f1, f1);
-        if (mod_BetaTweaks.optionsClientLogo != LogoState.CUSTOM || mod_BetaTweaks.logoSplashTextEnabled) {
+        if (mod_BetaTweaks.optionsClientLogo != LogoState.CUSTOM || logoSplashTextEnabled) {
         	drawCenteredString(fontRenderer, splashText, 0, -8, 0xffff00);
         }
         GL11.glPopMatrix();
@@ -207,7 +205,6 @@ public class GuiMainMenuCustom extends GuiMainMenu
         var4.addVertexWithUV((double)var8, 0.0D, (double)this.zLevel, (double)(0.5F + var6), (double)(0.5F - var7));
         var4.addVertexWithUV(0.0D, 0.0D, (double)this.zLevel, (double)(0.5F + var6), (double)(0.5F + var7));
         var4.draw();
-		
 	}
 
 	private void rotateAndBlurSkybox(float f) {
@@ -293,9 +290,8 @@ public class GuiMainMenuCustom extends GuiMainMenu
                 {
                     GL11.glRotatef(-90.0F, 1.0F, 0.0F, 0.0F);
                 }
-
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture(field_73978_o[var10]));
-                var4.startDrawingQuads();
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture(logoPanoramaFolder + panoramaFilePaths[var10]));
+	            var4.startDrawingQuads();
                 var4.setColorRGBA_I(16777215, 255 / (var6 + 1));
                 float var11 = 0.0F;
                 var4.addVertexWithUV(-1.0D, -1.0D, 1.0D, (double)(0.0F + var11), (double)(0.0F + var11));
@@ -384,9 +380,9 @@ public class GuiMainMenuCustom extends GuiMainMenu
                 GL11.glBlendFunc(768, 1);
             }
             
-            GL11.glRotatef(-mod_BetaTweaks.logoAxisTilt, 1.0F, 0.0F, 0.0F);
+            GL11.glRotatef(-logoAxisTilt, 1.0F, 0.0F, 0.0F);
             GL11.glScalef(0.89F, 1.0F, 0.4F);
-            GL11.glTranslatef((float)(-minecraftLogo[0].length()) * 0.4865F + mod_BetaTweaks.logoOffsetX, (float)(-minecraftLogo.length) * 0.5F - mod_BetaTweaks.logoOffsetY, mod_BetaTweaks.logoScale);
+            GL11.glTranslatef((float)(-minecraftLogo[0].length()) * 0.4865F + logoOffsetX, (float)(-minecraftLogo.length) * 0.5F - logoOffsetY, logoScale);
             
             GL11.glBindTexture(3553 /*GL_TEXTURE_2D*/, mc.renderEngine.getTexture("/terrain.png"));
             if(l == 0)
@@ -607,13 +603,16 @@ public class GuiMainMenuCustom extends GuiMainMenu
 				else if (readOptions) {
 					if (s.contains("=")) {
 						String as[] = s.split("=");
-						Field f1 = mod_BetaTweaks.class.getField("logo" + (as[0]));
+						Field f1 = GuiMainMenuCustom.class.getField("logo" + (as[0]));
 
 						if (f1.getType() == float.class) {
 							f1.set(null, Float.parseFloat(as[1]));
 						}
-						if (f1.getType() == Boolean.class) {
+						else if (f1.getType() == Boolean.class) {
 							f1.set(null, Boolean.parseBoolean(as[1]));
+						}
+						else if (f1.getType() == String.class) {
+							f1.set(null, as[1]);
 						}
 					}
 				}
@@ -710,7 +709,8 @@ public class GuiMainMenuCustom extends GuiMainMenu
 					+ System.getProperty("line.separator") + "LightMultiplier=0.8"
 					+ System.getProperty("line.separator") + "SplashTextEnabled=true"
 					+ System.getProperty("line.separator") + "SplashTextOffsetX=-15.0"
-					+ System.getProperty("line.separator") + "SplashTextOffsetY=-10.0");
+					+ System.getProperty("line.separator") + "SplashTextOffsetY=-10.0"
+					+ System.getProperty("line.separator") + "PanoramaFolder=/BetaTweaks/panorama");
 			/*
 				Field[] myFields = mod_BetaTweaks.class.getFields();
 				for (int i = 0; i < myFields.length; i++) {
@@ -742,9 +742,17 @@ public class GuiMainMenuCustom extends GuiMainMenu
     private float updateCounter;
     private String splashText;
     
+    public static float logoScale = 0;
+	public static float logoOffsetX = 0;
+	public static float logoOffsetY = 0;
+	public static float logoAxisTilt= 15;
+	public static float logoLightMultiplier = 1;
+	public static Boolean logoSplashTextEnabled = true;
+	public static float logoSplashTextOffsetX = 0;
+	public static float logoSplashTextOffsetY = 0;
+	public static String logoPanoramaFolder = "/BetaTweaks/panorama";
     
-
-	public static File configLogoFile = new File((Minecraft.getMinecraftDir()) + "/config/OldCustomLogo.cfg");
+    public static File configLogoFile = new File((Minecraft.getMinecraftDir()) + "/config/OldCustomLogo.cfg");
 	private static Long timeStamp = configLogoFile.lastModified();
 	private static List<String> image = new ArrayList<String>();
 	private static List<Integer> blockID = new ArrayList<Integer>();

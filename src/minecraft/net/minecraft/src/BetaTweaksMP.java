@@ -20,11 +20,8 @@ public class BetaTweaksMP extends BaseModMp {
 	
 	public static Boolean serverModInstalled = false;
 	
-	
 	public static List<String> playerList = new ArrayList<String>();
 	public static int maxPlayers;
-	
-	
 	
 	public static List<Integer> options = new ArrayList<Integer>();
 	
@@ -32,14 +29,17 @@ public class BetaTweaksMP extends BaseModMp {
 		return "v1";
 	}
 	
+	//Info for mine_diver's mod menu
 	public String Description() {
-		//For mine_diver's mod menu
 		return "Handles the multiplayer parts of BetaTweaks";
 	}
 	
 	public String Name() {
-		//For mine_diver's mod menu
 		return "Beta Tweaks MP Handler";
+	}
+	
+	public String Icon() {
+		return "/BetaTweaks/modMenu2";
 	}
 	
 	public void HandlePacket(Packet230ModLoader packet)

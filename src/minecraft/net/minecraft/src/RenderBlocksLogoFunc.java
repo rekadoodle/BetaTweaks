@@ -32,10 +32,10 @@ public class RenderBlocksLogoFunc extends RenderBlocks
         	f2 = 1.0F;
         	f1 = 0.5F;
         	
-        	f1 *= mod_BetaTweaks.logoLightMultiplier;
-        	f2 *= mod_BetaTweaks.logoLightMultiplier;
-        	f3 *= mod_BetaTweaks.logoLightMultiplier;
-        	f4 *= mod_BetaTweaks.logoLightMultiplier;
+        	f1 *= GuiMainMenuCustom.logoLightMultiplier;
+        	f2 *= GuiMainMenuCustom.logoLightMultiplier;
+        	f3 *= GuiMainMenuCustom.logoLightMultiplier;
+        	f4 *= GuiMainMenuCustom.logoLightMultiplier;
         }
          
         tessellator.startDrawingQuads();
