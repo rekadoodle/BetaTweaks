@@ -2,7 +2,7 @@
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
-package net.minecraft.src;
+package betatweaks.gui;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -10,8 +10,23 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
+import net.minecraft.src.ChatAllowedCharacters;
+import net.minecraft.src.GuiButton;
+import net.minecraft.src.GuiConnecting;
+import net.minecraft.src.GuiMultiplayer;
+import net.minecraft.src.GuiScreen;
+import net.minecraft.src.GuiYesNo;
+import net.minecraft.src.NBTTagCompound;
+import net.minecraft.src.NBTTagList;
+import net.minecraft.src.Packet;
+import net.minecraft.src.StringTranslate;
+import net.minecraft.src.mod_BetaTweaks;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+
+import betatweaks.CompressedStreamToolsMP;
+import betatweaks.ServerData;
 
 // Referenced classes of package net.minecraft.src:
 //            GuiScreen, GuiSlotServer, CompressedStreamTools, NBTTagCompound, 
@@ -22,12 +37,17 @@ import org.lwjgl.input.Mouse;
 public class GuiMultiplayerMenu extends GuiScreen
 {
 
-    public GuiMultiplayerMenu(GuiScreen guiscreen)
+    public GuiMultiplayerMenu()
     {
-    	parentScreen = guiscreen;
+    	this(mod_BetaTweaks.parentScreen);
     }
 
-    public void initGui()
+    public GuiMultiplayerMenu(GuiScreen parentScreen) {
+    	this.parentScreen = parentScreen;
+    	mod_BetaTweaks.dontOverride = true;
+	}
+
+	public void initGui()
     {
     	try {
             NBTTagCompound nbttagcompound = CompressedStreamToolsMP.func_35622_a(new File(mc.getMinecraftDir(), "servers.dat"));
@@ -116,6 +136,7 @@ public class GuiMultiplayerMenu extends GuiScreen
             mc.displayGuiScreen(new GuiAddServer(this, server = new ServerData(serverToEdit.name, serverToEdit.ip, serverToEdit.shouldPing)));
         } 
         else if(guibutton.id == 0) {
+        	mod_BetaTweaks.dontOverride = false;
             mc.displayGuiScreen(parentScreen);
         }
         else if(guibutton.id == 8) {
@@ -169,7 +190,10 @@ public class GuiMultiplayerMenu extends GuiScreen
         {
         	actionPerformed((GuiButton)controlList.get(2));
         }
-        else super.keyTyped(c, i);
+        else {
+        	if(i == 1) mod_BetaTweaks.dontOverride = false;
+        	super.keyTyped(c, i);
+        }
     }
 
     public void drawScreen(int i, int j, float f)
@@ -231,11 +255,12 @@ public class GuiMultiplayerMenu extends GuiScreen
     
     void joinServer(String address)
     {
+    	mod_BetaTweaks.dontOverride = false;
     	String[] ip = splitIP(address);
         mc.displayGuiScreen(new GuiConnecting(mc, ip[0], Integer.parseInt(ip[1])));
     }
 
-    void pollServer(ServerData server)
+    public void pollServer(ServerData server)
         throws IOException
     {
     	String[] ip = splitIP(server.ip);
@@ -328,7 +353,7 @@ public class GuiMultiplayerMenu extends GuiScreen
         return serverList;
     }
 
-    static Object getSync()
+    public static Object getSync()
     {
         return syncObj;
     }
@@ -338,7 +363,7 @@ public class GuiMultiplayerMenu extends GuiScreen
         tooltip = s;
     }
 
-    int pingCount = 0;
+    public int pingCount = 0;
     private static Object syncObj = new Object();
     private GuiScreen parentScreen;
     private GuiSlotServer slots;

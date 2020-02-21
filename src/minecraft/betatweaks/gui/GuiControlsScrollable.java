@@ -2,7 +2,7 @@
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode fieldsfirst 
 
-package net.minecraft.src;
+package betatweaks.gui;
 
 import java.util.List;
 
@@ -10,7 +10,15 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
+import betatweaks.Utils;
 import net.minecraft.client.Minecraft;
+import net.minecraft.src.GameSettings;
+import net.minecraft.src.GuiButton;
+import net.minecraft.src.GuiScreen;
+import net.minecraft.src.GuiSmallButton;
+import net.minecraft.src.StringTranslate;
+import net.minecraft.src.Tessellator;
+import net.minecraft.src.mod_BetaTweaks;
 
 // Referenced classes of package net.minecraft.src:
 //			GuiScreen, StringTranslate, GameSettings, GuiSmallButton, 
@@ -37,10 +45,10 @@ public class GuiControlsScrollable extends GuiScreen
 	private float initialClickY;
     private long lastClicked;
 
-	public GuiControlsScrollable(GuiScreen guiscreen, GameSettings gamesettings)
+	public GuiControlsScrollable()
 	{
-		parentScreen = guiscreen;
-		options = gamesettings;
+		parentScreen = mod_BetaTweaks.parentScreen;
+		options = Utils.mc.gameSettings;
 		
 		left = 0;
         top = 32;

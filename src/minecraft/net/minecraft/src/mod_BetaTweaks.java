@@ -1,16 +1,12 @@
 package net.minecraft.src;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
@@ -19,17 +15,37 @@ import java.util.Random;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 
+import betatweaks.*;
+import betatweaks.Config.LogoState;
+import betatweaks.block.*;
+import betatweaks.gui.*;
+import betatweaks.GuiAPIHandler;
 import hmi.GuiRecipeViewer;
-
-import org.lwjgl.opengl.*;
 
 
 public class mod_BetaTweaks extends BaseMod {
 
+	//TODO
+	//code cleanup
+	//improve selected dragging item slot graphics
+	
+	//DONE
+	//custom fullscreen res
+	//imprvoed chat
+	//crazee fov multiplier
+	//minecolony dragging shortcuts fix
+	//boat lag NOT fixed (known issue)
+	//package
+	//watershader fov fix
+	//fixed fov slider not showing up sometimes
+	//fix crash on mp when guiapi not installed
+	
 	public String Version() {
-		return "v1.1.6_3";
+		return "v1.2.0";
 	}
 	
 	//Info for mine_diver's mod menu
@@ -42,50 +58,26 @@ public class mod_BetaTweaks extends BaseMod {
 	}
 	
 	public String Icon() {
-		return "/BetaTweaks/modMenu1";
+		return resources + "/modMenu1";
 	}
 
-	enum LogoState {
-		STANDARD, ANIMATED, CUSTOM
-	};
-
-	public static Boolean optionsClientDraggingShortcuts = true;
-	public static LogoState optionsClientLogo = LogoState.STANDARD;
-	public static Boolean optionsClientPanoramaEnabled = false;
-	public static Boolean optionsClientQuitGameButton = true;
-	public static Boolean optionsClientMultiplayerMenu = true;
-	public static Boolean optionsClientScrollableControls = true;
-	public static Boolean optionsClientIngameTexturePackButton = false;
-	public static Boolean optionsClientDisableAchievementNotifications = false;
-	public static Boolean optionsClientDisableEntityRendererOverride = false;
-	public static Boolean optionsClientFovSliderVisible = true;
-	public static float optionsClientFovSliderValue = 0F;
-	public static Boolean optionsClientIndevStorageBlocks = false;
-	public static Boolean optionsClientHideLongGrass = false;
-	public static Boolean optionsClientHideDeadBush = false;
-
-	public static Boolean optionsGameplayPunchableSheep = true;
-	public static Boolean optionsGameplayLadderGaps = true;
-	public static Boolean optionsGameplayLightTNTwithFist = true;
-	public static Boolean optionsGameplayHoeDirtSeeds = false;
-	public static Boolean optionsGameplayMinecartBoosters = true;
-	public static Boolean optionsGameplayElevatorBoats = true;
-
-	public static Boolean guiAPIinstalled;
-	public static Boolean modloaderMPinstalled;
-	public static Boolean HMIinstalled;
-	public static Boolean optifineInstalled;
-	public static Boolean forgeInstalled;
-	private GuiScreen parentScreen;
+	public static boolean guiAPIinstalled;
+	public static boolean modloaderMPinstalled;
+	public static boolean HMIinstalled;
+	public static boolean minecolonyInstalled;
+	public static boolean optifineInstalled;
+	public static boolean shaderModInstalled;
+	public static boolean forgeInstalled;
+	public static GuiScreen parentScreen;
 	public static GuiScreen firstGuiScreenAfterHijack;
 	private boolean aetherSheepExist;
 
-	private static Boolean TNTinitialised = false;
-	private static Boolean storageBlocksInitialised = false;
-	private static Boolean customLogoInitialised = false;
-	private static Boolean resetTallGrass = true;
-	private static Boolean resetDeadBush = true;
-	private static Boolean resetAchievements = true;
+	private static boolean TNTinitialised = false;
+	private static boolean storageBlocksInitialised = false;
+	private static boolean customLogoInitialised = false;
+	private static boolean resetTallGrass = true;
+	private static boolean resetDeadBush = true;
+	private static boolean resetAchievements = true;
 	
 	private static World currentWorld = null;
 
@@ -94,100 +86,163 @@ public class mod_BetaTweaks extends BaseMod {
 	private static int lastTickHoeY;
 	private static int lastTickHoeZ;
 
-	private static File configFile = new File((Minecraft.getMinecraftDir()) + "/config/BetaTweaks.cfg");
 	protected Random rand;
+	private final int guiOptionsButtonCount;
+	
+	private DisplayMode customRes;
 
 	private KeyBinding playerList = new KeyBinding("List Players", Keyboard.KEY_TAB);
+	private KeyBinding customFullscreen = new KeyBinding("Custom Fullscreen", Keyboard.KEY_F8);
 	public static KeyBinding zoom = new KeyBinding("Zoom", Keyboard.KEY_LCONTROL);
 
-	mod_BetaTweaks() {
+	private HashMap<Class<? extends GuiScreen>, Class<? extends GuiScreen>> guiOverrides = new HashMap<Class<? extends GuiScreen>, Class<? extends GuiScreen>>();
+	public static boolean dontOverride = false;
+	
+	public mod_BetaTweaks() {
 		
-		try {
-			Class.forName("ModLoaderMp");
-			modloaderMPinstalled = true;
+		if(modloaderMPinstalled = Utils.classExists("ModLoaderMp")) {
 			ModLoader.RegisterKey(this, playerList, false);
-			
-			//Load MP code for BetaTweaks
-			ClassLoader classloader = (net.minecraft.src.ModLoader.class).getClassLoader();
-			Method addmodMethod;
-			try {
-				addmodMethod = ModLoader.class.getDeclaredMethod("addMod", ClassLoader.class, String.class);
-				addmodMethod.setAccessible(true);
-				try {
-					addmodMethod.invoke(null, new Object[] {
-							classloader, "BetaTweaksMP.class"
-						});
-				} 
-				catch (IllegalAccessException e) { e.printStackTrace(); } 
-				catch (IllegalArgumentException e) { e.printStackTrace(); } 
-				catch (InvocationTargetException e) { e.printStackTrace(); }
-			} 
-			catch (NoSuchMethodException e1) { e1.printStackTrace(); }
-			catch (SecurityException e1) { e1.printStackTrace(); }
-		} 
-		catch (ClassNotFoundException e) { modloaderMPinstalled = false; }
+			//Load MP handler for BetaTweaks
+			//Use net.minecraft.src.BetaTweaksMP in eclipse
+			Utils.loadMod("BetaTweaksMP");
+		}
 		
-		try {
-			Class.forName("ModSettings");
-			guiAPIinstalled = true;
-			BetaTweaksGuiAPI.instance.init();
-		} 
-		catch (ClassNotFoundException e) { guiAPIinstalled = false; }
+		if(guiAPIinstalled = Utils.classExists("ModSettings")) {
+			GuiAPIHandler.instance.init();
+		}
 		
-		try {
-			Class.forName("GuiDetailSettingsOF");
-			optifineInstalled = true;
-		} 
-		catch (ClassNotFoundException e) { optifineInstalled = false; }
+		optifineInstalled = Utils.classExists("GuiDetailSettingsOF");
+		forgeInstalled = Utils.classExists("forge.ForgeHooksClient");
+		aetherSheepExist = Utils.classExists("EntitySheepuff");
+		shaderModInstalled = Utils.classExists("Shader");
 		
-		try {
-			Class.forName("forge.ForgeHooksClient");
-			forgeInstalled = true;
-		} 
-		catch (ClassNotFoundException e) { forgeInstalled = false; }
+		betatweaks.Config.init();
 		
-		try {
-			Class.forName("EntitySheepuff");
-			aetherSheepExist = true;
-		} 
-		catch (ClassNotFoundException e) { aetherSheepExist = false; }
-		
-		if (!configFile.exists()) writeConfig();
-		readConfig();
-		if (guiAPIinstalled) BetaTweaksGuiAPI.instance.loadSettings();
+		if (guiAPIinstalled) GuiAPIHandler.instance.loadSettings();
 
-		initSettings(ModLoader.getMinecraftInstance());
+		initSettings(Utils.mc);
 
 		ModLoader.SetInGameHook(this, true, false);
 		ModLoader.SetInGUIHook(this, true, false);
 
-		if ((optionsClientLogo != LogoState.STANDARD || optionsClientPanoramaEnabled)
-				&& ModLoader.getMinecraftInstance().currentScreen == null)
-			ModLoader.getMinecraftInstance().currentScreen = new GuiInitialHijack();
+		if ((betatweaks.Config.clientLogo != LogoState.STANDARD || betatweaks.Config.clientPanoramaEnabled)
+				&& Utils.mc.currentScreen == null)
+			Utils.mc.currentScreen = new GuiInitialHijack();
 		
-		if(!optionsClientDisableEntityRendererOverride) {
+		if(!betatweaks.Config.clientDisableEntityRendererOverride) {
 			if(!optifineInstalled) ModLoader.RegisterKey(this, zoom, false);
-			ModLoader.getMinecraftInstance().entityRenderer = new EntityRendererProxyFOV(ModLoader.getMinecraftInstance());
+			Utils.mc.entityRenderer = new EntityRendererProxyFOV();
 		}
 
+		Object obj;
+		if((obj = Utils.getStaticFieldValue(GuiOptions.class, "field_22135_k", "l")) instanceof Integer) {
+			guiOptionsButtonCount = (Integer)obj;
+		}
+		else {
+			guiOptionsButtonCount = 5;
+		}
+		
+		if(betatweaks.Config.clientShowAllResolutionsInConsole) {
+			DisplayMode[] modes;
+			try {
+				modes = Display.getAvailableDisplayModes();
+				for (int i=0;i<modes.length;i++) {
+	                DisplayMode current = modes[i];
+	                System.out.println(current.getWidth() + "," + current.getHeight() + "," +
+	                                    current.getBitsPerPixel() + "," + current.getFrequency());
+	            }
+			} 
+			catch (LWJGLException e) { e.printStackTrace(); }
+		}
+		if(!betatweaks.Config.clientCustomFullscreenResolution.isEmpty()) {
+			String[] s = betatweaks.Config.clientCustomFullscreenResolution.split(",");
+			Constructor<?> displayconstructor;
+			try {
+				displayconstructor = DisplayMode.class.getDeclaredConstructor(int.class, int.class, int.class, int.class);
+				displayconstructor.setAccessible(true);
+				customRes = (DisplayMode) displayconstructor.newInstance(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]), Integer.parseInt(s[3]));
+			} 
+			catch (Exception e) { e.printStackTrace(); }
+			ModLoader.RegisterKey(this, customFullscreen, false);
+		}
+		
 	}
+	
+	private boolean fullscreen;
+	
+	public void KeyboardEvent(KeyBinding keybinding)
+    {
+		if(keybinding == customFullscreen) {
+			Minecraft mc = Utils.mc;
+			try
+	        {
+	            fullscreen = !fullscreen;
+	            if(fullscreen)
+	            {
+	            	Display.setDisplayMode(customRes);
+	                mc.displayWidth = Display.getDisplayMode().getWidth();
+	                mc.displayHeight = Display.getDisplayMode().getHeight();
+	                if(mc.displayWidth <= 0)
+	                {
+	                	mc.displayWidth = 1;
+	                }
+	                if(mc.displayHeight <= 0)
+	                {
+	                	mc.displayHeight = 1;
+	                }
+	            } else
+	            {
+	                if(mc.mcCanvas != null)
+	                {
+	                	mc.displayWidth = mc.mcCanvas.getWidth();
+	                	mc.displayHeight = mc.mcCanvas.getHeight();
+	                } else
+	                {
+	                	mc.displayWidth = 0;
+	                    mc.displayHeight = 0;
+	                }
+	                if(mc.displayWidth <= 0)
+	                {
+	                	mc.displayWidth = 1;
+	                }
+	                if(mc.displayHeight <= 0)
+	                {
+	                	mc.displayHeight = 1;
+	                }
+	            }
+	            if(mc.currentScreen != null)
+	            {
+	            	ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+	                int k = scaledresolution.getScaledWidth();
+	                int l = scaledresolution.getScaledHeight();
+	                mc.currentScreen.setWorldAndResolution(mc, k, l);
+	            }
+	            Display.setFullscreen(fullscreen);
+	            Display.update();
+	        }
+	        catch(Exception exception)
+	        {
+	            exception.printStackTrace();
+	        }
+		}
+    }
 
-	public static void initSettings(Minecraft minecraft) {
+	public void initSettings(Minecraft minecraft) {
+		overrideIngameChat = true;
 		GuiMainMenuCustom.resetLogo = true;
-		minecraft.hideQuitButton = !optionsClientQuitGameButton;
+		minecraft.hideQuitButton = !betatweaks.Config.clientQuitGameButton;
 
-		if (optionsGameplayLightTNTwithFist && !TNTinitialised) {
+		if (betatweaks.Config.gameplayLightTNTwithFist && !TNTinitialised) {
 			TNTinitialised = true;
-			Block.blocksList[Block.tnt.blockID] = null;
 			new BlockTNTPunchable();
 		}
 
-		if (optionsClientIndevStorageBlocks && !storageBlocksInitialised) {
+		if (betatweaks.Config.clientIndevStorageBlocks && !storageBlocksInitialised) {
 			storageBlocksInitialised = true;
 			initStorageBlocks();
 		}
 
-		if ((optionsClientLogo == LogoState.CUSTOM || optionsClientPanoramaEnabled) && !customLogoInitialised) {
+		if ((betatweaks.Config.clientLogo == LogoState.CUSTOM || betatweaks.Config.clientPanoramaEnabled) && !customLogoInitialised) {
 			if (!GuiMainMenuCustom.configLogoFile.exists())
 				GuiMainMenuCustom.writeCustomLogoConfig();
 			GuiMainMenuCustom.readCustomLogoConfig();
@@ -195,174 +250,132 @@ public class mod_BetaTweaks extends BaseMod {
 
 		if (resetTallGrass) {
 			resetTallGrass = false;
-			Block.blocksList[Block.tallGrass.blockID] = null;
-			Field x = getObfuscatedPrivateField(Block.class, new String[] {"tallGrass", "Y"});
-			if (x != null) {
-				x.setAccessible(true);
-				try {
-					Field modifiersField = Field.class.getDeclaredField("modifiers");
-					modifiersField.setAccessible(true);
-					modifiersField.setInt(x, x.getModifiers() & ~Modifier.FINAL);
-					if (optionsClientHideLongGrass) {
-						x.set(null, new BlockTallGrassHidden(Block.tallGrass));
-					} else {
-						x.set(null, (BlockTallGrass) (new BlockTallGrass(31, 39)).setHardness(0.0F)
-								.setStepSound(Block.soundGrassFootstep).setBlockName("tallgrass"));
-					}
-				} 
-				catch (NoSuchFieldException e) { e.printStackTrace();} 
-				catch (IllegalAccessException e) { e.printStackTrace();}
+			Utils.clearBlockID(Block.tallGrass.blockID);
+			if (betatweaks.Config.clientHideLongGrass) {
+				Utils.replaceBlock(new BlockTallGrassHidden(), "tallGrass", "Y");
+			} else {
+				Utils.replaceBlock(new BlockTallGrass(31, 39).setHardness(0.0F).setStepSound(Block.soundGrassFootstep).setBlockName("tallgrass"), "tallGrass", "Y");
 			}
 		}
 
 		if (resetDeadBush) {
 			resetDeadBush = false;
-			Block.blocksList[Block.deadBush.blockID] = null;
-			Field x = getObfuscatedPrivateField(Block.class, new String[] {"deadBush", "Z"});
-			if (x != null) {
-				x.setAccessible(true);
-				try {
-					Field modifiersField = Field.class.getDeclaredField("modifiers");
-					modifiersField.setAccessible(true);
-					modifiersField.setInt(x, x.getModifiers() & ~Modifier.FINAL);
-					if (optionsClientHideDeadBush) {
-						x.set(null, new BlockDeadBushHidden(Block.deadBush));
-					} else {
-						x.set(null, (BlockDeadBush) (new BlockDeadBush(32, 55)).setHardness(0.0F)
-								.setStepSound(Block.soundGrassFootstep).setBlockName("deadbush"));
-					}
-				} 
-				catch (NoSuchFieldException e1) { e1.printStackTrace(); } 
-				catch (IllegalAccessException e) { e.printStackTrace(); }
+			Utils.clearBlockID(Block.deadBush.blockID);
+			if (betatweaks.Config.clientHideDeadBush) {
+				Utils.replaceBlock(new BlockDeadBushHidden(), "deadBush", "Z");
+			} else {
+				Utils.replaceBlock(new BlockDeadBush(32, 55).setHardness(0.0F).setStepSound(Block.soundGrassFootstep).setBlockName("deadbush"), "deadBush", "Z");
 			}
 		}
 
 		if (resetAchievements) {
 			resetAchievements = false;
-			if (optionsClientDisableAchievementNotifications) {
+			if (betatweaks.Config.clientDisableAchievementNotifications) {
 				minecraft.guiAchievement = new GuiAchievementNull(minecraft);
 			} else {
 				minecraft.guiAchievement = new GuiAchievement(minecraft);
 			}
 		}
+		
+		guiOverrides.clear();
+		if(betatweaks.Config.clientImprovedChat) {
+			guiOverrides.put(GuiChat.class, GuiImprovedChat.class);
+		}
+		if(betatweaks.Config.clientScrollableControls) {
+			guiOverrides.put(GuiControls.class, GuiControlsScrollable.class);
+		}
+		if(betatweaks.Config.clientMultiplayerMenu) {
+			guiOverrides.put(GuiMultiplayer.class, GuiMultiplayerMenu.class);
+		}
+		if (betatweaks.Config.clientLogo != LogoState.STANDARD || betatweaks.Config.clientPanoramaEnabled) {
+			guiOverrides.put(GuiMainMenu.class, GuiMainMenuCustom.class);
+		}
+		else {
+			guiOverrides.put(GuiMainMenuCustom.class, GuiMainMenu.class);
+		}
+		
+		
 	}
-	private int texturePackButtonIndex = -1;
-	private int fovSliderIndex = -1;
+	private int buttonCount = -1;
+	private int buttonCount2 = -1;
+	private GuiButton texturePackButton;
 	private TexturePackBase initialTexturePack;
-	private Field optionsTopBitArrayField = getObfuscatedPrivateField(GuiOptions.class, new String[] {"field_22135_k", "l"});
-	private Field timerField = getObfuscatedPrivateField(Minecraft.class, new String[] {"timer", "T"});
+	private boolean overrideIngameChat = false;
+	
 	
 	public void ModsLoaded() {
 		HMIinstalled = ModLoader.isModLoaded("mod_HowManyItems");
+		minecolonyInstalled = ModLoader.isModLoaded("mod_MineColony");
 	}
 	
-	//Used to draw the button on the first frame it is created
-	private GuiButton drawButton(Minecraft mc, GuiButton button) {
-		ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
-        int posX = (Mouse.getX() * scaledresolution.getScaledWidth()) / mc.displayWidth;
-        int posY = scaledresolution.getScaledHeight() - (Mouse.getY() * scaledresolution.getScaledHeight()) / mc.displayHeight - 1;
-		button.drawButton(mc, posX, posY);
-		return button;
-	}
-	
-	//Used to draw a screen on the first frame it is overrided
-	private void overrideCurrentScreen(Minecraft mc, GuiScreen guiscreen) {
-		mc.displayGuiScreen(guiscreen);
-		GL11.glClear(256);
-		ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
-        int posX = (Mouse.getX() * scaledresolution.getScaledWidth()) / mc.displayWidth;
-        int posY = scaledresolution.getScaledHeight() - (Mouse.getY() * scaledresolution.getScaledHeight()) / mc.displayHeight - 1;
-        float f = 0.0F;
-        try {
-			f = ((Timer)timerField.get(mc)).renderPartialTicks;
-		} 
-        catch (IllegalAccessException e) { e.printStackTrace(); }
-        mc.currentScreen.drawScreen(posX, posY, f);
-        if(mc.currentScreen.guiParticles != null)
-        {
-        	mc.currentScreen.guiParticles.draw(f);
-        }
-	}
-	
+	@SuppressWarnings("unchecked")
 	public boolean OnTickInGUI(Minecraft mc, GuiScreen guiscreen) {
+		if(overrideIngameChat) {
+			if(betatweaks.Config.clientImprovedChat) {
+				if(!(mc.ingameGUI instanceof GuiIngameImprovedChat)) {
+					mc.ingameGUI = new GuiIngameImprovedChat(mc);
+				}
+			}
+			else {
+				if(mc.ingameGUI instanceof GuiIngameImprovedChat) {
+					mc.ingameGUI = new GuiIngame(mc);
+				}
+			}
+			overrideIngameChat = false;
+		}
+		
+		if(guiOverrides.containsKey(guiscreen.getClass()) && !dontOverride) {
+			Utils.overrideCurrentScreen(mc, guiOverrides.get(guiscreen.getClass()));
+		}
 		if (firstGuiScreenAfterHijack != null) {
-			overrideCurrentScreen(mc, firstGuiScreenAfterHijack);
+			Utils.overrideCurrentScreen(mc, firstGuiScreenAfterHijack);
 			firstGuiScreenAfterHijack = null;
 		} else if (guiAPIinstalled && guiscreen instanceof GuiModScreen) {
-			BetaTweaksGuiAPI.instance.handleTooltip((GuiModScreen)guiscreen);
+			GuiAPIHandler.instance.handleTooltip((GuiModScreen)guiscreen, Utils.cursorX(), Utils.cursorY());
 			if (parentScreen != guiscreen && guiscreen instanceof GuiModSelect && parentScreen instanceof GuiModScreen) {
 				
-				Boolean temp1 = optionsClientIndevStorageBlocks;
-				Boolean temp2 = optionsClientHideLongGrass;
-				Boolean temp3 = optionsClientHideDeadBush;
-				Boolean temp4 = optionsClientDisableAchievementNotifications;
-				BetaTweaksGuiAPI.instance.updateSettings();
-				if (temp2 != optionsClientHideLongGrass) {
+				Boolean temp1 = betatweaks.Config.clientIndevStorageBlocks;
+				Boolean temp2 = betatweaks.Config.clientHideLongGrass;
+				Boolean temp3 = betatweaks.Config.clientHideDeadBush;
+				Boolean temp4 = betatweaks.Config.clientDisableAchievementNotifications;
+				GuiAPIHandler.instance.updateSettings();
+				if (temp2 != betatweaks.Config.clientHideLongGrass) {
 					resetTallGrass = true;
 				}
-				if (temp3 != optionsClientHideDeadBush) {
+				if (temp3 != betatweaks.Config.clientHideDeadBush) {
 					resetDeadBush = true;
 				}
-				if (temp4 != optionsClientDisableAchievementNotifications) {
+				if (temp4 != betatweaks.Config.clientDisableAchievementNotifications) {
 					resetAchievements = true;
 				}
 				initSettings(mc);
-				if (temp1 != optionsClientIndevStorageBlocks || temp2 != optionsClientHideLongGrass
-						|| temp3 != optionsClientHideDeadBush) {
+				if (temp1 != betatweaks.Config.clientIndevStorageBlocks || temp2 != betatweaks.Config.clientHideLongGrass
+						|| temp3 != betatweaks.Config.clientHideDeadBush) {
 					if (mc.theWorld != null)
 						mc.renderGlobal.loadRenderers();
 				}
 			}
-			if(parentScreen != guiscreen) {
-				parentScreen = guiscreen;
-			}
-		} else if (guiscreen instanceof GuiMainMenu && !(guiscreen instanceof GuiMainMenuCustom)
-				&& (optionsClientLogo != LogoState.STANDARD || optionsClientPanoramaEnabled)) {
-			overrideCurrentScreen(mc, new GuiMainMenuCustom());
-		} else if (guiscreen instanceof GuiMainMenuCustom && !(guiscreen instanceof GuiMainMenu)
-				&& (optionsClientLogo == LogoState.STANDARD && !optionsClientPanoramaEnabled)) {
-			overrideCurrentScreen(mc, new GuiMainMenu());
-		} else if (optionsClientMultiplayerMenu && guiscreen instanceof GuiMultiplayer && !(parentScreen instanceof GuiMultiplayerMenu || parentScreen instanceof GuiMultiplayer)) {
-			overrideCurrentScreen(mc, new GuiMultiplayerMenu(parentScreen));
-		} else if (optionsClientScrollableControls && guiscreen instanceof GuiControls) {
-			overrideCurrentScreen(mc, new GuiControlsScrollable(parentScreen, mc.gameSettings));
-		} else if (guiscreen instanceof GuiIngameMenu) {
-			if(optionsClientIngameTexturePackButton && (texturePackButtonIndex == -1 || guiscreen.controlList.size() == texturePackButtonIndex)) {
-				texturePackButtonIndex = guiscreen.controlList.size();
-				guiscreen.controlList.add(drawButton(mc, new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs")));
+		} else if (betatweaks.Config.clientIngameTexturePackButton && guiscreen instanceof GuiIngameMenu) {
+			if(buttonCount == -1 || guiscreen.controlList.size() == buttonCount) {
+				buttonCount = guiscreen.controlList.size();
+				texturePackButton = new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs");
+				texturePackButton.drawButton(mc, Utils.cursorX(), Utils.cursorY());
+				guiscreen.controlList.add(texturePackButton);
 				
 			}
-			if(optionsClientIngameTexturePackButton) {
-				try {
-					Field x = getObfuscatedPrivateField(GuiScreen.class, new String[] {"selectedButton", "a"});
-					if(x != null) {
-						x.setAccessible(true);
-						GuiButton currentButton = (GuiButton)x.get(guiscreen);
-						if(currentButton != null) {
-							if(currentButton.id == 137) {
-								mc.displayGuiScreen(new GuiTexturePacks(guiscreen));
-								x.set(guiscreen, null);
-							}
-						}
-					}
-				}  
-				catch (IllegalArgumentException e) { e.printStackTrace(); } 
-				catch (IllegalAccessException e) { e.printStackTrace(); } 
+			if(Utils.buttonClicked(texturePackButton)) {
+				mc.displayGuiScreen(new GuiTexturePacks(guiscreen));
 			}
-		} else if (guiscreen instanceof GuiOptions && !optionsClientDisableEntityRendererOverride) {
-			if(optionsClientFovSliderVisible && (fovSliderIndex == -1 || guiscreen.controlList.size() == fovSliderIndex)) {
-				fovSliderIndex = guiscreen.controlList.size();
-				int x = 5;
-				try {
-					x = ((EnumOptions[])optionsTopBitArrayField.get(guiscreen)).length;
-				} 
-				catch (IllegalAccessException e) { e.printStackTrace(); }
-				guiscreen.controlList.add(drawButton(mc, new GuiSliderFOV(137, guiscreen.width / 2 - 155 + x % 2 * 160, guiscreen.height / 6 + 24 * (x >> 1))));
+		} else if (guiscreen instanceof GuiOptions && !betatweaks.Config.clientDisableEntityRendererOverride) {
+			if(betatweaks.Config.clientFovSliderVisible && (buttonCount2 == -1 || guiscreen.controlList.size() == buttonCount2)) {
+				buttonCount2 = guiscreen.controlList.size();
+				guiscreen.controlList.add(new GuiSliderBT(guiscreen.width / 2 - 155 + guiOptionsButtonCount % 2 * 160, guiscreen.height / 6 + 24 * (guiOptionsButtonCount >> 1), betatweaks.Config.getField("clientFovSliderValue")));
+				((GuiButton)guiscreen.controlList.get(buttonCount2)).drawButton(mc, Utils.cursorX(), Utils.cursorY());
 			}
 			
 		} else if (guiscreen instanceof GuiTexturePacks) {
 			if(initialTexturePack == null) {
-				initialTexturePack = ModLoader.getMinecraftInstance().texturePackList.selectedTexturePack;
+				initialTexturePack = Utils.mc.texturePackList.selectedTexturePack;
 			}
 			
 		}
@@ -373,7 +386,7 @@ public class mod_BetaTweaks extends BaseMod {
 			if (guiAPIinstalled
 					&& (currentWorld == null || !currentWorld.multiplayerWorld) != (mc.theWorld == null
 							|| !mc.theWorld.multiplayerWorld)) {
-				BetaTweaksGuiAPI.instance.loadSettings();
+				GuiAPIHandler.instance.loadSettings();
 			}
 			if (modloaderMPinstalled && mc.theWorld == null) {
 				BetaTweaksMP.serverModInstalled = false;
@@ -381,39 +394,32 @@ public class mod_BetaTweaks extends BaseMod {
 			currentWorld = mc.theWorld;
 		}
 		
-		if (optionsClientDraggingShortcuts && guiscreen instanceof GuiContainer && (!HMIinstalled || !(guiscreen instanceof GuiRecipeViewer))) {
+		if (betatweaks.Config.clientDraggingShortcuts && guiscreen instanceof GuiContainer && (!HMIinstalled || !(guiscreen instanceof GuiRecipeViewer))) {
 			GuiContainer container = (GuiContainer)guiscreen;
-			int x = (Mouse.getX() * container.width) / mc.displayWidth;
-            int y = container.height - (Mouse.getY() * container.height) / mc.displayHeight - 1;
+			
+			if(minecolonyInstalled) {
+				if(container instanceof GuiHut && ((GuiHut)container).page != 0) {
+					return true;
+				}
+				else if(container instanceof GuiCitizen && ((GuiCitizen)container).page != 0) {
+					return true;
+				}
+			}
+			
+			int x = Utils.cursorX();
+            int y = Utils.cursorY();
             EntityPlayerSP player = mc.thePlayer;
         	PlayerController controller = mc.playerController;
         	int windowId = container.inventorySlots.windowId;
         	Boolean shiftClick = Keyboard.isKeyDown(42) || Keyboard.isKeyDown(54);
-        	
+
         	Slot slot = null;
-        	Method getSlot = null;
 			try {
-				getSlot = GuiContainer.class.getDeclaredMethod("getSlotAtPosition", int.class, int.class);
-				getSlot.setAccessible(true);
 				slot = (Slot)getSlot.invoke(container, new Object[]{x, y});
 			} 
-			catch (NoSuchMethodException e1) {
-				try {
-					getSlot = GuiContainer.class.getDeclaredMethod("a", int.class, int.class);
-					getSlot.setAccessible(true);
-					slot = (Slot)getSlot.invoke(container, new Object[]{x, y});
-				} 
-				catch (NoSuchMethodException e) { e.printStackTrace(); } 
-				catch (IllegalAccessException e) { e.printStackTrace(); } 
-				catch (IllegalArgumentException e) { e.printStackTrace(); } 
-				catch (InvocationTargetException e) { e.printStackTrace(); }  
-			} 
-			catch (IllegalAccessException e) { e.printStackTrace(); } 
-			catch (IllegalArgumentException e) { e.printStackTrace(); } 
-			catch (InvocationTargetException e) { e.printStackTrace(); } 
+			catch (Exception e) { e.printStackTrace(); }
 			
 			if(slot != null) {
-				//System.out.println(slot.slotNumber);
             while(Mouse.next()) {
             	
         		if(Mouse.getEventButtonState())
@@ -671,21 +677,32 @@ public class mod_BetaTweaks extends BaseMod {
 	private boolean rmbHeld;
     private static RenderItem itemRenderer = new RenderItem();
 
+    private final Method getSlot = Utils.getMethod(GuiContainer.class,  new Class<?>[] {int.class, int.class}, "getSlotAtPosition", "a");
+    private int debug;
 	public boolean OnTickInGame(Minecraft minecraft) {
-		if((texturePackButtonIndex != -1 || fovSliderIndex != -1) && !(minecraft.currentScreen instanceof GuiIngameMenu || minecraft.currentScreen instanceof GuiOptions)) {
-			texturePackButtonIndex = -1;
-			fovSliderIndex = -1;
+		
+		//SCROLL TEST
+		/*
+		if(Keyboard.isKeyDown(Keyboard.KEY_K)) {
+			minecraft.ingameGUI.addChatMessage("message" + debug++);
 		}
-		if(initialTexturePack != null && initialTexturePack != ModLoader.getMinecraftInstance().texturePackList.selectedTexturePack 
-				&& !(minecraft.currentScreen instanceof GuiTexturePacks)) {
+		*/
+		
+		//Clear button override 'memory'
+		if((buttonCount != -1 || buttonCount2 != -1) && !(minecraft.currentScreen instanceof GuiIngameMenu || minecraft.currentScreen instanceof GuiOptions)) {
+			buttonCount = buttonCount2 = -1;
+		}
+		
+		//Reload world if texture pack changed in game
+		if(initialTexturePack != null && !(minecraft.currentScreen instanceof GuiTexturePacks)) {
+			if(initialTexturePack != Utils.mc.texturePackList.selectedTexturePack && minecraft.theWorld != null) {
+				minecraft.renderGlobal.loadRenderers();
+			}	
 			initialTexturePack = null;
-			if (minecraft.theWorld != null) minecraft.renderGlobal.loadRenderers();
 		}
 		
-		
-
 		//Equip armour from hotbar
-		if(optionsClientDraggingShortcuts) {
+		if(betatweaks.Config.clientDraggingShortcuts) {
 			if(Mouse.isButtonDown(1) && minecraft.currentScreen == null) {
 				if(!rmbHeld) {
 					rmbHeld = true;
@@ -706,13 +723,12 @@ public class mod_BetaTweaks extends BaseMod {
 			
 		}
 		
-		if (modloaderMPinstalled && BetaTweaksMP.serverModInstalled && BetaTweaksMP.optionsServerAllowPlayerList
+		//Draw playerlist
+		if (modloaderMPinstalled && BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayAllowPlayerList
 				&& Keyboard.isKeyDown(playerList.keyCode) && minecraft.currentScreen == null) {
-			Gui x = new Gui();
 			ScaledResolution scaledresolution = new ScaledResolution(minecraft.gameSettings, minecraft.displayWidth,
 					minecraft.displayHeight);
 			int kx = scaledresolution.getScaledWidth();
-			FontRenderer fontrenderer = minecraft.fontRenderer;
 			int j3 = BetaTweaksMP.maxPlayers;
 			int i4 = j3;
 			int k4 = 1;
@@ -726,22 +742,23 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 			int j6 = (kx - k4 * k5) / 2;
 			byte byte2 = 10;
-			x.drawRect(j6 - 1, byte2 - 1, j6 + k5 * k4, byte2 + 9 * i4, 0x80000000);
+			Utils.gui.drawRect(j6 - 1, byte2 - 1, j6 + k5 * k4, byte2 + 9 * i4, 0x80000000);
 			for (int k7 = 0; k7 < j3; k7++) {
 				int i8 = j6 + (k7 % k4) * k5;
 				int l8 = byte2 + (k7 / k4) * 9;
-				x.drawRect(i8, l8, (i8 + k5) - 1, l8 + 8, 0x20ffffff);
+				Utils.gui.drawRect(i8, l8, (i8 + k5) - 1, l8 + 8, 0x20ffffff);
 				GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
 				GL11.glEnable(3008 /* GL_ALPHA_TEST */);
 				if (k7 >= BetaTweaksMP.playerList.size()) {
 					continue;
 				}
-				fontrenderer.drawStringWithShadow(BetaTweaksMP.playerList.get(k7), i8, l8, 0xffffff);
+				minecraft.fontRenderer.drawStringWithShadow(BetaTweaksMP.playerList.get(k7), i8, l8, 0xffffff);
 			}
 		}
 
-		if ((optionsGameplayLadderGaps && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.optionsGameplayLadderGaps)) {
+		//laddergaps
+		if ((betatweaks.Config.gameplayLadderGaps && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
+				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayLadderGaps)) {
 
 			for (int z = 0; z < minecraft.theWorld.loadedEntityList.size()
 					+ minecraft.theWorld.playerEntities.size(); z++) {
@@ -788,15 +805,17 @@ public class mod_BetaTweaks extends BaseMod {
 
 			}
 		}
-		if (((optionsGameplayPunchableSheep && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.optionsGameplayPunchableSheep))
+		
+		//punch sheep for wool
+		if (((betatweaks.Config.gameplayPunchSheepForWool && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
+				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayPunchableSheep))
 				&& minecraft.objectMouseOver != null
 				&& minecraft.objectMouseOver.typeOfHit == EnumMovingObjectType.ENTITY && Mouse.isButtonDown(0)) {
 
 			Entity e = minecraft.objectMouseOver.entityHit;
 			if (e instanceof EntitySheep) {
 				if (minecraft.theWorld.multiplayerWorld && modloaderMPinstalled
-						&& BetaTweaksMP.optionsGameplayPunchableSheep) {
+						&& BetaTweaksMP.gameplayPunchableSheep) {
 					BetaTweaksMP.sheepPunched(e.entityId);
 				} else if (e.beenAttacked) {
 					if (!((EntitySheep) e).getSheared()) {
@@ -833,7 +852,8 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 		}
 
-		if (optionsGameplayMinecartBoosters && !minecraft.theWorld.multiplayerWorld) {
+		//minecraft boosters
+		if (betatweaks.Config.gameplayMinecartBoosters && !minecraft.theWorld.multiplayerWorld) {
 			for (int i = 0; i < minecraft.theWorld.loadedEntityList.size(); i++) {
 				Entity entity = (Entity) minecraft.theWorld.loadedEntityList.get(i);
 				if (entity instanceof EntityMinecart) {
@@ -876,7 +896,8 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 		}
 
-		if (optionsGameplayElevatorBoats && !minecraft.theWorld.multiplayerWorld) {
+		//boat elevators
+		if (betatweaks.Config.gameplayBoatElevators && !minecraft.theWorld.multiplayerWorld) {
 			for (int i = 0; i < minecraft.theWorld.loadedEntityList.size(); i++) {
 				Entity entity = (Entity) minecraft.theWorld.loadedEntityList.get(i);
 				if (entity instanceof EntityBoat) {
@@ -905,15 +926,16 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 		}
 
-		if (((optionsGameplayHoeDirtSeeds && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.optionsGameplayHoeDirtSeeds))
+		//hoe dirt for seeds
+		if (((betatweaks.Config.gameplayHoeDirtForSeeds && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
+				&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayHoeDirtSeeds))
 				&& minecraft.thePlayer.getCurrentEquippedItem() != null
 				&& minecraft.thePlayer.getCurrentEquippedItem().getItem() instanceof ItemHoe
 				&& lastTickHoeDamage == minecraft.thePlayer.getCurrentEquippedItem().getItemDamage() - 1) {
 			lastTickHoeDamage = -1;
 
 			if (minecraft.theWorld.multiplayerWorld && modloaderMPinstalled && BetaTweaksMP.serverModInstalled
-					&& BetaTweaksMP.optionsGameplayHoeDirtSeeds) {
+					&& BetaTweaksMP.gameplayHoeDirtSeeds) {
 
 				BetaTweaksMP.grassHoed(lastTickHoeX, lastTickHoeY, lastTickHoeZ);
 			} else {
@@ -933,9 +955,10 @@ public class mod_BetaTweaks extends BaseMod {
 			return true;
 		}
 
-		if ((optionsClientHideLongGrass || optionsClientHideDeadBush
-				|| ((optionsGameplayHoeDirtSeeds && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-						&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.optionsGameplayHoeDirtSeeds)))
+		//handle block placing on invisible blocks
+		if ((betatweaks.Config.clientHideLongGrass || betatweaks.Config.clientHideDeadBush
+				|| ((betatweaks.Config.gameplayHoeDirtForSeeds && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
+						&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayHoeDirtSeeds)))
 				&& Mouse.isButtonDown(1) && minecraft.thePlayer.getCurrentEquippedItem() != null
 				&& minecraft.objectMouseOver != null
 				&& minecraft.objectMouseOver.typeOfHit == EnumMovingObjectType.TILE) {
@@ -944,8 +967,8 @@ public class mod_BetaTweaks extends BaseMod {
 			int y = minecraft.objectMouseOver.blockY;
 			int z = minecraft.objectMouseOver.blockZ;
 
-			if ((optionsGameplayHoeDirtSeeds && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
-					&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.optionsGameplayHoeDirtSeeds)
+			if ((betatweaks.Config.gameplayHoeDirtForSeeds && !minecraft.theWorld.multiplayerWorld) || (modloaderMPinstalled
+					&& BetaTweaksMP.serverModInstalled && BetaTweaksMP.gameplayHoeDirtSeeds)
 					&& minecraft.thePlayer.getCurrentEquippedItem() != null
 					&& minecraft.thePlayer.getCurrentEquippedItem().getItem() instanceof ItemHoe) {
 				int b = minecraft.theWorld.getBlockId(x, y, z);
@@ -977,8 +1000,8 @@ public class mod_BetaTweaks extends BaseMod {
 				x++;
 			}
 			int b = minecraft.theWorld.getBlockId(x, y, z);
-			if (((Block.blocksList[b] == Block.tallGrass && optionsClientHideLongGrass)
-					|| (Block.blocksList[b] == Block.deadBush && optionsClientHideDeadBush))) {
+			if (((Block.blocksList[b] == Block.tallGrass && betatweaks.Config.clientHideLongGrass)
+					|| (Block.blocksList[b] == Block.deadBush && betatweaks.Config.clientHideDeadBush))) {
 
 				if (minecraft.theWorld.multiplayerWorld && modloaderMPinstalled
 						&& BetaTweaksMP.serverModInstalled) {
@@ -997,18 +1020,14 @@ public class mod_BetaTweaks extends BaseMod {
 	}
 
 	public static void initStorageBlocks() {
-		Block.blocksList[Block.blockSteel.blockID] = null;
-		Block.blocksList[Block.blockGold.blockID] = null;
-		Block.blocksList[Block.blockDiamond.blockID] = null;
-		new BlockOreStorageIndev(Block.blockSteel, new String[] {"blockSteel", "aj"}, "/BetaTweaks/steelSide.png", "/BetaTweaks/steelBottom.png");
-		new BlockOreStorageIndev(Block.blockGold, new String[] {"blockGold", "ai"}, "/BetaTweaks/goldSide.png", "/BetaTweaks/goldBottom.png");
-		new BlockOreStorageIndev(Block.blockDiamond, new String[] {"blockDiamond", "ay"}, "/BetaTweaks/diamondSide.png", "/BetaTweaks/diamondBottom.png");
+		new BlockOreStorageIndev(Block.blockSteel, new String[] {"blockSteel", "aj"}, resources + "/steelSide.png", resources + "/steelBottom.png");
+		new BlockOreStorageIndev(Block.blockGold, new String[] {"blockGold", "ai"}, resources + "/goldSide.png", resources + "/goldBottom.png");
+		new BlockOreStorageIndev(Block.blockDiamond, new String[] {"blockDiamond", "ay"}, resources + "/diamondSide.png", resources + "/diamondBottom.png");
 		
-		ModLoader.RegisterAllTextureOverrides(ModLoader.getMinecraftInstance().renderEngine);
+		ModLoader.RegisterAllTextureOverrides(Utils.mc.renderEngine);
 		
-		Field blocksEffectiveAgainst = getObfuscatedPrivateField(ItemTool.class, new String[] {"blocksEffectiveAgainst", "bk"});
+		final Field blocksEffectiveAgainst = Utils.getField(ItemTool.class, "blocksEffectiveAgainst", "bk");
 		if (blocksEffectiveAgainst != null) {
-			blocksEffectiveAgainst.setAccessible(true);
 			for(Item item : Item.itemsList) {
 				if(item instanceof ItemPickaxe) {
 					try {
@@ -1027,66 +1046,32 @@ public class mod_BetaTweaks extends BaseMod {
 		
 	}
 
-	public static void writeConfig() {
-		try {
-			BufferedWriter configWriter = new BufferedWriter(new FileWriter(configFile));
-			configWriter.write("// Config file for Beta Tweaks");
+	
+	public static String resources = "/betatweaks/resources";
+	
 
-			Field[] myFields = mod_BetaTweaks.class.getFields();
-			for (int i = 0; i < myFields.length; i++) {
-				if (myFields[i].getName().contains("options"))
-					try {
-						configWriter.write(System.getProperty("line.separator") + myFields[i].getName().replaceFirst("options", "")
-								+ "=" + myFields[i].get(null).toString());
-					} catch (Exception exception) {
-						exception.printStackTrace();
-					}
-			}
-			configWriter.close();
-		} catch (Exception exception) {
-			exception.printStackTrace();
-		}
-	}
-
-	public void readConfig() {
-		try {
-			BufferedReader configReader = new BufferedReader(new FileReader(configFile));
-			String s;
-			while ((s = configReader.readLine()) != null) {
-				if (s.charAt(0) == '/' && s.charAt(1) == '/') {
-					continue;
-				} // Ignore comments
-
-				if (s.contains("=")) {
-					String as[] = s.split("=");
-					Field f1 = mod_BetaTweaks.class.getField("options" + (as[0]));
-
-					if (f1.getType() == int.class) {
-						f1.set(this, Integer.parseInt(as[1]));
-					} else if (f1.getType() == Boolean.class) {
-						f1.set(this, Boolean.parseBoolean(as[1]));
-					} else if (f1.getType() == LogoState.class) {
-						f1.set(this, LogoState.valueOf(as[1].toUpperCase()));
-					} else if (f1.getType() == float.class) {
-						f1.set(this, Float.parseFloat(as[1]));
-					}
-				}
-			}
-			configReader.close();
-		} catch (Exception exception) {
-			exception.printStackTrace();
-		}
+	public static void drawRect(int i, int j, int k, int l, int colour) {
+		Utils.gui.drawRect(i, j, k, l, colour);
 	}
 	
-	//clean mine_diver code
-	public static final Field getObfuscatedPrivateField(Class<?> target, String names[]) {
-        for (Field field : target.getDeclaredFields())
-            for (String name : names)
-                if (field.getName() == name) {
-                    field.setAccessible(true);
-                    return field;
-                }
-        return null;
-    }
+	public static FloatBuffer fogColorBuffer(EntityRenderer entityrenderer) {
+		return entityrenderer.fogColorBuffer;
+	}
+	
+	public static float fogColorRed(EntityRenderer entityrenderer) {
+		return entityrenderer.fogColorRed;
+	}
+	
+	public static float fogColorGreen(EntityRenderer entityrenderer) {
+		return entityrenderer.fogColorGreen;
+	}
+	
+	public static float fogColorBlue(EntityRenderer entityrenderer) {
+		return entityrenderer.fogColorBlue;
+	}
+	
+	static {
+		
+	}
 
 }

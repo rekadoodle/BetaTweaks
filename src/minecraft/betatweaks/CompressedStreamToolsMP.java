@@ -1,4 +1,4 @@
-package net.minecraft.src;
+package betatweaks;
 
 import java.io.DataInput;
 import java.io.DataInputStream;
@@ -8,6 +8,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import net.minecraft.src.CompressedStreamTools;
+import net.minecraft.src.NBTBase;
+import net.minecraft.src.NBTTagCompound;
 
 public class CompressedStreamToolsMP extends CompressedStreamTools {
 

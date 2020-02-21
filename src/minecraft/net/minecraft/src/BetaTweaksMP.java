@@ -4,26 +4,30 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import betatweaks.GuiAPIHandler;
+import betatweaks.Utils;
+
 public class BetaTweaksMP extends BaseModMp {
 
-	public static Boolean optionsGameplayPunchableSheep = false;
-	public static Boolean optionsGameplayLadderGaps = false;
-	public static Boolean optionsGameplayLightTNTwithFist = false;
-	public static Boolean optionsGameplayHoeDirtSeeds = false;
-	public static Boolean optionsGameplayMinecartBoosters = false;
-	public static Boolean optionsGameplayElevatorBoats = false;
+	public static boolean gameplayPunchableSheep = false;
+	public static boolean gameplayLadderGaps = false;
+	public static boolean gameplayLightTNTwithFist = false;
+	public static boolean gameplayHoeDirtSeeds = false;
+	public static boolean gameplayMinecartBoosters = false;
+	public static boolean gameplayElevatorBoats = false;
+	public static boolean gameplayAllowPlayerList = false;
 	
-	public static Boolean optionsServerAllowPlayerList = false;
-	public static String optionsServerMOTD = "A Minecraft Server";
+	public static String motd = "A Minecraft Server";
 	
-	public static Boolean isOp = false;
-	
-	public static Boolean serverModInstalled = false;
+	public static boolean isOp = false;
+	public static boolean serverModInstalled = false;
 	
 	public static List<String> playerList = new ArrayList<String>();
 	public static int maxPlayers;
 	
-	public static List<Integer> options = new ArrayList<Integer>();
+	public static List<Integer> options1 = new ArrayList<Integer>();
+	
+	public static final ArrayList<Field> options = Utils.getFieldsStartingWith(BetaTweaksMP.class, "gameplay");
 	
 	public String Version() {
 		return "v1";
@@ -39,7 +43,7 @@ public class BetaTweaksMP extends BaseModMp {
 	}
 	
 	public String Icon() {
-		return "/BetaTweaks/modMenu2";
+		return mod_BetaTweaks.resources + "/modMenu2";
 	}
 	
 	public void HandlePacket(Packet230ModLoader packet)
@@ -53,30 +57,42 @@ public class BetaTweaksMP extends BaseModMp {
 				for (int i = 0; i < packet.dataInt.length - 1; i++) {
 						try {
 							myFields[i].set(this, packet.dataInt[i] == 1);
-							options.add(packet.dataInt[i]);
+							options1.add(packet.dataInt[i]);
 						} catch (IllegalAccessException e) {
 							e.printStackTrace();
 						}
 					
 				}
 				maxPlayers = packet.dataInt[packet.dataInt.length - 1];
-				optionsServerMOTD = packet.dataString[0];
+				motd = packet.dataString[0];
 				if (mod_BetaTweaks.guiAPIinstalled) {
-					BetaTweaksGuiAPI.instance.loadSettings();
+					GuiAPIHandler.instance.loadSettings();
 				}
 				break;
 			}
 			case 1:
 			{
 				isOp = packet.dataInt[0] == 1;
-				BetaTweaksGuiAPI.instance.loadSettings();
+				if (mod_BetaTweaks.guiAPIinstalled) {
+					GuiAPIHandler.instance.loadSettings();
+				}
 				break;
 			}
 			
 			case 2:
 			{
-				playerList.clear();
+				outerLoop:
+				for(int i = 0; i < playerList.size(); i++) {
+					for (int q = 0; q < packet.dataString.length; q++) {
+						if(playerList.get(i).equals(packet.dataString[q])) {
+							continue outerLoop;
+						}
+					}
+					playerList.remove(i);
+					i--;
+				}
 				for (int q = 0; q < packet.dataString.length; q++) {
+					if(!playerList.contains(packet.dataString[q]))
 					playerList.add(packet.dataString[q]);
 				}
 				break;
@@ -88,9 +104,9 @@ public class BetaTweaksMP extends BaseModMp {
 	}
 	
 	public static void updateServerSettings(String newMOTD) {
-		int[] dataInt = new int[options.size()];
-		for (int i = 0; i < options.size(); i++) {
-			dataInt[i] = options.get(i);
+		int[] dataInt = new int[options1.size()];
+		for (int i = 0; i < options1.size(); i++) {
+			dataInt[i] = options1.get(i);
 		}
 		String[] dataString = new String[1];
 		

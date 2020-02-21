@@ -1,9 +1,14 @@
 // func_1238_a reimplemented for use in mod_oldCustomLogo
 // Has been tweaked slightly to allow metadata
 
-package net.minecraft.src;
+package betatweaks;
 
 import org.lwjgl.opengl.GL11;
+
+import betatweaks.gui.GuiMainMenuCustom;
+import net.minecraft.src.Block;
+import net.minecraft.src.RenderBlocks;
+import net.minecraft.src.Tessellator;
 
 // Referenced classes of package net.minecraft.src:
 //            RenderBlocks, Block, Tessellator

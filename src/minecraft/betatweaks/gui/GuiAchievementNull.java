@@ -2,9 +2,11 @@
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
-package net.minecraft.src;
+package betatweaks.gui;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.src.GuiAchievement;
+
 import org.lwjgl.opengl.GL11;
 
 // Referenced classes of package net.minecraft.src:
@@ -21,6 +23,6 @@ public class GuiAchievementNull extends GuiAchievement
 
     public void updateAchievementWindow()
     {
-  	
+    	//Do nothing
     }
 }

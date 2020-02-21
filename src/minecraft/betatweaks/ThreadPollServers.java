@@ -2,18 +2,20 @@
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
-package net.minecraft.src;
+package betatweaks;
 
 import java.io.IOException;
 import java.net.*;
 
+import betatweaks.gui.GuiMultiplayerMenu;
+
 // Referenced classes of package net.minecraft.src:
 //            ServerNBTStorage, GuiSlotServer, GuiMultiplayer
 
-class ThreadPollServers extends Thread
+public class ThreadPollServers extends Thread
 {
 
-    ThreadPollServers(GuiMultiplayerMenu menu, ServerData server)
+    public ThreadPollServers(GuiMultiplayerMenu menu, ServerData server)
     {
     	this.menu = menu;
         this.server = server;

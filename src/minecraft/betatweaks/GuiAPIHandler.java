@@ -1,13 +1,12 @@
-package net.minecraft.src;
+package betatweaks;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.src.mod_BetaTweaks.LogoState;
+import net.minecraft.src.*;
 
-import org.lwjgl.input.Mouse;
-
+import betatweaks.Config.LogoState;
 import de.matthiasmann.twl.Button;
 import de.matthiasmann.twl.Label;
 import de.matthiasmann.twl.ScrollPane;
@@ -15,7 +14,7 @@ import de.matthiasmann.twl.TextWidget;
 import de.matthiasmann.twl.Widget;
 import de.matthiasmann.twl.model.SimpleButtonModel;
 
-public class BetaTweaksGuiAPI {
+public class GuiAPIHandler {
 
 	private static ModSettings settings = new ModSettings("mod_BetaTweaks");
 	private static ModSettingScreen screen = new ModSettingScreen("Beta Tweaks");
@@ -27,7 +26,7 @@ public class BetaTweaksGuiAPI {
 	private static SettingText motd;
 	private WidgetText motdWidget;
 	
-	public static BetaTweaksGuiAPI instance = new BetaTweaksGuiAPI();
+	public static GuiAPIHandler instance = new GuiAPIHandler();
 
 	private Button serverBT;
 	
@@ -46,7 +45,7 @@ public class BetaTweaksGuiAPI {
 		guihudLB.setText("GUI/HUD Settings");
 		widgetClientside.add(guihudLB);
         
-        SettingBoolean draggingShortcuts = new SettingBoolean("optionsClientDraggingShortcuts", mod_BetaTweaks.optionsClientDraggingShortcuts);
+        SettingBoolean draggingShortcuts = new SettingBoolean("clientDraggingShortcuts", Config.clientDraggingShortcuts);
         settings.append(draggingShortcuts);
         WidgetBoolean draggingShortcutsWidget = new WidgetBoolean(draggingShortcuts, "Inventory Dragging Shortcuts", "ON", "OFF");
         draggingShortcutsWidget.setTooltipContent(new String[] {
@@ -61,7 +60,7 @@ public class BetaTweaksGuiAPI {
         	});
         widgetClientside.add(draggingShortcutsWidget);
 		
-		SettingMulti logoState = new SettingMulti("optionsClientLogo", 0, new String[] {"Standard", "Animated", "Custom"});
+		SettingMulti logoState = new SettingMulti("clientLogo", 0, new String[] {"Standard", "Animated", "Custom"});
 		settings.append(logoState);
 		WidgetMulti logoStateWidget = new WidgetMulti(logoState, "Title Screen Logo");
 		logoStateWidget.setTooltipContent(new String[] {
@@ -72,7 +71,7 @@ public class BetaTweaksGuiAPI {
 	        });
 		widgetClientside.add(logoStateWidget);
 
-		SettingBoolean panorama = new SettingBoolean("optionsClientPanoramaEnabled", mod_BetaTweaks.optionsClientPanoramaEnabled);
+		SettingBoolean panorama = new SettingBoolean("clientPanoramaEnabled", Config.clientPanoramaEnabled);
 		settings.append(panorama);
 		WidgetBoolean panoramaWidget = new WidgetBoolean(panorama, "Title Screen Background", "Panorama", "Standard");
 		panoramaWidget.setTooltipContent(new String[] {
@@ -81,7 +80,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetClientside.add(panoramaWidget);
 
-		SettingBoolean quitButton = new SettingBoolean("optionsClientQuitGameButton", mod_BetaTweaks.optionsClientQuitGameButton);
+		SettingBoolean quitButton = new SettingBoolean("clientQuitGameButton", Config.clientQuitGameButton);
 		settings.append(quitButton);
 		WidgetBoolean quitButtonWidget = new WidgetBoolean(quitButton, "Quit Game Button", "ON", "OFF");
 		quitButtonWidget.setTooltipContent(new String[] {
@@ -89,7 +88,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetClientside.add(quitButtonWidget);
 		
-		SettingBoolean multiplayerMenu = new SettingBoolean("optionsClientMultiplayerMenu", mod_BetaTweaks.optionsClientMultiplayerMenu);
+		SettingBoolean multiplayerMenu = new SettingBoolean("clientMultiplayerMenu", Config.clientMultiplayerMenu);
 		settings.append(multiplayerMenu);
 		WidgetBoolean multiplayerMenuWidget = new WidgetBoolean(multiplayerMenu, "Multiplayer Menu", "ON", "OFF");
 		multiplayerMenuWidget.setTooltipContent(new String[] {
@@ -102,7 +101,20 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetClientside.add(multiplayerMenuWidget);
 		
-		SettingBoolean ctrlsMenu = new SettingBoolean("optionsClientScrollableControls", mod_BetaTweaks.optionsClientScrollableControls);
+		SettingBoolean improvedChat = new SettingBoolean("clientImprovedChat", Config.clientImprovedChat);
+		settings.append(improvedChat);
+		WidgetBoolean improvedChatWidget = new WidgetBoolean(improvedChat, "Improved Chat", "ON", "OFF");
+		improvedChatWidget.setTooltipContent(new String[] {
+				"Adds new QOL features to the chat, such as:",
+				"  Edit font size and chatbox size.",
+				"  Scroll to view previous chat messages.",
+				"  Copy, cut, paste, undo, etc. (Only in typing area).",
+				"  Tab to autocomplete playername (If server allows).",
+				"  Access previous inputs with up/down."
+        	});
+		widgetClientside.add(improvedChatWidget);
+		
+		SettingBoolean ctrlsMenu = new SettingBoolean("clientScrollableControls", Config.clientScrollableControls);
 		settings.append(ctrlsMenu);
 		WidgetBoolean ctrlsMenuWidget = new WidgetBoolean(ctrlsMenu, "Scrollable Controls", "ON", "OFF");
 		ctrlsMenuWidget.setTooltipContent(new String[] {
@@ -112,7 +124,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetClientside.add(ctrlsMenuWidget);
 		
-		SettingBoolean texturepackButton = new SettingBoolean("optionsClientIngameTexturePackButton", mod_BetaTweaks.optionsClientIngameTexturePackButton);
+		SettingBoolean texturepackButton = new SettingBoolean("clientIngameTexturePackButton", Config.clientIngameTexturePackButton);
 		settings.append(texturepackButton);
 		WidgetBoolean texturepackButtonWidget = new WidgetBoolean(texturepackButton, "ESC Menu Texture Pack Button", "ON", "OFF");
 		texturepackButtonWidget.setTooltipContent(new String[] {
@@ -121,7 +133,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetClientside.add(texturepackButtonWidget);
 
-		SettingBoolean fovSlider = new SettingBoolean("optionsClientFovSliderVisible", mod_BetaTweaks.optionsClientFovSliderVisible);
+		SettingBoolean fovSlider = new SettingBoolean("clientFovSliderVisible", Config.clientFovSliderVisible);
 		settings.append(fovSlider);
 		WidgetBoolean fovSliderWidget = new WidgetBoolean(fovSlider, "FOV Slider", "ON", "OFF");
 		fovSliderWidget.setTooltipContent(new String[] {
@@ -132,7 +144,7 @@ public class BetaTweaksGuiAPI {
 	       	});
 		widgetClientside.add(fovSliderWidget);
 		
-		SettingBoolean chieveNotifications = new SettingBoolean("optionsClientDisableAchievementNotifications", mod_BetaTweaks.optionsClientDisableAchievementNotifications);
+		SettingBoolean chieveNotifications = new SettingBoolean("clientDisableAchievementNotifications", Config.clientDisableAchievementNotifications);
 		settings.append(chieveNotifications);
 		WidgetBoolean chieveNotificationsWidget = new WidgetBoolean(chieveNotifications, "Hide Achievement Notifications");
 		chieveNotificationsWidget.setTooltipContent(new String[] {
@@ -145,7 +157,7 @@ public class BetaTweaksGuiAPI {
 		blockLB.setText("Block Settings");
 		widgetClientside.add(blockLB);
 
-		SettingBoolean indevStorageTextures = new SettingBoolean("optionsClientIndevStorageBlocks", mod_BetaTweaks.optionsClientIndevStorageBlocks);
+		SettingBoolean indevStorageTextures = new SettingBoolean("clientIndevStorageBlocks", Config.clientIndevStorageBlocks);
 		settings.append(indevStorageTextures);
 		WidgetBoolean indevStorageTexturesWidget = new WidgetBoolean(indevStorageTextures, "Indev Storage Block Textures", "ON", "OFF");
 		indevStorageTexturesWidget.setTooltipContent(new String[] {
@@ -155,7 +167,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetClientside.add(indevStorageTexturesWidget);
 		
-		SettingBoolean hideLongGrass = new SettingBoolean("optionsClientHideLongGrass", mod_BetaTweaks.optionsClientHideLongGrass);
+		SettingBoolean hideLongGrass = new SettingBoolean("clientHideLongGrass", Config.clientHideLongGrass);
 		settings.append(hideLongGrass);
 		WidgetBoolean hideLongGrassWidget = new WidgetBoolean(hideLongGrass, "Disable Long Grass");
 		hideLongGrassWidget.setTooltipContent(new String[] {
@@ -164,7 +176,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetClientside.add(hideLongGrassWidget);
 		
-		SettingBoolean hideDeadBush = new SettingBoolean("optionsClientHideDeadBush", mod_BetaTweaks.optionsClientHideDeadBush);
+		SettingBoolean hideDeadBush = new SettingBoolean("clientHideDeadBush", Config.clientHideDeadBush);
 		settings.append(hideDeadBush);
 		WidgetBoolean hideDeadBushWidget = new WidgetBoolean(hideDeadBush, "Disable Dead Shrubs");
 		hideDeadBushWidget.setTooltipContent(new String[] {
@@ -182,7 +194,7 @@ public class BetaTweaksGuiAPI {
         gameplayBT.setText("Gameplay Settings");
         screen.append(gameplayBT);
 		
-        SettingBoolean punchSheep = new SettingBoolean("optionsGameplayPunchableSheep", mod_BetaTweaks.optionsGameplayPunchableSheep);
+        SettingBoolean punchSheep = new SettingBoolean("gameplayPunchSheepForWool", Config.gameplayPunchSheepForWool);
 		settings.append(punchSheep);
 		WidgetBoolean punchSheepWidget = new WidgetBoolean(punchSheep, "Punch Sheep for Wool");
 		punchSheepWidget.setTooltipContent(new String[] {
@@ -191,7 +203,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetGameplay.add(punchSheepWidget);
 		
-		SettingBoolean ladderGaps = new SettingBoolean("optionsGameplayLadderGaps", mod_BetaTweaks.optionsGameplayLadderGaps);
+		SettingBoolean ladderGaps = new SettingBoolean("gameplayLadderGaps", Config.gameplayLadderGaps);
 		settings.append(ladderGaps);
 		WidgetBoolean ladderGapsWidget = new WidgetBoolean(ladderGaps, "Allow Gaps in Ladders");
 		ladderGapsWidget.setTooltipContent(new String[] {
@@ -200,7 +212,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetGameplay.add(ladderGapsWidget);
 		
-		SettingBoolean punchTNT = new SettingBoolean("optionsGameplayLightTNTwithFist", mod_BetaTweaks.optionsGameplayLightTNTwithFist);
+		SettingBoolean punchTNT = new SettingBoolean("gameplayLightTNTwithFist", Config.gameplayLightTNTwithFist);
 		settings.append(punchTNT);
 		WidgetBoolean punchTNTWidget = new WidgetBoolean(punchTNT, "Punch TNT to ignite");
 		punchTNTWidget.setTooltipContent(new String[] {
@@ -210,7 +222,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetGameplay.add(punchTNTWidget);
 		
-		SettingBoolean hoeCreatesSeeds = new SettingBoolean("optionsGameplayHoeDirtSeeds", mod_BetaTweaks.optionsGameplayHoeDirtSeeds);
+		SettingBoolean hoeCreatesSeeds = new SettingBoolean("gameplayHoeDirtForSeeds", Config.gameplayHoeDirtForSeeds);
 		settings.append(hoeCreatesSeeds);
 		WidgetBoolean hoeCreatesSeedsWidget = new WidgetBoolean(hoeCreatesSeeds, "Hoe Grass for Seeds");
 		hoeCreatesSeedsWidget.setTooltipContent(new String[] {
@@ -219,7 +231,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetGameplay.add(hoeCreatesSeedsWidget);
 		
-		SettingBoolean oldMinecartBoosters = new SettingBoolean("optionsGameplayMinecartBoosters", mod_BetaTweaks.optionsGameplayMinecartBoosters);
+		SettingBoolean oldMinecartBoosters = new SettingBoolean("gameplayMinecartBoosters", Config.gameplayMinecartBoosters);
 		settings.append(oldMinecartBoosters);
 		WidgetBoolean oldMinecartBoostersWidget = new WidgetBoolean(oldMinecartBoosters, "Minecart Boosters");
 		oldMinecartBoostersWidget.setTooltipContent(new String[] {
@@ -229,7 +241,7 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetGameplay.add(oldMinecartBoostersWidget);
 
-		SettingBoolean elevatorBoats = new SettingBoolean("optionsGameplayElevatorBoats", mod_BetaTweaks.optionsGameplayElevatorBoats);
+		SettingBoolean elevatorBoats = new SettingBoolean("gameplayBoatElevators", Config.gameplayBoatElevators);
 		settings.append(elevatorBoats);
 		WidgetBoolean elevatorBoatsWidget = new WidgetBoolean(elevatorBoats, "Elevator Boats");
 		elevatorBoatsWidget.setTooltipContent(new String[] {
@@ -247,7 +259,7 @@ public class BetaTweaksGuiAPI {
         screen.append(serverBT);
 		
 		if (mod_BetaTweaks.modloaderMPinstalled) {
-			SettingBoolean playerList = new SettingBoolean("optionsServerAllowPlayerList", BetaTweaksMP.optionsServerAllowPlayerList);
+			SettingBoolean playerList = new SettingBoolean("serverAllowPlayerList", BetaTweaksMP.gameplayAllowPlayerList);
 			settings.append(playerList);
 			WidgetBoolean playerListWidget = new WidgetBoolean(playerList, "Enable Player List");
 			playerListWidget.setTooltipContent(new String[] {
@@ -256,7 +268,7 @@ public class BetaTweaksGuiAPI {
 	        	});
 			widgetServer.add(playerListWidget);
 			
-			motd = new SettingText("optionsServerMOTD", BetaTweaksMP.optionsServerMOTD);
+			motd = new SettingText("serverMOTD", BetaTweaksMP.motd);
 			settings.append(motd);
 			motdWidget = new WidgetText(motd, "MOTD");
 			motdWidget.setTooltipContent(new String[] {
@@ -299,10 +311,7 @@ public class BetaTweaksGuiAPI {
     private int scrollPos;
     private long mouseStillTime;
 	
-	public void handleTooltip(GuiModScreen guiscreen) {
-		int posX = (Mouse.getX() * guiscreen.width) / ModLoader.getMinecraftInstance().displayWidth;
-        int posY = guiscreen.height - (Mouse.getY() * guiscreen.height) / ModLoader.getMinecraftInstance().displayHeight - 1;
-		
+	public void handleTooltip(GuiModScreen guiscreen, int posX, int posY) {
         if(Math.abs(posX - lastMouseX) > 5 || Math.abs(posY - lastMouseY) > 5 ||
         		scrollPos != getScrollPos(guiscreen))
         {
@@ -368,12 +377,12 @@ public class BetaTweaksGuiAPI {
             //int k1 = j + 84 + 10;
             int k1 = j + 11 * tooltip.length + 17;
             
-            guiscreen.drawGradientRect(i, j, j1, k1, 0xe0000000, 0xe0000000);
-            guiscreen.fontRenderer.drawStringWithShadow(getTooltipHeader(setting), i + 5, j + 5, 0xdddddd);
+            Utils.drawRect(i, j, j1, k1, 0xe0000000);
+            Utils.mc.fontRenderer.drawStringWithShadow(getTooltipHeader(setting), i + 5, j + 5, 0xdddddd);
             for(int l1 = 0; l1 < tooltip.length; l1++)
             {
                 String line = tooltip[l1];
-                guiscreen.fontRenderer.drawStringWithShadow(line, i + 5, j + 5 + (l1 + 1) * 11, 0xdddddd);
+                Utils.mc.fontRenderer.drawStringWithShadow(line, i + 5, j + 5 + (l1 + 1) * 11, 0xdddddd);
             }
         }
 	}
@@ -392,324 +401,212 @@ public class BetaTweaksGuiAPI {
 	}
 	
 	private String getBackendName(Setting setting) {
-		Field backendNameField = null;
 		try {
-			backendNameField = Setting.class.getField("backendName");
-		} catch (NoSuchFieldException e) {
-			try {
-				backendNameField = Setting.class.getField("backendname");
-			} catch (NoSuchFieldException e2) {
-				e.printStackTrace();
-				e2.printStackTrace();
-			}
-		}
-		if(backendNameField != null) {
-			try {
-				return (String)backendNameField.get(setting);
-			} 
-			catch (IllegalAccessException e) { e.printStackTrace(); }
-		}
+			Field backendNameField = Utils.getField(Setting.class, "backendName", "backendname");
+			return (String)backendNameField.get(setting);
+		} 
+		catch (IllegalAccessException e) { e.printStackTrace(); }
 		return null;
 	}
 	
 	private int getScrollPos(GuiModScreen guiscreen) {
-		Field mainWidgetField = null;
 		try {
-			mainWidgetField = WidgetSimplewindow.class.getField("mainWidget");
-		} catch (NoSuchFieldException e) {
-			try {
-				mainWidgetField = WidgetSimplewindow.class.getField("mainwidget");
-			} catch (NoSuchFieldException e2) {
-				e.printStackTrace();
-				e2.printStackTrace();
-			}
-		}
-		if(mainWidgetField != null) {
-			try {
-				return ((ScrollPane)mainWidgetField.get((WidgetSimplewindow)guiscreen.mainwidget)).getScrollPositionY();
-			} 
-			catch (IllegalAccessException e) { e.printStackTrace(); }
-		}
+			Field mainWidgetField = Utils.getField(WidgetSimplewindow.class, "mainWidget", "mainwidget");
+			return ((ScrollPane)mainWidgetField.get((WidgetSimplewindow)guiscreen.mainwidget)).getScrollPositionY();
+		} 
+		catch (IllegalAccessException e) { e.printStackTrace(); }
 		return -1;
 	}
 	
 	private String getTooltipHeader(WidgetSetting widget) {
-		Field niceNameReference = null;
 		try {
-			niceNameReference = WidgetSetting.class.getField("niceName");
-		} catch (NoSuchFieldException e) {
-			try {
-				niceNameReference = WidgetSetting.class.getField("nicename");
-			} catch (NoSuchFieldException e2) {
-				e.printStackTrace();
-				e2.printStackTrace();
+			Field niceNameReference = Utils.getField(WidgetSetting.class, "niceName", "nicename");
+			String name = (String)niceNameReference.get(widget);
+			
+			Setting setting = null;
+			String defaultValue = null;
+	        if(widget instanceof WidgetBoolean) {
+	        	Field settingField = Utils.getField(WidgetBoolean.class, "settingReference", "value");
+				setting = (Setting)settingField.get(widget);
+	        }
+	        else if(widget instanceof WidgetMulti) {
+	        	setting = ((WidgetMulti)widget).value;
+	        }
+	        else if(widget instanceof WidgetText) {
+	        	Field settingField = Utils.getField(WidgetText.class, "settingReference", "value");
+				setting = (Setting)settingField.get(widget);
+	        }
+	        
+	        Field defaultValueField = Utils.getField(Setting.class, "defaultValue", "defvalue");
+			defaultValue = (String)defaultValueField.get(setting).toString();
+			if(setting instanceof SettingMulti) {
+				Field labelsField = Utils.getField(SettingMulti.class, "labelValues", "labels");
+		       	defaultValue = ((String[])labelsField.get(setting))[Integer.parseInt(defaultValueField.get(setting).toString())];
 			}
-		}
-		String name = null;
-		if(niceNameReference != null) {
-			try {
-				name = (String)niceNameReference.get(widget);
-			} 
-			catch (IllegalAccessException e) { e.printStackTrace(); }
-		}
-		
-		Setting setting = null;
-		String defaultValue = null;
-        if(widget instanceof WidgetBoolean) {
-        	Field settingField = null;
-        	try {
-        		settingField = WidgetBoolean.class.getField("settingReference");
-        	} 
-        	catch (NoSuchFieldException e) {
-    			try {
-    				settingField = WidgetBoolean.class.getField("value");
-    			} 
-    			catch (NoSuchFieldException e2) { e.printStackTrace(); e2.printStackTrace(); }
-    		}
-    		if(settingField != null) {
-    			try {
-    				setting = (Setting)settingField.get(widget);
-    			} 
-    			catch (IllegalAccessException e) { e.printStackTrace(); }
-    		}
-        }
-        else if(widget instanceof WidgetMulti) {
-        	setting = ((WidgetMulti)widget).value;
-        }
-        else if(widget instanceof WidgetText) {
-        	Field settingField = null;
-        	try {
-        		settingField = WidgetText.class.getField("settingReference");
-        	} 
-        	catch (NoSuchFieldException e) {
-    			try {
-    				settingField = WidgetText.class.getField("value");
-    			} 
-    			catch (NoSuchFieldException e2) { e.printStackTrace(); e2.printStackTrace(); }
-    		}
-    		if(settingField != null) {
-    			try {
-    				setting = (Setting)settingField.get(widget);
-    			} 
-    			catch (IllegalAccessException e) { e.printStackTrace(); }
-    		}
-        }
-        
-        Field defaultValueField = null;
-        try {
-        	defaultValueField = Setting.class.getField("defaultValue");
-        } 
-        catch (NoSuchFieldException e) {
-        	try {
-    			defaultValueField = Setting.class.getField("defvalue");
-    		} 
-    		catch (NoSuchFieldException e2) { e.printStackTrace(); e2.printStackTrace(); }
-    	}
-           
-    	if(defaultValueField != null) {
-    		try {
-    			defaultValue = (String)defaultValueField.get(setting).toString();
-    			if(setting instanceof SettingMulti) {
-    				try {
-    		        	Field labelsField = SettingMulti.class.getField("labelValues");
-    		        	defaultValue = ((String[])labelsField.get(setting))[Integer.parseInt(defaultValueField.get(setting).toString())];
-    		        } 
-    		        catch (NoSuchFieldException e) {
-    		        	try {
-    		        		Field labelsField = SettingMulti.class.getField("labels");
-    		        		defaultValue = ((String[])labelsField.get(setting))[Integer.parseInt(defaultValueField.get(setting).toString())];
-    		    		} 
-    		    		catch (NoSuchFieldException e2) { e.printStackTrace(); e2.printStackTrace(); }
-    		    	}
-    			}
-    		} 
-    		catch (IllegalAccessException e) { e.printStackTrace(); }
-    	}
-        
-        return name + " - (default : " + defaultValue + ")";
+			
+	        return name + " - (default : " + defaultValue + ")";
+		} 
+		catch (IllegalAccessException e) { e.printStackTrace(); }
+		return null;
 	}
 	
 	public ArrayList<SettingBoolean> getAllBooleanSettings()
     {
-        ArrayList<SettingBoolean> settings = new ArrayList<SettingBoolean>();
-        for (Setting setting : this.settings.Settings)
+        ArrayList<SettingBoolean> booleansettings = new ArrayList<SettingBoolean>();
+        for (Setting setting : settings.Settings)
         {
             if (!SettingBoolean.class.isAssignableFrom(setting.getClass()))
             {
                 continue;
             }
-            settings.add((SettingBoolean) setting);
+            booleansettings.add((SettingBoolean) setting);
         }
-        return settings;
+        return booleansettings;
     }
 	
 	public ArrayList<SettingMulti> getAllMultiSettings()
     {
-        ArrayList<SettingMulti> settings = new ArrayList<SettingMulti>();
-        for (Setting setting : this.settings.Settings)
+        ArrayList<SettingMulti> multisettings = new ArrayList<SettingMulti>();
+        for (Setting setting : settings.Settings)
         {
             if (!SettingMulti.class.isAssignableFrom(setting.getClass()))
             {
                 continue;
             }
-            settings.add((SettingMulti) setting);
+            multisettings.add((SettingMulti) setting);
         }
-        return settings;
+        return multisettings;
     }
 	
 	
 
 	public void loadSettings() {
-		if (ModLoader.getMinecraftInstance().theWorld == null) {
-			widgetGameplay.setEnabled(true);
-			for(int i = 0; i < widgetGameplay.getNumChildren(); i++)
-			widgetGameplay.getChild(i).setEnabled(true);
-			serverBT.setVisible(false);
-
-			Field[] myFields = mod_BetaTweaks.class.getFields();
-			for (int i = 0; i < myFields.length; i++) {
-				if (myFields[i].getName().contains("options")) {
-					try {
-						for (int j = 0; j < getAllBooleanSettings().size(); j++) {
-							if (myFields[i].getName() == getBackendName(getAllBooleanSettings().get(j))) {
-								getAllBooleanSettings().get(j).set((Boolean) myFields[i].get(null));
-							}
-						}
-						for (int j = 0; j < getAllMultiSettings().size(); j++) {
-							if (myFields[i].getName() == getBackendName(getAllMultiSettings().get(j))) {
-								if (myFields[i].getType() == LogoState.class) {
-									getAllMultiSettings().get(j)
-											.set(LogoState.valueOf(myFields[i].get(null).toString()).ordinal());
-								}
-							}
-						}
-					} catch (Exception exception) {
-						exception.printStackTrace();
-					}
-				}
-			}
-		}
-
-		else if (ModLoader.getMinecraftInstance().theWorld.multiplayerWorld && mod_BetaTweaks.modloaderMPinstalled
-				&& BetaTweaksMP.serverModInstalled) {
-			widgetGameplay.setEnabled(true);
-			if (BetaTweaksMP.isOp) {
+		try {
+			if (Utils.mc.theWorld == null) {
+				widgetGameplay.setEnabled(true);
 				for(int i = 0; i < widgetGameplay.getNumChildren(); i++)
-					widgetGameplay.getChild(i).setEnabled(true);
-				serverBT.setVisible(true);
-			} else {
-				for(int i = 0; i < widgetGameplay.getNumChildren(); i++)
-					widgetGameplay.getChild(i).setEnabled(false);
+				widgetGameplay.getChild(i).setEnabled(true);
 				serverBT.setVisible(false);
-			}
 
-			Field[] myFields = BetaTweaksMP.class.getFields();
-			for (int i = 0; i < myFields.length; i++) {
-				if (myFields[i].getName().contains("optionsGameplay") || myFields[i].getName().contains("optionsServer")) {
-					try {
-						for (int j = 0; j < getAllBooleanSettings().size(); j++) {
-							if (myFields[i].getName() == getBackendName(getAllBooleanSettings().get(j))) {
-								getAllBooleanSettings().get(j).set((Boolean) myFields[i].get(null));
-							}
-						}
-					} catch (Exception exception) {
-						exception.printStackTrace();
-					}
-				}
-			}
-			motd.set(BetaTweaksMP.optionsServerMOTD);
-		} else if (ModLoader.getMinecraftInstance().theWorld.multiplayerWorld) {
-			widgetGameplay.setEnabled(false);
-			serverBT.setVisible(false);
-		}
-	}
-	
-	public void updateSettings() {
-		
-		if (ModLoader.getMinecraftInstance().theWorld == null || !ModLoader.getMinecraftInstance().theWorld.multiplayerWorld) {
-			Field[] myFields = mod_BetaTweaks.class.getFields();
-			for (int i = 0; i < myFields.length; i++) {
-				if (myFields[i].getName().contains("optionsGameplay"))
-					try {
-						for (int j = 0; j < getAllBooleanSettings().size(); j++) {
-							if (myFields[i].getName() == getBackendName(getAllBooleanSettings().get(j))) {
-								myFields[i].set(null, getAllBooleanSettings().get(j).get());
-							}
-						}
-						for (int j = 0; j < getAllMultiSettings().size(); j++) {
-							if (myFields[i].getName() == getBackendName(getAllMultiSettings().get(j))) {
-								if (myFields[i].getType() == LogoState.class) {
-									myFields[i].set(null,
-											LogoState.values()[getAllMultiSettings().get(j).get()]);
-								}
-							}
-						}
-					} catch (Exception exception) {
-						exception.printStackTrace();
-					}
-			}
-		}
-		else if (ModLoader.getMinecraftInstance().theWorld.multiplayerWorld && mod_BetaTweaks.modloaderMPinstalled
-				&& BetaTweaksMP.serverModInstalled) {
-			if (BetaTweaksMP.isOp) {
-				List<Integer> options2 = new ArrayList<Integer>();
-				Field[] myFields = BetaTweaksMP.class.getFields();
-				for (int i = 0; i < myFields.length; i++) {
-					if (myFields[i].getName().contains("optionsGameplay") || myFields[i].getName().contains("optionsServer"))
-						try {
-							for (int j = 0; j < getAllBooleanSettings().size(); j++) {
-								if (myFields[i]
-										.getName() == getBackendName(getAllBooleanSettings().get(j))) {
-									options2.add(getAllBooleanSettings().get(j).get() ? 1 : 0);
-									// mod_BetaTweaksMP.options.add(guiapiSettings.getAllBooleanSettings().get(j).get()
-									// ? 1 : 0);
-									// myFields[i].set(null, guiapiSettings.getAllBooleanSettings().get(j).get());
-								}
-							}
-						} catch (Exception exception) {
-							exception.printStackTrace();
-						}
-				}
-				Boolean settingsChanged = false;
-				for (int i = 0; i < options2.size(); i++) {
-					if (BetaTweaksMP.options.get(i) != options2.get(i)) {
-						settingsChanged = true;
-						break;
-					}
-				}
-				if (motd.get() != BetaTweaksMP.optionsServerMOTD) {
-					settingsChanged = true;
-				}
-				if (settingsChanged) {
-					BetaTweaksMP.options = options2;
-					BetaTweaksMP.updateServerSettings(motd.get());
-				}
-
-			}
-		}
-		Field[] myFieldsClient = mod_BetaTweaks.class.getFields();
-		for (int i = 0; i < myFieldsClient.length; i++) {
-			if (myFieldsClient[i].getName().contains("optionsClient"))
-				try {
+				for(Field option : Config.options) {
 					for (int j = 0; j < getAllBooleanSettings().size(); j++) {
-						if (myFieldsClient[i].getName() == getBackendName(getAllBooleanSettings().get(j))) {
-							myFieldsClient[i].set(null, getAllBooleanSettings().get(j).get());
+						if (option.getName() == getBackendName(getAllBooleanSettings().get(j))) {
+							getAllBooleanSettings().get(j).set((Boolean) option.get(null));
+							break;
 						}
 					}
 					for (int j = 0; j < getAllMultiSettings().size(); j++) {
-						if (myFieldsClient[i].getName() == getBackendName(getAllMultiSettings().get(j))) {
-							if (myFieldsClient[i].getType() == LogoState.class) {
-								myFieldsClient[i].set(null,
-										LogoState.values()[getAllMultiSettings().get(j).get()]);
+						if (option.getName() == getBackendName(getAllMultiSettings().get(j))) {
+							if (option.getType() == LogoState.class) {
+								getAllMultiSettings().get(j).set(LogoState.valueOf(option.get(null).toString()).ordinal());
+								break;
 							}
 						}
 					}
-				} catch (Exception exception) {
-					exception.printStackTrace();
 				}
-		}
+			}
 
-		mod_BetaTweaks.writeConfig();
+			else if (Utils.mc.theWorld.multiplayerWorld && mod_BetaTweaks.modloaderMPinstalled
+					&& BetaTweaksMP.serverModInstalled) {
+				widgetGameplay.setEnabled(true);
+				if (BetaTweaksMP.isOp) {
+					for(int i = 0; i < widgetGameplay.getNumChildren(); i++)
+						widgetGameplay.getChild(i).setEnabled(true);
+					serverBT.setVisible(true);
+				} else {
+					for(int i = 0; i < widgetGameplay.getNumChildren(); i++)
+						widgetGameplay.getChild(i).setEnabled(false);
+					serverBT.setVisible(false);
+				}
+
+				for(Field options : BetaTweaksMP.options) {
+					for (int j = 0; j < getAllBooleanSettings().size(); j++) {
+						if (options.getName() == getBackendName(getAllBooleanSettings().get(j))) {
+							getAllBooleanSettings().get(j).set((Boolean) options.get(null));
+							break;
+						}
+					}
+				}
+				motd.set(BetaTweaksMP.motd);
+			} else if (Utils.mc.theWorld.multiplayerWorld) {
+				widgetGameplay.setEnabled(false);
+				serverBT.setVisible(false);
+			}
+		} 
+		catch (Exception exception) { exception.printStackTrace(); }
+	}
+	
+	public void updateSettings() {
+		try {
+			if (Utils.mc.theWorld == null || !Utils.mc.theWorld.multiplayerWorld) {
+				for(Field option : Config.optionsGameplay) {
+					for (int j = 0; j < getAllBooleanSettings().size(); j++) {
+						if (option.getName() == getBackendName(getAllBooleanSettings().get(j))) {
+							option.set(null, getAllBooleanSettings().get(j).get());
+							break;
+						}
+					}
+					for (int j = 0; j < getAllMultiSettings().size(); j++) {
+						if (option.getName() == getBackendName(getAllMultiSettings().get(j))) {
+							if (option.getType() == LogoState.class) {
+								option.set(null, LogoState.values()[getAllMultiSettings().get(j).get()]);
+								break;
+							}
+						}
+					}
+				}
+			}
+			else if (Utils.mc.theWorld.multiplayerWorld && mod_BetaTweaks.modloaderMPinstalled
+					&& BetaTweaksMP.serverModInstalled) {
+				if (BetaTweaksMP.isOp) {
+					List<Integer> options2 = new ArrayList<Integer>();
+					
+					for(Field option : BetaTweaksMP.options) {
+						for (int j = 0; j < getAllBooleanSettings().size(); j++) {
+							if (option.getName() == getBackendName(getAllBooleanSettings().get(j))) {
+								options2.add(getAllBooleanSettings().get(j).get() ? 1 : 0);
+								break;
+							}
+						}
+					}
+					Boolean settingsChanged = false;
+					for (int i = 0; i < options2.size(); i++) {
+						if (BetaTweaksMP.options1.get(i) != options2.get(i)) {
+							settingsChanged = true;
+							break;
+						}
+					}
+					if (motd.get() != BetaTweaksMP.motd) {
+						settingsChanged = true;
+					}
+					if (settingsChanged) {
+						BetaTweaksMP.options1 = options2;
+						BetaTweaksMP.updateServerSettings(motd.get());
+					}
+
+				}
+			}
+			
+			for(Field option : Config.optionsClient) {
+				for (int j = 0; j < getAllBooleanSettings().size(); j++) {
+					if (option.getName() == getBackendName(getAllBooleanSettings().get(j))) {
+						option.set(null, getAllBooleanSettings().get(j).get());
+						break;
+					}
+				}
+				for (int j = 0; j < getAllMultiSettings().size(); j++) {
+					if (option.getName() == getBackendName(getAllMultiSettings().get(j))) {
+						if (option.getType() == LogoState.class) {
+							option.set(null, LogoState.values()[getAllMultiSettings().get(j).get()]);
+							break;
+						}
+					}
+				}
+			}
+		} catch (Exception exception) {
+			exception.printStackTrace();
+		}
+		Config.writeConfig();
 	}
 
 }

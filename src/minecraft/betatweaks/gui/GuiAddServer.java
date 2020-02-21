@@ -2,9 +2,15 @@
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
-package net.minecraft.src;
+package betatweaks.gui;
 
 import org.lwjgl.input.Keyboard;
+
+import betatweaks.ServerData;
+import net.minecraft.src.GuiButton;
+import net.minecraft.src.GuiScreen;
+import net.minecraft.src.GuiTextField;
+import net.minecraft.src.StringTranslate;
 
 // Referenced classes of package net.minecraft.src:
 //            GuiScreen, GuiTextField, StringTranslate, GuiButton, 

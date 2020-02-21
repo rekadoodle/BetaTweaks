@@ -2,7 +2,7 @@
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
-package net.minecraft.src;
+package betatweaks.gui;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -16,7 +16,16 @@ import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.src.mod_BetaTweaks.LogoState;
+import net.minecraft.src.Block;
+import net.minecraft.src.GuiButton;
+import net.minecraft.src.GuiMainMenu;
+import net.minecraft.src.MathHelper;
+import net.minecraft.src.ScaledResolution;
+import net.minecraft.src.Tessellator;
+import net.minecraft.src.mod_BetaTweaks;
+import betatweaks.Config;
+import betatweaks.RenderBlocksLogoFunc;
+import betatweaks.Config.LogoState;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
@@ -72,7 +81,18 @@ public class GuiMainMenuCustom extends GuiMainMenu
             {
                 for(int j = 0; j < logoEffects[i].length; j++)
                 {
-                    logoEffects[i][j].update();
+                    logoEffects[i][j][1] = logoEffects[i][j][0];
+                    if(logoEffects[i][j][0] > 0.0D)
+                    {
+                    	logoEffects[i][j][2] -= 0.59999999999999998D;
+                    }
+                    logoEffects[i][j][0] += logoEffects[i][j][2];
+                    logoEffects[i][j][2] *= 0.90000000000000002D;
+                    if(logoEffects[i][j][0] < 0.0D)
+                    {
+                    	logoEffects[i][j][0] = 0.0D;
+                    	logoEffects[i][j][2] = 0.0D;
+                    }
                 }
 
             }
@@ -91,7 +111,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
     public void drawScreen(int i, int j, float f)
     {
     	
-    	if (mod_BetaTweaks.optionsClientPanoramaEnabled) {
+    	if (Config.clientPanoramaEnabled) {
     		if (undrawn2) {
     			undrawn2 = false;
         		this.viewportTexture = this.mc.renderEngine.allocateAndSetupTexture(new BufferedImage(256, 256, 2));
@@ -106,15 +126,15 @@ public class GuiMainMenuCustom extends GuiMainMenu
     	
     	
         Tessellator tessellator = Tessellator.instance;
-        if (mod_BetaTweaks.optionsClientLogo != LogoState.STANDARD)  {
-        	if (!modBlockTexturesLoaded && mod_BetaTweaks.optionsClientLogo == LogoState.CUSTOM && updateCounter > 1) {
+        if (Config.clientLogo != LogoState.STANDARD)  {
+        	if (!modBlockTexturesLoaded && Config.clientLogo == LogoState.CUSTOM && updateCounter > 1) {
         		mc.renderEngine.updateDynamicTextures();
         		modBlockTexturesLoaded = true;
         	}
         	
         	
         GL11.glEnable(2929 /*GL_DEPTH_TEST*/);
-        if (mod_BetaTweaks.optionsClientLogo == LogoState.CUSTOM) {
+        if (Config.clientLogo == LogoState.CUSTOM) {
         	drawLogo(f);
         }
         else {
@@ -134,7 +154,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
         }
         tessellator.setColorOpaque_I(0xffffff);
         GL11.glPushMatrix();
-        if (mod_BetaTweaks.optionsClientLogo != LogoState.CUSTOM) {
+        if (Config.clientLogo != LogoState.CUSTOM) {
         	GL11.glTranslatef(width / 2 + 90, (float)(70), 0.0F);
         }
         else {
@@ -144,11 +164,11 @@ public class GuiMainMenuCustom extends GuiMainMenu
         float f1 = 1.8F - MathHelper.abs(MathHelper.sin(((float)(System.currentTimeMillis() % 1000L) / 1000F) * 3.141593F * 2.0F) * 0.1F);
         f1 = (f1 * 100F) / (float)(fontRenderer.getStringWidth(splashText) + 32);
         GL11.glScalef(f1, f1, f1);
-        if (mod_BetaTweaks.optionsClientLogo != LogoState.CUSTOM || logoSplashTextEnabled) {
+        if (Config.clientLogo != LogoState.CUSTOM || logoSplashTextEnabled) {
         	drawCenteredString(fontRenderer, splashText, 0, -8, 0xffff00);
         }
         GL11.glPopMatrix();
-        if (mod_BetaTweaks.optionsClientPanoramaEnabled) {
+        if (Config.clientPanoramaEnabled) {
         	drawString(this.fontRenderer, "Minecraft Beta 1.7.3", 2, this.height - 10, 16777215);
         }
         else {
@@ -316,15 +336,14 @@ public class GuiMainMenuCustom extends GuiMainMenu
     	}
     	minecraftLogo = getCustomLogo();
         
-        if(logoEffects == null)
+    	if(logoEffects == null)
         {
-        	
-            logoEffects = new LogoEffectRandomizer[getCustomLogoWidth()][minecraftLogo.length];
+            logoEffects = new double[getCustomLogoWidth()][minecraftLogo.length][3];
             for(int i = 0; i < logoEffects.length; i++)
             {
                 for(int j = 0; j < logoEffects[i].length; j++)
                 {
-                    logoEffects[i][j] = new LogoEffectRandomizer(i, j, rand);
+                    logoEffects[i][j][0] = logoEffects[i][j][1] = (double)(10 + j) + rand.nextDouble() * 32D + (double)i;
                 }
 
             }
@@ -388,8 +407,8 @@ public class GuiMainMenuCustom extends GuiMainMenu
                     }
                     GL11.glPushMatrix();
                     if(j1 < logoEffects.length && i1 < logoEffects[j1].length) {
-                    LogoEffectRandomizer logoeffectrandomizer = logoEffects[j1][i1];
-                    float f1 = (float)(logoeffectrandomizer.b + (logoeffectrandomizer.a - logoeffectrandomizer.b) * (double)f);
+                    double[] logoRandom = logoEffects[j1][i1];
+                    float f1 = (float)(logoRandom[1] + (logoRandom[0] - logoRandom[1]) * (double)f);
                     float f2 = 1.0F;
                     float f3 = 1.0F;
                     float f4 = 0.0F;
@@ -426,12 +445,12 @@ public class GuiMainMenuCustom extends GuiMainMenu
     {
     	if(logoEffects == null)
         {
-            logoEffects = new LogoEffectRandomizer[minecraftLogoVanilla[0].length()][minecraftLogoVanilla.length];
+            logoEffects = new double[minecraftLogoVanilla[0].length()][minecraftLogoVanilla.length][3];
             for(int i = 0; i < logoEffects.length; i++)
             {
                 for(int j = 0; j < logoEffects[i].length; j++)
                 {
-                    logoEffects[i][j] = new LogoEffectRandomizer(i, j, rand);
+                    logoEffects[i][j][0] = logoEffects[i][j][1] = (double)(10 + j) + rand.nextDouble() * 32D + (double)i;
                 }
 
             }
@@ -492,8 +511,8 @@ public class GuiMainMenuCustom extends GuiMainMenu
                         continue;
                     }
                     GL11.glPushMatrix();
-                    LogoEffectRandomizer logoeffectrandomizer = logoEffects[j1][i1];
-                    float f1 = (float)(logoeffectrandomizer.b + (logoeffectrandomizer.a - logoeffectrandomizer.b) * (double)f);
+                    double[] logoRandom = logoEffects[j1][i1];
+                    float f1 = (float)(logoRandom[1] + (logoRandom[0] - logoRandom[1]) * (double)f);
                     float f2 = 1.0F;
                     float f3 = 1.0F;
                     float f4 = 0.0F;
@@ -698,7 +717,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 					+ System.getProperty("line.separator") + "SplashTextEnabled=true"
 					+ System.getProperty("line.separator") + "SplashTextOffsetX=-15.0"
 					+ System.getProperty("line.separator") + "SplashTextOffsetY=-10.0"
-					+ System.getProperty("line.separator") + "PanoramaFolder=/BetaTweaks/panorama");
+					+ System.getProperty("line.separator") + "PanoramaFolder=" + mod_BetaTweaks.resources + "/panorama");
 			/*
 				Field[] myFields = mod_BetaTweaks.class.getFields();
 				for (int i = 0; i < myFields.length; i++) {
@@ -726,7 +745,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 			  "X X X X X X X XX  X   XX  XXX XX   X ", 
 			  "X   X X X  XX X   X   X X X X X    X ", 
 			  "X   X X X   X XXX XXX X X X X X    X "};
-    private LogoEffectRandomizer logoEffects[][];
+    private double[][][] logoEffects;
     private float updateCounter;
     private String splashText;
     
@@ -738,7 +757,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 	public static Boolean logoSplashTextEnabled = true;
 	public static float logoSplashTextOffsetX = 0;
 	public static float logoSplashTextOffsetY = 0;
-	public static String logoPanoramaFolder = "/BetaTweaks/panorama";
+	public static String logoPanoramaFolder = mod_BetaTweaks.resources + "/panorama";
     
     public static File configLogoFile = new File((Minecraft.getMinecraftDir()) + "/config/OldCustomLogo.cfg");
 	private static Long timeStamp = configLogoFile.lastModified();

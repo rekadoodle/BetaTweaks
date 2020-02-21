@@ -1,10 +1,13 @@
-package net.minecraft.src;
+package betatweaks.block;
+
+import net.minecraft.src.Block;
+import net.minecraft.src.BlockTallGrass;
 
 public class BlockTallGrassHidden extends BlockTallGrass {
 
-	protected BlockTallGrassHidden(Block block)
+	public BlockTallGrassHidden()
     {
-        super(block.blockID, 0);
+        super(Block.tallGrass.blockID, 0);
         setBlockName("tallgrass");
         setBlockBounds(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
         setStepSound(soundGrassFootstep);

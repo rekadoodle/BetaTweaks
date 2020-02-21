@@ -2,8 +2,9 @@
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
-package net.minecraft.src;
+package betatweaks;
 
+import net.minecraft.src.NBTTagCompound;
 
 // Referenced classes of package net.minecraft.src:
 //            NBTTagCompound
