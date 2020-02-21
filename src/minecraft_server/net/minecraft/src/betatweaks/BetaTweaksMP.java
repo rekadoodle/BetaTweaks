@@ -32,6 +32,7 @@ import net.minecraft.src.ModLoader;
 import net.minecraft.src.ModLoaderMp;
 import net.minecraft.src.Packet;
 import net.minecraft.src.Packet230ModLoader;
+import net.minecraft.src.mod_BetaTweaks;
 
 public class BetaTweaksMP extends BaseModMp {
 
@@ -57,7 +58,6 @@ public class BetaTweaksMP extends BaseModMp {
 	}
 
 	BetaTweaksMP() {
-		Packet.addIdClassMapping(254, false, true, net.minecraft.src.betatweaks.Packet254ServerPing.class);
 		try {
 			configFile = new File(new File(".").getCanonicalPath(), "/config/BetaTweaksMP.cfg");
 		} catch (IOException e1) {
@@ -385,7 +385,7 @@ public class BetaTweaksMP extends BaseModMp {
 							if (entity.motionX > (double) f4) {
 								entity.motionX = (double) f4;
 							}
-							entity.fallDistance = 0.0F;
+							mod_BetaTweaks.setFallDistance(entity, 0.0F);
 							if (entity.motionY < -0.14999999999999999D) {
 								entity.motionY = -0.14999999999999999D;
 							}

@@ -17,13 +17,22 @@ import net.minecraft.src.GuiScreen;
 import net.minecraft.src.KeyBinding;
 import net.minecraft.src.ScaledResolution;
 import net.minecraft.src.betatweaks.config.Config;
+import net.minecraft.src.betatweaks.dummy.HandlerGuiAPI;
 import net.minecraft.src.betatweaks.gui.GuiControlsScrollable;
-import net.minecraft.src.betatweaks.references.HandlerGuiAPI;
 
-public class CustomFullscreenRes extends Thread {
+public class CustomFullscreenRes {
+
+	private static boolean isFullscreen;
+	private static DisplayMode customResolution;
+	private static int canvasWidth;
+	private static int canvasHeight;
+	private static final Field fullscreenField = Utils.getField(Minecraft.class, "fullscreen", "Q");
+	private static final Field canvasWidthField = Utils.getField(Component.class, "width");
+	private static final Field canvasHeightField = Utils.getField(Component.class, "height");
+	public static final KeyBinding toggleKeybind = new KeyBinding("Custom Fullscreen", Keyboard.KEY_F8);
+	private static boolean fullscreenKeyHeld = false;
 	
-	@Override
-	public void run() {
+	public static List<DisplayMode> getResolutions() {
 		List<DisplayMode> modesFiltered = new ArrayList<DisplayMode>();
 		try {
 			DisplayMode[] allModes = Display.getAvailableDisplayModes();
@@ -45,24 +54,8 @@ public class CustomFullscreenRes extends Thread {
 			}
 		} 
 		catch (LWJGLException e) { e.printStackTrace(); }
-		finally {
-			try {
-				Class<?> guiApiHandler = Utils.class.getClassLoader().loadClass("betatweaks.references.guiapi.ConcreteHandlerGuiAPI");
-				Utils.guiapihandler = (HandlerGuiAPI) guiApiHandler.getDeclaredConstructor(List.class).newInstance(modesFiltered);
-			} 
-			catch (Exception e) { e.printStackTrace(); } 
-		}
+		return modesFiltered;
 	}
-
-	private static boolean isFullscreen;
-	private static DisplayMode customResolution;
-	private static int canvasWidth;
-	private static int canvasHeight;
-	private static final Field fullscreenField = Utils.getField(Minecraft.class, "fullscreen", "Q");
-	private static final Field canvasWidthField = Utils.getField(Component.class, "width");
-	private static final Field canvasHeightField = Utils.getField(Component.class, "height");
-	public static final KeyBinding toggleKeybind = new KeyBinding("Custom Fullscreen", Keyboard.KEY_F8);
-	private static boolean fullscreenKeyHeld = false;
 	
 	public static DisplayMode get() {
 		return customResolution;

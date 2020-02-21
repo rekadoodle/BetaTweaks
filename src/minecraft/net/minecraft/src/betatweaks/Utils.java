@@ -3,21 +3,23 @@ package net.minecraft.src.betatweaks;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
+
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 import net.minecraft.src.betatweaks.config.SBase;
-import net.minecraft.src.betatweaks.references.HandlerAether;
-import net.minecraft.src.betatweaks.references.HandlerForge;
-import net.minecraft.src.betatweaks.references.HandlerGuiAPI;
-import net.minecraft.src.betatweaks.references.HandlerHMI;
-import net.minecraft.src.betatweaks.references.HandlerJSON;
-import net.minecraft.src.betatweaks.references.HandlerMineColony;
-import net.minecraft.src.betatweaks.references.HandlerModLoaderMp;
-import net.minecraft.src.betatweaks.references.HandlerOptifine;
-import net.minecraft.src.betatweaks.references.HandlerShaders;
+import net.minecraft.src.betatweaks.dummy.HandlerAether;
+import net.minecraft.src.betatweaks.dummy.HandlerForge;
+import net.minecraft.src.betatweaks.dummy.HandlerGuiAPI;
+import net.minecraft.src.betatweaks.dummy.HandlerHMI;
+import net.minecraft.src.betatweaks.dummy.HandlerJSON;
+import net.minecraft.src.betatweaks.dummy.HandlerMineColony;
+import net.minecraft.src.betatweaks.dummy.HandlerModLoaderMp;
+import net.minecraft.src.betatweaks.dummy.HandlerOptifine;
+import net.minecraft.src.betatweaks.dummy.HandlerShaders;
 
 public class Utils {
 
@@ -204,43 +206,50 @@ public class Utils {
 	
 	public static void init() {
 		if(classExists("ModSettings")) {
+			guiapihandler = (HandlerGuiAPI) getHandler("guiapi");
+			
 			//One of the settings in GuiAPI is the custom resolution
 			//Loading all the system resolutions takes a couple of seconds so this happens on another thread
-			//This thread then attempts to load the GuiAPI handler
-			(new CustomFullscreenRes()).start();
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					guiapihandler.init(CustomFullscreenRes.getResolutions());
+				}
+			}).start();
 		}
 		if(classExists("EntitySheepuff")) {
-			aetherHandler = (HandlerAether) getHandler("aether.ConcreteHandlerAether");
+			aetherHandler = (HandlerAether) getHandler("aether");
 		}
 		if(classExists("forge.ForgeHooksClient")) {
-			forgeHandler = (HandlerForge) getHandler("forge.ConcreteHandlerForge");
+			forgeHandler = (HandlerForge) getHandler("forge");
 		}
 		if(classExists("Shader")) {
-			shadersHandler = (HandlerShaders) getHandler("shaders.ConcreteHandlerShaders");
+			shadersHandler = (HandlerShaders) getHandler("shaders");
 		}
 		if(classExists("GuiDetailSettingsOF")) {
-			optifineHandler = (HandlerOptifine) getHandler("optifine.ConcreteHandlerOptifine");
+			optifineHandler = (HandlerOptifine) getHandler("optifine");
 		}
 		if(classExists("ModLoaderMp")) {
-			mpHandler = (HandlerModLoaderMp) getHandler("modloadermp.ConcreteHandlerModLoaderMp");
+			mpHandler = (HandlerModLoaderMp) getHandler("modloadermp");
 		}
 		if(classExists("org.json.JSONObject")) {
-			jsonHandler = (HandlerJSON) getHandler("json.ConcreteHandlerJSON");
+			jsonHandler = (HandlerJSON) getHandler("json");
 		}
 	}
 	
 	public static void modsLoaded() {
-		if(ModLoader.isModLoaded("mod_HowManyItems")) {
-			hmiHandler = (HandlerHMI) getHandler("hmi.ConcreteHandlerHMI");
+		String modpackage = mod_BetaTweaks.class.getPackage().getName() + '.';
+		if(ModLoader.isModLoaded(modpackage + "mod_HowManyItems")) {
+			hmiHandler = (HandlerHMI) getHandler("hmi");
 		}
-		if(ModLoader.isModLoaded("mod_MineColony")) {
-			minecolonyHandler = (HandlerMineColony) getHandler("minecolony.ConcreteHandlerMineColony");
+		if(ModLoader.isModLoaded(modpackage + "mod_MineColony")) {
+			minecolonyHandler = (HandlerMineColony) getHandler("minecolony");
 		}
 	}
 	
 	private static Object getHandler(String path) {
 		try { 
-			return Utils.class.getClassLoader().loadClass("betatweaks.references." + path).newInstance(); 
+			return Utils.class.getClassLoader().loadClass(Utils.class.getPackage().getName() + ".references." + path + ".ConcreteHandler").newInstance(); 
 		}
 		catch (Throwable e) { e.printStackTrace(); return null; } 
 	}

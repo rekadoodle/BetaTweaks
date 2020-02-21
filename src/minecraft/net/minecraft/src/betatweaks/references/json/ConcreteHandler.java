@@ -3,9 +3,9 @@ package net.minecraft.src.betatweaks.references.json;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import net.minecraft.src.betatweaks.references.HandlerJSON;
+import net.minecraft.src.betatweaks.dummy.HandlerJSON;
 
-public class ConcreteHandlerJSON extends HandlerJSON {
+public class ConcreteHandler extends HandlerJSON {
 
 	@Override
 	public int getPlayerCount(String jsonText) throws Exception {

@@ -5,15 +5,15 @@ import java.util.LinkedList;
 import net.minecraft.src.*;
 import net.minecraft.src.betatweaks.Utils;
 import net.minecraft.src.betatweaks.config.SBoolean;
-import net.minecraft.src.betatweaks.references.HandlerModLoaderMp;
+import net.minecraft.src.betatweaks.dummy.HandlerModLoaderMp;
 
-public class ConcreteHandlerModLoaderMp extends HandlerModLoaderMp {
+public class ConcreteHandler extends HandlerModLoaderMp {
 
 	private BaseModMp packetHandler;
 	public int maxPlayers;
 	
 	@SuppressWarnings("unchecked")
-	public ConcreteHandlerModLoaderMp() {
+	public ConcreteHandler() {
 		packetHandler = new PacketHandler(this);
 		try {
 			((LinkedList<BaseMod>) Utils.getField(ModLoader.class, "modList").get(null)).add(packetHandler);

@@ -1,4 +1,4 @@
-package net.minecraft.src.betatweaks.references;
+package net.minecraft.src.betatweaks.dummy;
 
 import java.util.ArrayList;
 import java.util.List;

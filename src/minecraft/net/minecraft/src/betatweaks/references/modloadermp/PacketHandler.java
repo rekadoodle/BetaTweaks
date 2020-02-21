@@ -15,9 +15,9 @@ import net.minecraft.src.betatweaks.Utils;
 public class PacketHandler extends BaseModMp {
 	
 	private KeyBinding playerListKey = new KeyBinding("List Players", Keyboard.KEY_TAB);
-	private ConcreteHandlerModLoaderMp handler;
+	private ConcreteHandler handler;
 	
-	public PacketHandler(ConcreteHandlerModLoaderMp handler) {
+	public PacketHandler(ConcreteHandler handler) {
 		this.handler = handler;
 		ModLoader.RegisterKey(this, playerListKey, false);
 		ModLoader.SetInGameHook(this, true, false);

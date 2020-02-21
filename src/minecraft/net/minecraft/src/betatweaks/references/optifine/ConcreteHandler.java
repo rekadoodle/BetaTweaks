@@ -1,9 +1,9 @@
 package net.minecraft.src.betatweaks.references.optifine;
 
 import net.minecraft.src.Config;
-import net.minecraft.src.betatweaks.references.HandlerOptifine;
+import net.minecraft.src.betatweaks.dummy.HandlerOptifine;
 
-public class ConcreteHandlerOptifine extends HandlerOptifine {
+public class ConcreteHandler extends HandlerOptifine {
 
 	@Override
 	public boolean isFarView() {

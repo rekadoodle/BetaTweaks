@@ -3,9 +3,9 @@ package net.minecraft.src.betatweaks.references.minecolony;
 import net.minecraft.src.GuiCitizen;
 import net.minecraft.src.GuiContainer;
 import net.minecraft.src.GuiHut;
-import net.minecraft.src.betatweaks.references.HandlerMineColony;
+import net.minecraft.src.betatweaks.dummy.HandlerMineColony;
 
-public class ConcreteHandlerMineColony extends HandlerMineColony {
+public class ConcreteHandler extends HandlerMineColony {
 
 	@Override
 	public boolean disallowDraggingShortcuts(GuiContainer container) {

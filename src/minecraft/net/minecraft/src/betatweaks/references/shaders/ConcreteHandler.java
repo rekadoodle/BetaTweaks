@@ -6,9 +6,9 @@ import org.lwjgl.opengl.GL13;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 import net.minecraft.src.betatweaks.Utils;
-import net.minecraft.src.betatweaks.references.HandlerShaders;
+import net.minecraft.src.betatweaks.dummy.HandlerShaders;
 
-public class ConcreteHandlerShaders extends HandlerShaders {
+public class ConcreteHandler extends HandlerShaders {
 	
 	public void init(EntityRenderer renderer) {
 		this.renderer = renderer;

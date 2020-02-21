@@ -14,7 +14,8 @@ public class mod_BetaTweaks extends BaseModMp{
 	}
 
 	mod_BetaTweaks(){
-		
+
+		Packet.addIdClassMapping(254, false, true, net.minecraft.src.betatweaks.Packet254ServerPing.class);
 		//JsonServer.main();
 			ClassLoader classloader = (net.minecraft.src.ModLoader.class).getClassLoader();
 			Method addmodMethod;
@@ -39,5 +40,9 @@ public class mod_BetaTweaks extends BaseModMp{
 	public boolean hasClientSide()
 	{
 		  return false;
+	}
+	
+	public static void setFallDistance(Entity entity, float f) {
+		entity.fallDistance = f;
 	}
 }

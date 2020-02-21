@@ -8,9 +8,9 @@ import net.minecraft.src.EntityItem;
 import net.minecraft.src.EntitySheepuff;
 import net.minecraft.src.ItemStack;
 import net.minecraft.src.betatweaks.Utils;
-import net.minecraft.src.betatweaks.references.HandlerAether;
+import net.minecraft.src.betatweaks.dummy.HandlerAether;
 
-public class ConcreteHandlerAether extends HandlerAether {
+public class ConcreteHandler extends HandlerAether {
 
 	@Override
 	public void shearSheepuff(Entity entity) {

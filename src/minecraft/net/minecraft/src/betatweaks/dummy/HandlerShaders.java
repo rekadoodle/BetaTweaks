@@ -1,4 +1,4 @@
-package net.minecraft.src.betatweaks.references;
+package net.minecraft.src.betatweaks.dummy;
 
 import net.minecraft.src.EntityLiving;
 import net.minecraft.src.EntityRenderer;

@@ -10,14 +10,14 @@ import net.minecraft.src.betatweaks.CustomFullscreenRes;
 import net.minecraft.src.betatweaks.Graphics;
 import net.minecraft.src.betatweaks.Utils;
 import net.minecraft.src.betatweaks.config.*;
-import net.minecraft.src.betatweaks.references.HandlerGuiAPI;
+import net.minecraft.src.betatweaks.dummy.HandlerGuiAPI;
 import de.matthiasmann.twl.Button;
 import de.matthiasmann.twl.Label;
 import de.matthiasmann.twl.ScrollPane;
 import de.matthiasmann.twl.Widget;
 import de.matthiasmann.twl.model.SimpleButtonModel;
 
-public class ConcreteHandlerGuiAPI extends HandlerGuiAPI {
+public class ConcreteHandler extends HandlerGuiAPI {
 	//Code here is suboptimal because this class is designed to work with both v10.4 and v11.0 of GuiAPI
 	//Maybe I should have made one class for each version...
 	
@@ -44,7 +44,7 @@ public class ConcreteHandlerGuiAPI extends HandlerGuiAPI {
 	private static WidgetInt resWidget;
 	private static SettingInt resSetting;
 	
-	public ConcreteHandlerGuiAPI(List<DisplayMode> resolutions) {
+	public void init(List<DisplayMode> resolutions) {
 		modes = resolutions;
 		oldGuiAPI = !Utils.classExists("GuiApiHelper");
 		
@@ -66,7 +66,7 @@ public class ConcreteHandlerGuiAPI extends HandlerGuiAPI {
             if(modes.contains(CustomFullscreenRes.get())) resSetting.set(modes.indexOf(CustomFullscreenRes.get()));
             resWidget = new WidgetInt((SettingInt)resSetting, "Custom Resolution");
             resWidget.addCallback(new ModAction(
-            		ConcreteHandlerGuiAPI.class, "updateResolutionWidget", "Callback for Resolution Change"));
+            		ConcreteHandler.class, "updateResolutionWidget", "Callback for Resolution Change"));
             resSetting.setTooltipContent(cfg.customFullscreenRes);
             settings.add(resSetting);
             widgetClientside.add(resWidget);
@@ -211,7 +211,7 @@ public class ConcreteHandlerGuiAPI extends HandlerGuiAPI {
 	private Button createLinkButton(String text, WidgetSinglecolumn screen) {
 		SimpleButtonModel model = new SimpleButtonModel();
 		model.addActionCallback(new ModAction(
-        		ConcreteHandlerGuiAPI.class, "updateResolutionWidget", "Callback for Resolution Change"));
+        		ConcreteHandler.class, "updateResolutionWidget", "Callback for Resolution Change"));
 		model.addActionCallback(
 				new ModAction(GuiModScreen.class, "show", new Class[] {Widget.class})
 				.setDefaultArguments(new Object[] {new WidgetSimplewindow(screen, text)}));
