@@ -121,6 +121,17 @@ public class BetaTweaksGuiAPI {
         	});
 		widgetClientside.add(texturepackButtonWidget);
 
+		SettingBoolean fovSlider = new SettingBoolean("optionsClientFovSliderVisible", mod_BetaTweaks.optionsClientFovSliderVisible);
+		settings.append(fovSlider);
+		WidgetBoolean fovSliderWidget = new WidgetBoolean(fovSlider, "FOV Slider", "ON", "OFF");
+		fovSliderWidget.setTooltipContent(new String[] {
+	       		"Adds an fov slider to the options menu.",
+	       		"",
+	       		"Won't work if ClientDisableEntityRendererOverride",
+	       		"in config is set to false."
+	       	});
+		widgetClientside.add(fovSliderWidget);
+		
 		SettingBoolean chieveNotifications = new SettingBoolean("optionsClientDisableAchievementNotifications", mod_BetaTweaks.optionsClientDisableAchievementNotifications);
 		settings.append(chieveNotifications);
 		WidgetBoolean chieveNotificationsWidget = new WidgetBoolean(chieveNotifications, "Hide Achievement Notifications");
@@ -289,8 +300,8 @@ public class BetaTweaksGuiAPI {
     private long mouseStillTime;
 	
 	public void handleTooltip(GuiModScreen guiscreen) {
-		int posX = (Mouse.getEventX() * guiscreen.width) / ModLoader.getMinecraftInstance().displayWidth;
-        int posY = guiscreen.height - (Mouse.getEventY() * guiscreen.height) / ModLoader.getMinecraftInstance().displayHeight - 1;
+		int posX = (Mouse.getX() * guiscreen.width) / ModLoader.getMinecraftInstance().displayWidth;
+        int posY = guiscreen.height - (Mouse.getY() * guiscreen.height) / ModLoader.getMinecraftInstance().displayHeight - 1;
 		
         if(Math.abs(posX - lastMouseX) > 5 || Math.abs(posY - lastMouseY) > 5 ||
         		scrollPos != getScrollPos(guiscreen))

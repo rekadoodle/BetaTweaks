@@ -16,9 +16,12 @@ import java.util.List;
 import net.minecraft.client.Minecraft;
 import java.util.Random;
 
+import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.*;
+
 
 public class mod_BetaTweaks extends BaseMod {
 
@@ -51,6 +54,9 @@ public class mod_BetaTweaks extends BaseMod {
 	public static Boolean optionsClientScrollableControls = true;
 	public static Boolean optionsClientIngameTexturePackButton = false;
 	public static Boolean optionsClientDisableAchievementNotifications = false;
+	public static Boolean optionsClientDisableEntityRendererOverride = false;
+	public static Boolean optionsClientFovSliderVisible = true;
+	public static float optionsClientFovSliderValue = 0F;
 	public static Boolean optionsClientIndevStorageBlocks = false;
 	public static Boolean optionsClientHideLongGrass = false;
 	public static Boolean optionsClientHideDeadBush = false;
@@ -67,6 +73,7 @@ public class mod_BetaTweaks extends BaseMod {
 	public static Boolean HMIinstalled;
 	public static GuiScreen parentScreen;
 	public static GuiScreen firstGuiScreenAfterHijack;
+	private boolean aetherSheepExist;
 
 	private static Boolean TNTinitialised = false;
 	private static Boolean storageBlocksInitialised = false;
@@ -85,17 +92,17 @@ public class mod_BetaTweaks extends BaseMod {
 	private static File configFile = new File((Minecraft.getMinecraftDir()) + "/config/BetaTweaks.cfg");
 	protected Random rand;
 
-	private KeyBinding playerList = new KeyBinding("List Players", 15);
+	private KeyBinding playerList = new KeyBinding("List Players", Keyboard.KEY_TAB);
+	public static KeyBinding zoom = new KeyBinding("Zoom", Keyboard.KEY_LCONTROL);
 
 	mod_BetaTweaks() {
+		
 		try {
 			Class.forName("ModLoaderMp");
 			modloaderMPinstalled = true;
 			ModLoader.RegisterKey(this, playerList, false);
-			ModLoader.RegisterKey(this, new KeyBinding("s", 2), false);
-			ModLoader.RegisterKey(this, new KeyBinding("s", 2), false);
-			ModLoader.RegisterKey(this, new KeyBinding("4", 2), false);
-
+			
+			
 			ClassLoader classloader = (net.minecraft.src.ModLoader.class).getClassLoader();
 			Method addmodMethod;
 			try {
@@ -120,8 +127,13 @@ public class mod_BetaTweaks extends BaseMod {
 			BetaTweaksGuiAPI.instance.init();
 		} 
 		catch (ClassNotFoundException e) { guiAPIinstalled = false; }
-
 		
+		try {
+			Class.forName("EntitySheepuff");
+			aetherSheepExist = true;
+		} catch (ClassNotFoundException e) {
+			aetherSheepExist = false;
+		}
 		
 		if (!configFile.exists()) writeConfig();
 		readConfig();
@@ -135,6 +147,11 @@ public class mod_BetaTweaks extends BaseMod {
 		if ((optionsClientLogo != LogoState.STANDARD || optionsClientPanoramaEnabled)
 				&& ModLoader.getMinecraftInstance().currentScreen == null)
 			ModLoader.getMinecraftInstance().currentScreen = new GuiInitialHijack();
+		
+		if(!optionsClientDisableEntityRendererOverride) {
+			ModLoader.RegisterKey(this, zoom, false);
+			ModLoader.getMinecraftInstance().entityRenderer = new EntityRendererProxyFOV(ModLoader.getMinecraftInstance());
+		}
 
 	}
 
@@ -213,16 +230,21 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 	}
 	private int texturePackButtonIndex = -1;
+	private int fovSliderIndex = -1;
 	private TexturePackBase initialTexturePack;
+	private Field optionsTopBitArrayField = getObfuscatedPrivateField(GuiOptions.class, new String[] {"field_22135_k", "l"});
+	private Field timerField = getObfuscatedPrivateField(Minecraft.class, new String[] {"timer", "T"});
 	
 	public boolean OnTickInGUI(Minecraft mc, GuiScreen guiscreen) {
-		
+		boolean redrawGui = false;
 		if (firstGuiScreenAfterHijack != null) {
+			redrawGui = true;
 			mc.displayGuiScreen(firstGuiScreenAfterHijack);
 			firstGuiScreenAfterHijack = null;
 		} else if (guiAPIinstalled && guiscreen instanceof GuiModScreen) {
 			BetaTweaksGuiAPI.instance.handleTooltip((GuiModScreen)guiscreen);
 			if (parentScreen != guiscreen && guiscreen instanceof GuiModSelect && parentScreen instanceof GuiModScreen) {
+				
 				Boolean temp1 = optionsClientIndevStorageBlocks;
 				Boolean temp2 = optionsClientHideLongGrass;
 				Boolean temp3 = optionsClientHideDeadBush;
@@ -249,22 +271,27 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 		} else if (guiscreen instanceof GuiMainMenu && !(guiscreen instanceof GuiMainMenuCustom)
 				&& (optionsClientLogo != LogoState.STANDARD || optionsClientPanoramaEnabled)) {
+			redrawGui = true;
 			mc.displayGuiScreen(new GuiMainMenuCustom());
 		} else if (guiscreen instanceof GuiMainMenuCustom && !(guiscreen instanceof GuiMainMenu)
 				&& (optionsClientLogo == LogoState.STANDARD && !optionsClientPanoramaEnabled)) {
+			redrawGui = true;
 			mc.displayGuiScreen(new GuiMainMenu());
 		} else if (optionsClientMultiplayerMenu && guiscreen instanceof GuiMultiplayer && !(parentScreen instanceof GuiMultiplayerMenu || parentScreen instanceof GuiMultiplayer)) {
+			redrawGui = true;
 			mc.displayGuiScreen(new GuiMultiplayerMenu(parentScreen));
 		} else if (optionsClientScrollableControls && guiscreen instanceof GuiControls) {
+			redrawGui = true;
 			mc.displayGuiScreen(new GuiControlsScrollable(parentScreen, mc.gameSettings));
 		} else if (guiscreen instanceof GuiIngameMenu) {
 			if(optionsClientIngameTexturePackButton && (texturePackButtonIndex == -1 || guiscreen.controlList.size() == texturePackButtonIndex)) {
+				redrawGui = true;
 				texturePackButtonIndex = guiscreen.controlList.size();
 				guiscreen.controlList.add(new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs"));
 			}
 			if(optionsClientIngameTexturePackButton) {
 				try {
-					Field x = getObfuscatedPrivateField(Block.class, new String[] {"selectedButton", "a"});
+					Field x = getObfuscatedPrivateField(GuiScreen.class, new String[] {"selectedButton", "a"});
 					if(x != null) {
 						x.setAccessible(true);
 						GuiButton currentButton = (GuiButton)x.get(guiscreen);
@@ -279,6 +306,18 @@ public class mod_BetaTweaks extends BaseMod {
 				catch (IllegalArgumentException e) { e.printStackTrace(); } 
 				catch (IllegalAccessException e) { e.printStackTrace(); } 
 			}
+		} else if (guiscreen instanceof GuiOptions && !optionsClientDisableEntityRendererOverride) {
+			if(optionsClientFovSliderVisible && (fovSliderIndex == -1 || guiscreen.controlList.size() == fovSliderIndex)) {
+				redrawGui = true;
+				fovSliderIndex = guiscreen.controlList.size();
+				int x = 5;
+				try {
+					x = ((EnumOptions[])optionsTopBitArrayField.get(guiscreen)).length;
+				} 
+				catch (IllegalAccessException e) { e.printStackTrace(); }
+				guiscreen.controlList.add(new GuiSliderFOV(137, guiscreen.width / 2 - 155 + x % 2 * 160, guiscreen.height / 6 + 24 * (x >> 1)));
+			}
+			
 		} else if (guiscreen instanceof GuiTexturePacks) {
 			if(initialTexturePack == null) {
 				initialTexturePack = ModLoader.getMinecraftInstance().texturePackList.selectedTexturePack;
@@ -286,6 +325,24 @@ public class mod_BetaTweaks extends BaseMod {
 			
 		} else if (guiscreen != parentScreen) {
 			parentScreen = guiscreen;
+		}
+		if(redrawGui) {
+			GL11.glClear(256);
+			ScaledResolution scaledresolution = new ScaledResolution(mc.gameSettings, mc.displayWidth, mc.displayHeight);
+	        int i = scaledresolution.getScaledWidth();
+	        int j = scaledresolution.getScaledHeight();
+	        int k = (Mouse.getX() * i) / mc.displayWidth;
+	        int i1 = j - (Mouse.getY() * j) / mc.displayHeight - 1;
+	        float f = 0.0F;
+	        try {
+				f = ((Timer)timerField.get(mc)).renderPartialTicks;
+			} 
+	        catch (IllegalAccessException e) { e.printStackTrace(); }
+            guiscreen.drawScreen(k, i1, f);
+            if(guiscreen.guiParticles != null)
+            {
+                guiscreen.guiParticles.draw(f);
+            }
 		}
 		if (mc.theWorld != currentWorld) {
 			if (guiAPIinstalled
@@ -311,9 +368,8 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 		if (optionsClientDraggingShortcuts && guiscreen instanceof GuiContainer && (!HMIinstalled || !(guiscreen instanceof GuiRecipeViewer))) {
 			GuiContainer container = (GuiContainer)guiscreen;
-			int x = (Mouse.getEventX() * container.width) / mc.displayWidth;
-            int y = container.height - (Mouse.getEventY() * container.height) / mc.displayHeight - 1;
-            
+			int x = (Mouse.getX() * container.width) / mc.displayWidth;
+            int y = container.height - (Mouse.getY() * container.height) / mc.displayHeight - 1;
             EntityPlayerSP player = mc.thePlayer;
         	PlayerController controller = mc.playerController;
         	int windowId = container.inventorySlots.windowId;
@@ -399,14 +455,17 @@ public class mod_BetaTweaks extends BaseMod {
         				}
     	            }
         			else if(Mouse.getEventButton() == 1/* && slot.getHasStack()*/) {
+        				boolean itemHeld = player.inventory.getItemStack() != null;
     					controller.handleMouseClick(windowId, slot.slotNumber, 1, false, player);
     					ItemStack item = player.inventory.getItemStack();
-    					if(player.inventory.getItemStack() != null) {
+    					if(!itemHeld && player.inventory.getItemStack() != null) {
     						itemClickedOn = true;
-    						lastSlotNo = slot.slotNumber;
     						if(!item.isItemEqual(player.inventory.getItemStack())) {
     							itemClickedOn = false;
     						}
+    					}
+    					if(item != null) {
+    						lastSlotNo = slot.slotNumber;
     					}
     				}
     			} 
@@ -418,7 +477,7 @@ public class mod_BetaTweaks extends BaseMod {
     					else controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
     					collecting = false;
     	            }
-    				else if(Mouse.getEventButton() == 0) {
+    				else if(Mouse.getEventButton() == 0 || Mouse.getEventButton() == 1) {
     					itemClickedOn = false;
         				spreading = false;
         				collecting = false;
@@ -432,18 +491,21 @@ public class mod_BetaTweaks extends BaseMod {
     				}
     	        }
     			if(Mouse.isButtonDown(1)) {
-    				
-    					if(slot.slotNumber != lastSlotNo /*&& !itemClickedOn*/
+    				if (!itemClickedOn)
+					{
+						if(slot.slotNumber != lastSlotNo /*&& !itemClickedOn*/
     							&& player.inventory.getItemStack() != null && (!slot.getHasStack() 
     							|| (slot.getStack().isItemEqual(player.inventory.getItemStack()) 
     									&& slot.getStack().getMaxStackSize() > slot.getStack().stackSize))) {
     						controller.handleMouseClick(windowId, slot.slotNumber, 1, false, player);
     						lastSlotNo = slot.slotNumber;
 						}
+					}
+    					
     			}
     			else if(Mouse.isButtonDown(0)) {
     				if (spreading) {
-    					if(!slot.getHasStack()) {
+    					if(!slot.getHasStack() && slot.isItemValid(player.inventory.getItemStack())) {
     						if(spreadCount == -1) {
     							spreadCount = player.inventory.getItemStack().stackSize;
     						}
@@ -469,6 +531,8 @@ public class mod_BetaTweaks extends BaseMod {
     							
     						}
     					}
+    					
+    					
     				}
     				else if (collecting){
     					if(lastSlotNo != slot.slotNumber) {
@@ -537,6 +601,47 @@ public class mod_BetaTweaks extends BaseMod {
 				spreadCount = -1;
 			}
 		}
+			if(spreadSlots.size() > 1) {
+				GL11.glTranslatef((container.width - container.xSize) / 2, (container.height - container.ySize) / 2, 0.0F);
+				for(int slotNo : spreadSlots) {
+					
+					for(Object obj : container.inventorySlots.slots) {
+						Slot currentSlot = (Slot)obj;
+						if(currentSlot.slotNumber == slotNo && currentSlot != slot) {
+							GL11.glEnable(32826 /*GL_RESCALE_NORMAL_EXT*/);
+					        
+					                GL11.glDisable(2896 /*GL_LIGHTING*/);
+					                GL11.glDisable(2929 /*GL_DEPTH_TEST*/);
+					                int j1 = currentSlot.xDisplayPosition;
+					                int l1 = currentSlot.yDisplayPosition;
+					                guiscreen.drawRect(j1, l1, j1 + 16, l1 + 16, 0x80ffffff);
+					                GL11.glEnable(2896 /*GL_LIGHTING*/);
+					                GL11.glEnable(2929 /*GL_DEPTH_TEST*/);
+					                
+				            		GL11.glPushMatrix();
+				            		GL11.glRotatef(120F, 1.0F, 0.0F, 0.0F);
+				            		RenderHelper.enableStandardItemLighting();
+				            		GL11.glPopMatrix();
+					                itemRenderer.renderItemIntoGUI(container.fontRenderer, mc.renderEngine, currentSlot.getStack(), currentSlot.xDisplayPosition, currentSlot.yDisplayPosition);
+					                itemRenderer.renderItemOverlayIntoGUI(container.fontRenderer, mc.renderEngine, currentSlot.getStack(), currentSlot.xDisplayPosition, currentSlot.yDisplayPosition);
+					                
+						}
+					}
+				}
+				
+				InventoryPlayer inventoryplayer = mc.thePlayer.inventory;
+		        if(inventoryplayer.getItemStack() != null)
+		        {
+		        	int k = (container.width - container.xSize) / 2;
+		            int l = (container.height - container.ySize) / 2;
+		            GL11.glTranslatef(0.0F, 0.0F, 32F);
+		            itemRenderer.renderItemIntoGUI(container.fontRenderer, mc.renderEngine, inventoryplayer.getItemStack(), x - k - 8, y - l - 8);
+		            itemRenderer.renderItemOverlayIntoGUI(container.fontRenderer, mc.renderEngine, inventoryplayer.getItemStack(), x - k - 8, y - l - 8);
+		            GL11.glTranslatef(0.0F, 0.0F, -32F);
+		        }
+		        GL11.glDisable(32826 /*GL_RESCALE_NORMAL_EXT*/);
+        		RenderHelper.disableStandardItemLighting();
+			}
 		}
 		return true;
 	}
@@ -549,16 +654,20 @@ public class mod_BetaTweaks extends BaseMod {
 	private int lastSlotNo;
 	private ArrayList<Integer> spreadSlots = new ArrayList<Integer>();
 	private boolean rmbHeld;
+    private static RenderItem itemRenderer = new RenderItem();
 
 	public boolean OnTickInGame(Minecraft minecraft) {
-		if(texturePackButtonIndex != -1 && !(minecraft.currentScreen instanceof GuiIngameMenu)) {
+		if((texturePackButtonIndex != -1 || fovSliderIndex != -1) && !(minecraft.currentScreen instanceof GuiIngameMenu || minecraft.currentScreen instanceof GuiOptions)) {
 			texturePackButtonIndex = -1;
+			fovSliderIndex = -1;
 		}
 		if(initialTexturePack != null && initialTexturePack != ModLoader.getMinecraftInstance().texturePackList.selectedTexturePack 
 				&& !(minecraft.currentScreen instanceof GuiTexturePacks)) {
 			initialTexturePack = null;
 			if (minecraft.theWorld != null) minecraft.renderGlobal.loadRenderers();
 		}
+		
+		
 
 		if(optionsClientDraggingShortcuts) {
 			if(Mouse.isButtonDown(1) && minecraft.currentScreen == null) {
@@ -689,7 +798,23 @@ public class mod_BetaTweaks extends BaseMod {
 					}
 				}
 			}
+			else if(aetherSheepExist && e instanceof EntitySheepuff) {
+				if (!minecraft.theWorld.multiplayerWorld && e.beenAttacked) {
+					if (!((EntitySheepuff) e).getSheared()) {
 
+						((EntitySheepuff) e).setSheared(true);
+						Random rand = new Random();
+						int i = 2 + rand.nextInt(3);
+						for (int j = 0; j < i; j++) {
+							EntityItem wool = e.entityDropItem(
+									new ItemStack(Block.cloth.blockID, 1, ((EntitySheepuff) e).getFleeceColor()), 1.0F);
+							wool.motionY += rand.nextFloat() * 0.05F;
+							wool.motionX += (rand.nextFloat() - rand.nextFloat()) * 0.1F;
+							wool.motionZ += (rand.nextFloat() - rand.nextFloat()) * 0.1F;
+						}
+					}
+				}
+			}
 		}
 
 		if (optionsGameplayMinecartBoosters && !minecraft.theWorld.multiplayerWorld) {
@@ -924,6 +1049,8 @@ public class mod_BetaTweaks extends BaseMod {
 						f1.set(this, Boolean.parseBoolean(as[1]));
 					} else if (f1.getType() == LogoState.class) {
 						f1.set(this, LogoState.valueOf(as[1].toUpperCase()));
+					} else if (f1.getType() == float.class) {
+						f1.set(this, Float.parseFloat(as[1]));
 					}
 				}
 			}

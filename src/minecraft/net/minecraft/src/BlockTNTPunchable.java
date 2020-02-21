@@ -23,7 +23,7 @@ public class BlockTNTPunchable extends BlockTNT
     	setBlockName(Block.tnt.getBlockName());
     	
     	try {
-    		Field x = mod_BetaTweaks.getObfuscatedPrivateField(Block.class, new String[] {"tnt", "q"});
+    		Field x = mod_BetaTweaks.getObfuscatedPrivateField(Block.class, new String[] {"tnt", "an"});
     		if (x != null) {
     			x.setAccessible(true);
                 
