@@ -32,8 +32,10 @@ public class GuiControlsScrollable extends GuiScreen
 	private float scrollMultiplier;
 	private int selectedButton = -1;
 	private boolean drag;
-	private float dragY = 0;
 	private float amountScrolled = 0;
+	
+	private float initialClickY;
+    private long lastClicked;
 
 	public GuiControlsScrollable(GuiScreen guiscreen, GameSettings gamesettings)
 	{
@@ -90,27 +92,6 @@ public class GuiControlsScrollable extends GuiScreen
 			if (!found){
 				if (mouseY > top && mouseY < bottom){
 					drag = true;
-					dragY = mouseY;
-					
-					int listRight = width / 2 + 124;
-					int scrollRight = listRight + 6;
-					if(mouseX >= listRight && mouseX <= scrollRight) {
-						scrollMultiplier = -1F;
-						int contentHeight = getContentHeight() - (bottom - top - 4);
-						if(contentHeight < 1) {
-							contentHeight = 1;
-						}
-						int i4 = (int)((float)((bottom - top) * (bottom - top)) / (float)getContentHeight());
-						if(i4 < 32) {
-							i4 = 32;
-						}
-						if(i4 > bottom - top - 8) {
-							i4 = bottom - top - 8;
-						}
-						scrollMultiplier /= (float)(bottom - top - i4) / (float)contentHeight;
-					} else {
-						scrollMultiplier = 1F;
-					}
 				}
 			}
 		}
@@ -118,20 +99,13 @@ public class GuiControlsScrollable extends GuiScreen
 	}
 
 	protected void mouseMovedOrUp(int mouseX, int mouseY, int button) {
-		if (drag){
-			if (button < 0){
-				if (Mouse.isButtonDown(0)){
-					updateScrolled(((float)mouseY - dragY) * scrollMultiplier);
-					dragY = mouseY;
-				}
-			} else if (button == 0) {
-				drag = false;
-			}
+		if (drag && button >= 0){
+			drag = false;
 		}
 		super.mouseMovedOrUp(mouseX, mouseY, button);
 	}
 	
-	public void updateScrolled(float amount){
+	public void updateScrolled(float amount) {
 		int i = getContentHeight() - (bottom - top - 4);
 		if(i < 0) {
 			i /= 2;
@@ -188,6 +162,74 @@ public class GuiControlsScrollable extends GuiScreen
 		int l = right / 2 + 124;
 		int i1 = l + 6;
 
+		if(Mouse.isButtonDown(0) && drag)
+        {
+            if(initialClickY == -1F)
+            {
+                boolean flag = true;
+                if(mouseY >= top && mouseY <= bottom)
+                {
+                    int j1 = width / 2 - 110;
+                    int k1 = width / 2 + 110;
+                    int i2 = ((mouseY - top - 0) + (int)amountScrolled) - 4;
+                    int k2 = i2 / slotHeight;
+                    if(mouseX >= j1 && mouseX <= k1 && k2 >= 0 && i2 >= 0 && k2 < size)
+                    {
+                        boolean flag1 = System.currentTimeMillis() - lastClicked < 250L;
+                        //elementClicked(k2, flag1);
+                        //selectedElement = k2;
+                        lastClicked = System.currentTimeMillis();
+                    } else
+                    if(mouseX >= j1 && mouseX <= k1 && i2 < 0)
+                    {
+                        //func_27255_a(mouseX - j1, ((mouseY - top) + (int)amountScrolled) - 4);
+                        flag = false;
+                    }
+                    if(mouseX >= l && mouseX <= i1)
+                    {
+                        scrollMultiplier = -1F;
+                        int i3 = getContentHeight() - (bottom - top - 4);
+                        if(i3 < 1)
+                        {
+                            i3 = 1;
+                        }
+                        int l3 = (int)((float)((bottom - top) * (bottom - top)) / (float)getContentHeight());
+                        if(l3 < 32)
+                        {
+                            l3 = 32;
+                        }
+                        if(l3 > bottom - top - 8)
+                        {
+                            l3 = bottom - top - 8;
+                        }
+                        scrollMultiplier /= (float)(bottom - top - l3) / (float)i3;
+                    } else
+                    {
+                        scrollMultiplier = 1.0F;
+                    }
+                    if(flag)
+                    {
+                        initialClickY = mouseY;
+                    } else
+                    {
+                        initialClickY = -2F;
+                    }
+                } else
+                {
+                    initialClickY = -2F;
+                }
+            } else
+            if(initialClickY >= 0.0F)
+            {
+                amountScrolled -= ((float)mouseY - initialClickY) * scrollMultiplier;
+                initialClickY = mouseY;
+            }
+        } else
+        {
+            initialClickY = -1F;
+        }
+        bindAmountScrolled();
+		
 		GL11.glDisable(2896 /*GL_LIGHTING*/);
 		GL11.glDisable(2912 /*GL_FOG*/);
 		Tessellator tessellator = Tessellator.instance;
@@ -307,6 +349,23 @@ public class GuiControlsScrollable extends GuiScreen
 		((GuiButton)controlList.get(controlList.size()-1)).drawButton(mc, mouseX, mouseY);
 
 	}
+	
+	private void bindAmountScrolled()
+    {
+        int i = getContentHeight() - (bottom - top - 4);
+        if(i < 0)
+        {
+            i /= 2;
+        }
+        if(amountScrolled < 0.0F)
+        {
+            amountScrolled = 0.0F;
+        }
+        if(amountScrolled > (float)i)
+        {
+            amountScrolled = i;
+        }
+    }
 	
 	void overlayBackground(int top, int bottom, int k, int l) {
 		Tessellator tessellator = Tessellator.instance;

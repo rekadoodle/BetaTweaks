@@ -8,7 +8,7 @@ public class BlockOreStorageIndev extends BlockOreStorage {
 	private int sideTexture;
 	private int bottomTexture;
 	
-	public BlockOreStorageIndev(Block block, int fieldNo, String sideTexture, String bottomTexture) {
+	public BlockOreStorageIndev(Block block, String[] fields, String sideTexture, String bottomTexture) {
 		super(block.blockID, block.blockIndexInTexture);
 		setHardness(block.getHardness());
         setBlockName(block.getBlockName().replaceFirst("tile.", ""));
@@ -17,14 +17,16 @@ public class BlockOreStorageIndev extends BlockOreStorage {
         this.sideTexture = ModLoader.addOverride("/terrain.png", sideTexture);
         this.bottomTexture = ModLoader.addOverride("/terrain.png", bottomTexture);
         try {
-            Field field = Block.class.getDeclaredFields()[fieldNo];
-            field.setAccessible(true);
-            
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-           
-            field.set(null, this);
+        	Field field = mod_BetaTweaks.getObfuscatedPrivateField(Block.class, fields);
+            if(field != null) {
+            	field.setAccessible(true);
+                
+                Field modifiersField = Field.class.getDeclaredField("modifiers");
+                modifiersField.setAccessible(true);
+                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+               
+                field.set(null, this);
+            }
         } 
         catch (Exception e) {e.printStackTrace();}
     }

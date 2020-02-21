@@ -23,14 +23,16 @@ public class BlockTNTPunchable extends BlockTNT
     	setBlockName(Block.tnt.getBlockName());
     	
     	try {
-    		Field x = Block.class.getDeclaredFields()[64];
-            x.setAccessible(true);
-            
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(x, x.getModifiers() & ~Modifier.FINAL);
-           
-            x.set(null, this);
+    		Field x = mod_BetaTweaks.getObfuscatedPrivateField(Block.class, new String[] {"tnt", "q"});
+    		if (x != null) {
+    			x.setAccessible(true);
+                
+                Field modifiersField = Field.class.getDeclaredField("modifiers");
+                modifiersField.setAccessible(true);
+                modifiersField.setInt(x, x.getModifiers() & ~Modifier.FINAL);
+               
+                x.set(null, this);
+    		}
         } catch (Exception e) {e.printStackTrace();}
         setTickOnLoad(true);
     }

@@ -64,6 +64,7 @@ public class mod_BetaTweaks extends BaseMod {
 
 	public static Boolean guiAPIinstalled;
 	public static Boolean modloaderMPinstalled;
+	public static Boolean HMIinstalled;
 	public static GuiScreen parentScreen;
 	public static GuiScreen firstGuiScreenAfterHijack;
 
@@ -91,6 +92,10 @@ public class mod_BetaTweaks extends BaseMod {
 			Class.forName("ModLoaderMp");
 			modloaderMPinstalled = true;
 			ModLoader.RegisterKey(this, playerList, false);
+			ModLoader.RegisterKey(this, new KeyBinding("s", 2), false);
+			ModLoader.RegisterKey(this, new KeyBinding("s", 2), false);
+			ModLoader.RegisterKey(this, new KeyBinding("4", 2), false);
+
 			ClassLoader classloader = (net.minecraft.src.ModLoader.class).getClassLoader();
 			Method addmodMethod;
 			try {
@@ -116,6 +121,8 @@ public class mod_BetaTweaks extends BaseMod {
 		} 
 		catch (ClassNotFoundException e) { guiAPIinstalled = false; }
 
+		
+		
 		if (!configFile.exists()) writeConfig();
 		readConfig();
 		if (guiAPIinstalled) BetaTweaksGuiAPI.instance.loadSettings();
@@ -155,41 +162,45 @@ public class mod_BetaTweaks extends BaseMod {
 		if (resetTallGrass) {
 			resetTallGrass = false;
 			Block.blocksList[Block.tallGrass.blockID] = null;
-			Field x = Block.class.getDeclaredFields()[47];
-			x.setAccessible(true);
-			try {
-				Field modifiersField = Field.class.getDeclaredField("modifiers");
-				modifiersField.setAccessible(true);
-				modifiersField.setInt(x, x.getModifiers() & ~Modifier.FINAL);
-				if (optionsClientHideLongGrass) {
-					x.set(null, new BlockTallGrassHidden(Block.tallGrass));
-				} else {
-					x.set(null, (BlockTallGrass) (new BlockTallGrass(31, 39)).setHardness(0.0F)
-							.setStepSound(Block.soundGrassFootstep).setBlockName("tallgrass"));
-				}
-			} 
-			catch (NoSuchFieldException e) { e.printStackTrace();} 
-			catch (IllegalAccessException e) { e.printStackTrace();}
+			Field x = getObfuscatedPrivateField(Block.class, new String[] {"tallGrass", "Y"});
+			if (x != null) {
+				x.setAccessible(true);
+				try {
+					Field modifiersField = Field.class.getDeclaredField("modifiers");
+					modifiersField.setAccessible(true);
+					modifiersField.setInt(x, x.getModifiers() & ~Modifier.FINAL);
+					if (optionsClientHideLongGrass) {
+						x.set(null, new BlockTallGrassHidden(Block.tallGrass));
+					} else {
+						x.set(null, (BlockTallGrass) (new BlockTallGrass(31, 39)).setHardness(0.0F)
+								.setStepSound(Block.soundGrassFootstep).setBlockName("tallgrass"));
+					}
+				} 
+				catch (NoSuchFieldException e) { e.printStackTrace();} 
+				catch (IllegalAccessException e) { e.printStackTrace();}
+			}
 		}
 
 		if (resetDeadBush) {
 			resetDeadBush = false;
 			Block.blocksList[Block.deadBush.blockID] = null;
-			Field x = Block.class.getDeclaredFields()[48];
-			x.setAccessible(true);
-			try {
-				Field modifiersField = Field.class.getDeclaredField("modifiers");
-				modifiersField.setAccessible(true);
-				modifiersField.setInt(x, x.getModifiers() & ~Modifier.FINAL);
-				if (optionsClientHideDeadBush) {
-					x.set(null, new BlockDeadBushHidden(Block.deadBush));
-				} else {
-					x.set(null, (BlockDeadBush) (new BlockDeadBush(32, 55)).setHardness(0.0F)
-							.setStepSound(Block.soundGrassFootstep).setBlockName("deadbush"));
-				}
-			} 
-			catch (NoSuchFieldException e1) { e1.printStackTrace(); } 
-			catch (IllegalAccessException e) { e.printStackTrace(); }
+			Field x = getObfuscatedPrivateField(Block.class, new String[] {"deadBush", "Z"});
+			if (x != null) {
+				x.setAccessible(true);
+				try {
+					Field modifiersField = Field.class.getDeclaredField("modifiers");
+					modifiersField.setAccessible(true);
+					modifiersField.setInt(x, x.getModifiers() & ~Modifier.FINAL);
+					if (optionsClientHideDeadBush) {
+						x.set(null, new BlockDeadBushHidden(Block.deadBush));
+					} else {
+						x.set(null, (BlockDeadBush) (new BlockDeadBush(32, 55)).setHardness(0.0F)
+								.setStepSound(Block.soundGrassFootstep).setBlockName("deadbush"));
+					}
+				} 
+				catch (NoSuchFieldException e1) { e1.printStackTrace(); } 
+				catch (IllegalAccessException e) { e.printStackTrace(); }
+			}
 		}
 
 		if (resetAchievements) {
@@ -253,13 +264,15 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 			if(optionsClientIngameTexturePackButton) {
 				try {
-					Field x = GuiScreen.class.getDeclaredFields()[7];
-					x.setAccessible(true);
-					GuiButton currentButton = (GuiButton)x.get(guiscreen);
-					if(currentButton != null) {
-						if(currentButton.id == 137) {
-							mc.displayGuiScreen(new GuiTexturePacks(guiscreen));
-							x.set(guiscreen, null);
+					Field x = getObfuscatedPrivateField(Block.class, new String[] {"selectedButton", "a"});
+					if(x != null) {
+						x.setAccessible(true);
+						GuiButton currentButton = (GuiButton)x.get(guiscreen);
+						if(currentButton != null) {
+							if(currentButton.id == 137) {
+								mc.displayGuiScreen(new GuiTexturePacks(guiscreen));
+								x.set(guiscreen, null);
+							}
 						}
 					}
 				}  
@@ -285,8 +298,18 @@ public class mod_BetaTweaks extends BaseMod {
 			}
 			currentWorld = mc.theWorld;
 		}
-		
-		if (optionsClientDraggingShortcuts && guiscreen instanceof GuiContainer) {
+		if(HMIinstalled == null) {
+			HMIinstalled = false;
+			List modList = ModLoader.getLoadedMods();
+			for (Object obj : modList) {
+				BaseMod mod = (BaseMod)obj;
+				if (mod.getClass().getName() == "mod_HowManyItems") {
+					HMIinstalled = true;
+					break;
+				}
+			}
+		}
+		if (optionsClientDraggingShortcuts && guiscreen instanceof GuiContainer && (!HMIinstalled || !(guiscreen instanceof GuiRecipeViewer))) {
 			GuiContainer container = (GuiContainer)guiscreen;
 			int x = (Mouse.getEventX() * container.width) / mc.displayWidth;
             int y = container.height - (Mouse.getEventY() * container.height) / mc.displayHeight - 1;
@@ -319,6 +342,7 @@ public class mod_BetaTweaks extends BaseMod {
 			catch (InvocationTargetException e) { e.printStackTrace(); } 
 			
 			if(slot != null) {
+				//System.out.println(slot.slotNumber);
             while(Mouse.next()) {
             	
         		if(Mouse.getEventButtonState())
@@ -359,15 +383,30 @@ public class mod_BetaTweaks extends BaseMod {
         				}
         			}
         			else if(Mouse.getEventButton() == 1 && player.inventory.getItemStack() == null && slot.getHasStack()) {
-    					itemClickedOn = true;
-    					controller.handleMouseClick(windowId, slot.slotNumber, 1, false, player);
-    					lastSlotNo = slot.slotNumber;
+        				if(slot instanceof SlotCrafting && shiftClick && slot.getHasStack()) {
+        					controller.handleMouseClick(windowId, slot.slotNumber, 1, shiftClick, player);
+        				}
+        				else if(shiftClick && slot.getHasStack()) {
+        					controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
+        					controller.handleMouseClick(windowId, slot.slotNumber, 1, false, player);
+        					controller.handleMouseClick(windowId, slot.slotNumber, 0, true, player);
+        					controller.handleMouseClick(windowId, slot.slotNumber, 0, false, player);
+        				}
+        				else {
+        					itemClickedOn = true;
+        					controller.handleMouseClick(windowId, slot.slotNumber, 1, false, player);
+        					lastSlotNo = slot.slotNumber;
+        				}
     	            }
         			else if(Mouse.getEventButton() == 1/* && slot.getHasStack()*/) {
     					controller.handleMouseClick(windowId, slot.slotNumber, 1, false, player);
+    					ItemStack item = player.inventory.getItemStack();
     					if(player.inventory.getItemStack() != null) {
     						itemClickedOn = true;
     						lastSlotNo = slot.slotNumber;
+    						if(!item.isItemEqual(player.inventory.getItemStack())) {
+    							itemClickedOn = false;
+    						}
     					}
     				}
     			} 
@@ -509,6 +548,7 @@ public class mod_BetaTweaks extends BaseMod {
 	private Boolean itemClickedOn = false;
 	private int lastSlotNo;
 	private ArrayList<Integer> spreadSlots = new ArrayList<Integer>();
+	private boolean rmbHeld;
 
 	public boolean OnTickInGame(Minecraft minecraft) {
 		if(texturePackButtonIndex != -1 && !(minecraft.currentScreen instanceof GuiIngameMenu)) {
@@ -520,6 +560,27 @@ public class mod_BetaTweaks extends BaseMod {
 			if (minecraft.theWorld != null) minecraft.renderGlobal.loadRenderers();
 		}
 
+		if(optionsClientDraggingShortcuts) {
+			if(Mouse.isButtonDown(1) && minecraft.currentScreen == null) {
+				if(!rmbHeld) {
+					rmbHeld = true;
+					if(minecraft.thePlayer.inventory.getCurrentItem() != null && minecraft.thePlayer.inventory.getCurrentItem().getItem() instanceof ItemArmor) {
+						int armourSlotID = ((ItemArmor)minecraft.thePlayer.inventory.getCurrentItem().getItem()).armorType + 5;
+						int heldSlotID = minecraft.thePlayer.inventorySlots.slots.size() - (9 - minecraft.thePlayer.inventory.currentItem);
+						GuiInventory inv = new GuiInventory(minecraft.thePlayer);
+						minecraft.playerController.handleMouseClick(inv.inventorySlots.windowId, heldSlotID, 0, false, minecraft.thePlayer);
+						minecraft.playerController.handleMouseClick(inv.inventorySlots.windowId, armourSlotID, 0, false, minecraft.thePlayer);
+						minecraft.playerController.handleMouseClick(inv.inventorySlots.windowId, heldSlotID, 0, false, minecraft.thePlayer);
+					}
+				}
+				
+			}
+			else {
+				rmbHeld = false;
+			}
+			
+		}
+		
 		if (modloaderMPinstalled && BetaTweaksMP.serverModInstalled && BetaTweaksMP.optionsServerAllowPlayerList
 				&& Keyboard.isKeyDown(playerList.keyCode) && minecraft.currentScreen == null) {
 			Gui x = new Gui();
@@ -798,15 +859,12 @@ public class mod_BetaTweaks extends BaseMod {
 		Block.blocksList[Block.blockSteel.blockID] = null;
 		Block.blocksList[Block.blockGold.blockID] = null;
 		Block.blocksList[Block.blockDiamond.blockID] = null;
-		new BlockOreStorageIndev(Block.blockSteel, 60, "/BetaTweaks/steelSide.png", "/BetaTweaks/steelBottom.png");
-		new BlockOreStorageIndev(Block.blockGold, 59, "/BetaTweaks/goldSide.png", "/BetaTweaks/goldBottom.png");
-		new BlockOreStorageIndev(Block.blockDiamond, 75, "/BetaTweaks/diamondSide.png", "/BetaTweaks/diamondBottom.png");
+		new BlockOreStorageIndev(Block.blockSteel, new String[] {"blockSteel", "aj"}, "/BetaTweaks/steelSide.png", "/BetaTweaks/steelBottom.png");
+		new BlockOreStorageIndev(Block.blockGold, new String[] {"blockGold", "ai"}, "/BetaTweaks/goldSide.png", "/BetaTweaks/goldBottom.png");
+		new BlockOreStorageIndev(Block.blockDiamond, new String[] {"blockDiamond", "ay"}, "/BetaTweaks/diamondSide.png", "/BetaTweaks/diamondBottom.png");
 		
-		try {
-			Class.forName("SAPI");
-		} 
-		catch (ClassNotFoundException e) { 
-			Field blocksEffectiveAgainst = ItemTool.class.getDeclaredFields()[0];
+		Field blocksEffectiveAgainst = getObfuscatedPrivateField(ItemTool.class, new String[] {"blocksEffectiveAgainst", "bk"});
+		if (blocksEffectiveAgainst != null) {
 			blocksEffectiveAgainst.setAccessible(true);
 			for(Item item : Item.itemsList) {
 				if(item instanceof ItemPickaxe) {
@@ -874,5 +932,16 @@ public class mod_BetaTweaks extends BaseMod {
 			exception.printStackTrace();
 		}
 	}
+	
+	//clean mine_diver code
+	public static final Field getObfuscatedPrivateField(Class<?> target, String names[]) {
+        for (Field field : target.getDeclaredFields())
+            for (String name : names)
+                if (field.getName() == name) {
+                    field.setAccessible(true);
+                    return field;
+                }
+        return null;
+    }
 
 }
