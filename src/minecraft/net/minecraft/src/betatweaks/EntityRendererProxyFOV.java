@@ -60,7 +60,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         	fov *= 60.0F / 70.0F;
         }
         if((!optifine && (mc.gameSettings.smoothCamera = Keyboard.isKeyDown(mod_BetaTweaks.zoom.keyCode) && ModLoader.isGUIOpen(null)))
-        		|| (optifine && Keyboard.isKeyDown(mc.gameSettings.ofKeyBindZoom.keyCode)))
+        		|| (optifine && Utils.optifineHandler.zoomKeyHeld()))
         {
             if(!zoomMode)
             {
@@ -380,7 +380,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                         }
                         GL11.glColorMask(false, false, false, false);
                         int i1;
-                        if(optifine) i1 = renderglobal.renderAllSortedRenderers(1, f);
+                        if(optifine) i1 = Utils.optifineHandler.renderAllSortedRenders(f);
                         else i1 = renderglobal.sortAndRender(entityliving, 1, f);
                         if(mc.gameSettings.anaglyph)
                         {
@@ -397,7 +397,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                         }
                         if(i1 > 0)
                         {
-                        	if(optifine) renderglobal.renderAllSortedRenderers(1, f);
+                        	if(optifine) Utils.optifineHandler.renderAllSortedRenders(f);
                         	else renderglobal.renderAllRenderLists(1, f);
                         }
                         GL11.glShadeModel(7424 /*GL_FLAT*/);
@@ -408,7 +408,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                     }
                 }
                 else {
-                	renderglobal.renderAllSortedRenderers(1, f);
+                	Utils.optifineHandler.renderAllSortedRenders(f);
                 }
                 
                 if(second_renderpass && i == 0)
