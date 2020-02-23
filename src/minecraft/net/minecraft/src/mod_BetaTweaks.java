@@ -58,15 +58,12 @@ public class mod_BetaTweaks extends BaseMod {
 			if(!Utils.isInstalled(Utils.optifineHandler)) ModLoader.RegisterKey(this, zoom, false);
 			Utils.mc.entityRenderer = new EntityRendererProxyFOV();
 		}
-
-		Object obj;
-		if((obj = Utils.getStaticFieldValue(GuiOptions.class, "field_22135_k", "l")) instanceof Integer) {
-			guiOptionsButtonCount = (Integer)obj;
+		int i = 5;
+		try {
+			i = new Utils.EasyField<Integer>(GuiOptions.class, "field_22135_k", "l").get();
 		}
-		else {
-			guiOptionsButtonCount = 5;
-		}
-		
+		catch(NullPointerException e) { }
+		guiOptionsButtonCount = i;
 		CustomFullscreenRes.set(cfg.customFullscreenRes.getValue());
 		ModLoader.RegisterKey(this, CustomFullscreenRes.toggleKeybind, false);
 	}
@@ -138,7 +135,7 @@ public class mod_BetaTweaks extends BaseMod {
 			Utils.overrideCurrentScreen(firstGuiScreenAfterHijack);
 			firstGuiScreenAfterHijack = null;
 		} else if (Utils.isInstalled(Utils.guiapihandler) && Utils.guiapihandler.isGuiModScreen(guiscreen)) {
-			Utils.guiapihandler.handleTooltip((GuiModScreen)guiscreen, Utils.cursorX(), Utils.cursorY());
+			Utils.guiapihandler.handleTooltip(guiscreen, Utils.cursorX(), Utils.cursorY());
 			if (Utils.guiapihandler.settingsChanged(guiscreen)) {
 				Boolean temp1 = cfg.indevStorageBlocks.isEnabled();
 				Boolean temp2 = cfg.hideLongGrass.isEnabled();

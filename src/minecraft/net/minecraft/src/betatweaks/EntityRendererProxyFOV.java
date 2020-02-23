@@ -1,6 +1,5 @@
 package net.minecraft.src.betatweaks;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -23,7 +22,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
 	private final Method orientCameraMethod = Utils.getMethod(EntityRenderer.class, new Class<?>[] {float.class}, "orientCamera", "g");
 	private final Method updateFogColorMethod = Utils.getMethod(EntityRenderer.class, new Class<?>[] {float.class}, "updateFogColor", "h");
 	
-	private final Field rendererUpdateCountField = Utils.getField(EntityRenderer.class, "rendererUpdateCount", "l");
+	private final Utils.EasyField<Integer> rendererUpdateCountField = new Utils.EasyField<Integer>(EntityRenderer.class, "rendererUpdateCount", "l");
 	
 	public EntityRendererProxyFOV() {
 		this(Utils.mc);
@@ -122,11 +121,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         float f2 = mc.thePlayer.prevTimeInPortal + (mc.thePlayer.timeInPortal - mc.thePlayer.prevTimeInPortal) * f;
         if(f2 > 0.0F)
         {
-        	int renderUpdateCount = 0;
-        	try {
-				renderUpdateCount = rendererUpdateCountField.getInt(this);
-			} 
-        	catch (IllegalAccessException e) { e.printStackTrace(); }
+        	int renderUpdateCount = rendererUpdateCountField.get(this);
             float f3 = 5F / (f2 * f2 + 5F) - f2 * 0.04F;
             f3 *= f3;
             GL11.glRotatef(((float)renderUpdateCount + f) * 20F, 0.0F, 1.0F, 1.0F);

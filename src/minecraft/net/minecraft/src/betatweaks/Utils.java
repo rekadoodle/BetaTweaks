@@ -25,36 +25,13 @@ public class Utils {
 
 	public static final Minecraft mc = ModLoader.getMinecraftInstance();
 	private static GuiScreen parentScreen;
-	private static final Field modifiersField = getField(Field.class, "modifiers");
-	private static final Field timerField = Utils.getField(Minecraft.class, "timer", "T");
-	private static final Field selectedButtonField = Utils.getField(GuiScreen.class, "selectedButton", "a");
+	private static final EasyField<Timer> timerField = new EasyField<Timer>(Minecraft.class, "timer", "T");
+	private static final EasyField<GuiButton> selectedButtonField = new EasyField<GuiButton>(GuiScreen.class, "selectedButton", "a");
 	private static Timer timer;
 	private static int lastMouseX;
     private static int lastMouseY;
     private static long mouseStillTime;
     private static GuiScreen currentScreen;
-
-	// Used for easy reflection with obfuscated or regular fields
-	public static final Field getField(Class<?> target, String ...names) {
-		for (Field field : target.getDeclaredFields()) {
-			for (String name : names) {
-				if (field.getName() == name) {
-					field.setAccessible(true);
-					return field;
-				}
-			}
-		}
-		return null;
-	}
-	
-	// Used to get a value of a hidden field
-	public static Object getStaticFieldValue(Class<?> target, String ...names) {
-		final Field field = getField(target, names);
-		try {
-			return field.get(null);
-		}
-		catch(Exception e) { return null; }
-	}
 
 	// Used for easy reflection with obfuscated or regular methods
 	public static final Method getMethod(Class<?> target, Class<?> types[], String ...names) {
@@ -97,13 +74,10 @@ public class Utils {
 	}
 	
 	public static void replaceBlock(Block newBlock, String ...fields) {
-        try {
-    		Field blockField = getField(Block.class, fields);
-			modifiersField.setInt(blockField, blockField.getModifiers() & ~Modifier.FINAL);
-			blockField.set(null, newBlock);
-			Block.blocksList[newBlock.blockID] = newBlock;
-        } 
-        catch (Exception e) { e.printStackTrace(); }
+		EasyField<Block> blockField = new EasyField<Block>(Block.class, fields);
+		blockField.removeFinalModifier();
+		blockField.set(newBlock);
+		Block.blocksList[newBlock.blockID] = newBlock;
 	}
 	
 	public static int cursorX() {
@@ -116,10 +90,7 @@ public class Utils {
 	
 	public static float renderPartialTicks() {
 		if(timer == null) {
-			try {
-				timer = (Timer) timerField.get(Utils.mc);
-			}
-			catch (Exception e) { e.printStackTrace(); } 
+			timer = timerField.get(Utils.mc);
 		}
 		return timer.renderPartialTicks;
 	}
@@ -139,10 +110,8 @@ public class Utils {
 	}
 	
 	public static boolean buttonClicked(GuiButton button) {
-		try {
-			if(selectedButtonField.get(mc.currentScreen) == button) return true;
-		} 
-		catch (Exception e) { e.printStackTrace(); }
+		if(selectedButtonField.get(mc.currentScreen) == button) 
+			return true;
 		return false;
 	}
 	
@@ -252,5 +221,66 @@ public class Utils {
 			return Utils.class.getClassLoader().loadClass(Utils.class.getPackage().getName() + ".references." + path + ".ConcreteHandler").newInstance(); 
 		}
 		catch (Throwable e) { e.printStackTrace(); return null; } 
+	}
+	
+	public static void logError(String... lines) {
+		System.out.println(new StringBuilder().append("BETATWEAKS ERROR: ").append(lines[0]).toString());
+		for (String message : lines) {
+			if(message == lines[0]) continue;
+			System.out.println(new StringBuilder().append('\t').append(message).toString());
+		}
+	}
+	
+	public static class EasyField<T> {
+
+		private static final EasyField<Integer> modifiersField = new EasyField<Integer>(Field.class, "modifiers");
+		public final Field field;
+		
+		public EasyField(Class<?> target, String... names) {
+			for (Field field : target.getDeclaredFields()) {
+				for (String name : names) {
+					if (field.getName() == name) {
+						field.setAccessible(true);
+						this.field = field;
+						return;
+					}
+				}
+			}
+			this.field = null;
+			logError("Failed to located field " + names[0] + " in class " + target.getSimpleName());
+		}
+		
+		public boolean exists() {
+			return field != null;
+		}
+		
+		@SuppressWarnings("unchecked")
+		public T get(Object instance) {
+			try {
+				return (T) field.get(instance);
+			}
+			catch (Exception e) { e.printStackTrace(); }
+			return null;
+		}
+		
+		public T get() {
+			return this.get(null);
+		}
+		
+		public void set(Object instance, T value) {
+			try {
+				field.set(instance, value);
+			} 
+			catch (Exception e) { e.printStackTrace(); }
+		}
+		
+		public void set(T value) {
+			this.set(null, value);
+		}
+		
+		public void removeFinalModifier() {
+			modifiersField.set(field, field.getModifiers() & ~Modifier.FINAL);
+		}
+		
 	}
 }

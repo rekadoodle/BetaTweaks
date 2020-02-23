@@ -12,13 +12,9 @@ public class ConcreteHandler extends HandlerModLoaderMp {
 	private BaseModMp packetHandler;
 	public int maxPlayers;
 	
-	@SuppressWarnings("unchecked")
 	public ConcreteHandler() {
 		packetHandler = new PacketHandler(this);
-		try {
-			((LinkedList<BaseMod>) Utils.getField(ModLoader.class, "modList").get(null)).add(packetHandler);
-		} 
-		catch (Exception e) { e.printStackTrace(); } 
+		new Utils.EasyField<LinkedList<BaseMod>>(ModLoader.class, "modList").get().add(packetHandler);
 	}
 
 	//Outgoing packet IDs

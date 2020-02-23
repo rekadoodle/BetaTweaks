@@ -47,25 +47,23 @@ public class BlockOreStorageIndev extends BlockOreStorage {
 		
 		ModLoader.RegisterAllTextureOverrides(Utils.mc.renderEngine);
 		
-		final Field blocksEffectiveAgainst = Utils.getField(ItemTool.class, "blocksEffectiveAgainst", "bk");
-		if (blocksEffectiveAgainst != null) {
+		Utils.EasyField<Block[]> blocksEffectiveAgainstField = new Utils.EasyField<Block[]>(ItemTool.class, "blocksEffectiveAgainst", "bk");
+		
+		if (blocksEffectiveAgainstField.exists()) {
 			for(Item item : Item.itemsList) {
 				if(item instanceof ItemPickaxe) {
-					try {
-						Block blocks[] = (Block[])blocksEffectiveAgainst.get(item);
-						for(int i = 0; i < blocks.length; i++) {
-							if(blocks[i].blockID == Block.blockSteel.blockID) {
-								blocks[i] = Block.blockSteel;
-							}
-							else if(blocks[i].blockID == Block.blockGold.blockID) {
-								blocks[i] = Block.blockGold;
-							}
-							else if(blocks[i].blockID == Block.blockDiamond.blockID) {
-								blocks[i] = Block.blockDiamond;
-							}
+					Block blocks[] = blocksEffectiveAgainstField.get(item);
+					for(int i = 0; i < blocks.length; i++) {
+						if(blocks[i].blockID == Block.blockSteel.blockID) {
+							blocks[i] = Block.blockSteel;
 						}
-					} 
-					catch (Exception e) { e.printStackTrace(); }
+						else if(blocks[i].blockID == Block.blockGold.blockID) {
+							blocks[i] = Block.blockGold;
+						}
+						else if(blocks[i].blockID == Block.blockDiamond.blockID) {
+							blocks[i] = Block.blockDiamond;
+						}
+					}
 				}
 			}
 		}

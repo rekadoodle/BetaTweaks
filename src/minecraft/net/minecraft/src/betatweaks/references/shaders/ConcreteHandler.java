@@ -12,31 +12,27 @@ public class ConcreteHandler extends HandlerShaders {
 	
 	public void init(EntityRenderer renderer) {
 		this.renderer = renderer;
-		framebuffer = (FBO) getValue("framebuffer");
-		water_config = (Water_Config) getValue("water_config");
-		black = (Shader) getValue("black");
-		white = (Shader) getValue("white");
-		transparency = (Shader) getValue("transparency");
-		water = (Shader) getValue("water");
-		white_inverse_view = (Integer) getValue("white_inverse_view");
-		transp_render_v3 = (Integer) getValue("transp_render_v3");
-		transp_water = (Integer) getValue("transp_water");
-		transp_waterfall = (Integer) getValue("transp_waterfall");
-		transp_waterfall_color = (Integer) getValue("transp_waterfall_color");
-		water_timer = (Integer) getValue("water_timer");
-		water_colorMap = (Integer) getValue("water_colorMap");
-		water_stencilMap = (Integer) getValue("water_stencilMap");
-		water_reflectedColorMap = (Integer) getValue("water_reflectedColorMap");
-		water_color = (Integer) getValue("water_color");
-		second_renderpass = (Boolean) getValue("second_renderpass");
+		framebuffer = getValue(FBO.class, "framebuffer");
+		water_config = getValue(Water_Config.class, "water_config");
+		black = getValue(Shader.class, "black");
+		white = getValue(Shader.class, "white");
+		transparency = getValue(Shader.class, "transparency");
+		water = getValue(Shader.class, "water");
+		white_inverse_view = getValue(Integer.class, "white_inverse_view");
+		transp_render_v3 = getValue(Integer.class, "transp_render_v3");
+		transp_water = getValue(Integer.class, "transp_water");
+		transp_waterfall = getValue(Integer.class, "transp_waterfall");
+		transp_waterfall_color = getValue(Integer.class, "transp_waterfall_color");
+		water_timer = getValue(Integer.class, "water_timer");
+		water_colorMap = getValue(Integer.class, "water_colorMap");
+		water_stencilMap = getValue(Integer.class, "water_stencilMap");
+		water_reflectedColorMap = getValue(Integer.class, "water_reflectedColorMap");
+		water_color = getValue(Integer.class, "water_color");
+		second_renderpass = getValue(Boolean.class, "second_renderpass");
 	}
 	
-	private Object getValue(String s) {
-		try {
-			return Utils.getField(EntityRenderer.class, s).get(renderer);
-		} 
-		catch (Exception e) { e.printStackTrace(); } 
-		return null;
+	private <T> T getValue(Class<T> type, String... names) {
+		return new Utils.EasyField<T>(EntityRenderer.class, "framebuffer").get(renderer);
 	}
 	
 	private EntityRenderer renderer;

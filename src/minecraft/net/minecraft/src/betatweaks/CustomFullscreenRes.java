@@ -26,9 +26,9 @@ public class CustomFullscreenRes {
 	private static DisplayMode customResolution;
 	private static int canvasWidth;
 	private static int canvasHeight;
-	private static final Field fullscreenField = Utils.getField(Minecraft.class, "fullscreen", "Q");
-	private static final Field canvasWidthField = Utils.getField(Component.class, "width");
-	private static final Field canvasHeightField = Utils.getField(Component.class, "height");
+	private static final Utils.EasyField<Boolean> fullscreenField = new Utils.EasyField<Boolean>(Minecraft.class, "fullscreen", "Q");
+	private static final Utils.EasyField<Integer> canvasWidthField = new Utils.EasyField<Integer>(Component.class, "width");
+	private static final Utils.EasyField<Integer> canvasHeightField = new Utils.EasyField<Integer>(Component.class, "height");
 	public static final KeyBinding toggleKeybind = new KeyBinding("Custom Fullscreen", Keyboard.KEY_F8);
 	private static boolean fullscreenKeyHeld = false;
 	
@@ -137,7 +137,7 @@ public class CustomFullscreenRes {
 			Display.setFullscreen(fullscreen);
             Display.update();
 		}
-		catch(Exception e) { e.printStackTrace(); }
+		catch(LWJGLException e) { e.printStackTrace(); }
 	}
 	
 	public static boolean isFullscreen() {
