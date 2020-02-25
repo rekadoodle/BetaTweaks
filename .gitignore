@@ -33,8 +33,14 @@ hs_err_pid*
 /runtime
 /temp
 
-# Eclipse
-/eclipse
+# Eclipse Resources
+/eclipse/*
+!/eclipse/Client
+/eclipse/Client/*
+!/eclipse/Client/bin
+/eclipse/Client/bin/*
+!/eclipse/Client/bin/betatweaks
+
 
 # MC Forge
 /forge

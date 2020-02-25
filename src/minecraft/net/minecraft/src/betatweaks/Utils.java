@@ -1,9 +1,14 @@
 package net.minecraft.src.betatweaks;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -11,15 +16,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 import net.minecraft.src.betatweaks.config.SBase;
-import net.minecraft.src.betatweaks.dummy.HandlerAether;
-import net.minecraft.src.betatweaks.dummy.HandlerForge;
-import net.minecraft.src.betatweaks.dummy.HandlerGuiAPI;
-import net.minecraft.src.betatweaks.dummy.HandlerHMI;
-import net.minecraft.src.betatweaks.dummy.HandlerJSON;
-import net.minecraft.src.betatweaks.dummy.HandlerMineColony;
-import net.minecraft.src.betatweaks.dummy.HandlerModLoaderMp;
-import net.minecraft.src.betatweaks.dummy.HandlerOptifine;
-import net.minecraft.src.betatweaks.dummy.HandlerShaders;
+import net.minecraft.src.betatweaks.dummy.*;
 
 public class Utils {
 
@@ -32,6 +29,10 @@ public class Utils {
     private static int lastMouseY;
     private static long mouseStillTime;
     private static GuiScreen currentScreen;
+    
+    private static final List<String> loadedResources = new ArrayList<String>();
+	private static final List<String> missingResources = new ArrayList<String>();
+	public static final String resourcesFolder = "/betatweaks/resources/";
 
 	// Used for easy reflection with obfuscated or regular methods
 	public static final Method getMethod(Class<?> target, Class<?> types[], String ...names) {
@@ -228,6 +229,52 @@ public class Utils {
 		for (String message : lines) {
 			if(message == lines[0]) continue;
 			System.out.println(new StringBuilder().append('\t').append(message).toString());
+		}
+	}
+	
+	public static URL getResourceURL(String resource) {
+		return getResourceURLAbsolute(new StringBuilder().append(resourcesFolder).append(resource).toString());
+	}
+	
+	private static URL getResourceURLAbsolute(String resource) {
+		return Utils.class.getResource(resource);
+	}
+	
+	public static String getResourceAbsolute(String resource) {
+		resourceExistsAbsolute(resource);
+		return resource;
+	}
+	
+	public static String getResource(String resource) {
+		return getResourceAbsolute(new StringBuilder().append(resourcesFolder).append(resource).toString());
+	}
+	
+	public static boolean resourceExists(String resource) {
+		return resourceExistsAbsolute(new StringBuilder().append(resourcesFolder).append(resource).toString());
+	}
+	
+	public static boolean resourceExistsAbsolute(String resource) {
+		if(loadedResources.contains(resource)) {
+			return true;
+		}
+		if(missingResources.contains(resource)) {
+			return false;
+		}
+		if(getResourceURLAbsolute(resource) != null) {
+			loadedResources.add(resource);
+			return true;
+		}
+		else  {
+			missingResources.add(resource);
+			String error = "Missing file " + new File("bin\\minecraft.jar").getAbsolutePath().replace("\\", "/") + resource;
+			if(System.getProperty("java.class.path").toLowerCase().contains("eclipse"))
+	        {
+				logError(new String[] {error, "Alternate Location " + mod_BetaTweaks.class.getClassLoader().getResource("").getPath().replaceFirst("/*$", "") + resource});
+	        }
+			else {
+				logError(error);
+			}
+			return false;
 		}
 	}
 	

@@ -26,7 +26,7 @@ public class mod_BetaTweaks extends BaseMod {
 	}
 	
 	public String Icon() {
-		return resources + "/modMenu1";
+		return Utils.getResource("modMenu1.png");
 	}
 	
 	public static GuiScreen firstGuiScreenAfterHijack;
@@ -58,11 +58,11 @@ public class mod_BetaTweaks extends BaseMod {
 			if(!Utils.isInstalled(Utils.optifineHandler)) ModLoader.RegisterKey(this, zoom, false);
 			Utils.mc.entityRenderer = new EntityRendererProxyFOV();
 		}
-		int i = 5;
+		int i;
 		try {
-			i = new Utils.EasyField<Integer>(GuiOptions.class, "field_22135_k", "l").get();
+			i = new Utils.EasyField<EnumOptions[]>(GuiOptions.class, "field_22135_k", "l").get().length;
 		}
-		catch(NullPointerException e) { }
+		catch(NullPointerException e) { i = 5; }
 		guiOptionsButtonCount = i;
 		CustomFullscreenRes.set(cfg.customFullscreenRes.getValue());
 		ModLoader.RegisterKey(this, CustomFullscreenRes.toggleKeybind, false);
@@ -243,8 +243,6 @@ public class mod_BetaTweaks extends BaseMod {
 		}
 		return true;
 	}
-	
-	public final static String resources = "/betatweaks/resources";
 	
 	//These methods are used to avoid reflection in classes from the betatweaks package.
 	public static void drawRect(int i, int j, int k, int l, int colour) {

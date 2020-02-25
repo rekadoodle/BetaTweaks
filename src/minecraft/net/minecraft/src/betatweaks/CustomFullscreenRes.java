@@ -2,7 +2,6 @@ package net.minecraft.src.betatweaks;
 
 import java.awt.Component;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +16,6 @@ import net.minecraft.src.GuiScreen;
 import net.minecraft.src.KeyBinding;
 import net.minecraft.src.ScaledResolution;
 import net.minecraft.src.betatweaks.config.Config;
-import net.minecraft.src.betatweaks.dummy.HandlerGuiAPI;
 import net.minecraft.src.betatweaks.gui.GuiControlsScrollable;
 
 public class CustomFullscreenRes {

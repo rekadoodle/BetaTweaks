@@ -1,7 +1,5 @@
 package net.minecraft.src.betatweaks.block;
 
-import java.lang.reflect.Field;
-
 import net.minecraft.src.*;
 import net.minecraft.src.betatweaks.Utils;
 import net.minecraft.src.betatweaks.config.Config;
@@ -40,10 +38,9 @@ public class BlockOreStorageIndev extends BlockOreStorage {
     }
     
     public static void init() {
-    	String resources = mod_BetaTweaks.resources;
-		new BlockOreStorageIndev(Block.blockSteel, new String[] {"blockSteel", "aj"}, resources + "/steelSide.png", resources + "/steelBottom.png");
-		new BlockOreStorageIndev(Block.blockGold, new String[] {"blockGold", "ai"}, resources + "/goldSide.png", resources + "/goldBottom.png");
-		new BlockOreStorageIndev(Block.blockDiamond, new String[] {"blockDiamond", "ay"}, resources + "/diamondSide.png", resources + "/diamondBottom.png");
+		new BlockOreStorageIndev(Block.blockSteel, new String[] {"blockSteel", "aj"}, Utils.getResource("steelSide.png"), Utils.getResource("steelBottom.png"));
+		new BlockOreStorageIndev(Block.blockGold, new String[] {"blockGold", "ai"}, Utils.getResource("goldSide.png"), Utils.getResource("goldBottom.png"));
+		new BlockOreStorageIndev(Block.blockDiamond, new String[] {"blockDiamond", "ay"}, Utils.getResource("diamondSide.png"), Utils.getResource("diamondBottom.png"));
 		
 		ModLoader.RegisterAllTextureOverrides(Utils.mc.renderEngine);
 		

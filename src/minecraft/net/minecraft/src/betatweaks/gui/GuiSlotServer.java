@@ -93,7 +93,7 @@ public class GuiSlotServer extends GuiSlot
         menu.drawString(Utils.mc.fontRenderer, server.playerCount, (j + 215) - Utils.mc.fontRenderer.getStringWidth(server.playerCount), k + 12, 0x808080);
         menu.drawString(Utils.mc.fontRenderer, server.ip, j + 2, k + 12 + 11, 0x303030);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        Utils.mc.renderEngine.bindTexture(Utils.mc.renderEngine.getTexture(mod_BetaTweaks.resources + "/icons.png"));
+        Utils.mc.renderEngine.bindTexture(Utils.mc.renderEngine.getTexture(Utils.getResource("icons.png")));
         int i1 = 0;
         int j1 = 0;
         String s = null;

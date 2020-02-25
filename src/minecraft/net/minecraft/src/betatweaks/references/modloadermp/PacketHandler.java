@@ -44,7 +44,7 @@ public class PacketHandler extends BaseModMp {
 	}
 	
 	public String Icon() {
-		return mod_BetaTweaks.resources + "/modMenu2";
+		return Utils.getResource("modMenu2.png");
 	}
 	
 	public void HandlePacket(Packet230ModLoader packet) {

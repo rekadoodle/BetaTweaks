@@ -19,6 +19,7 @@ import net.minecraft.src.ScaledResolution;
 import net.minecraft.src.Tessellator;
 import net.minecraft.src.mod_BetaTweaks;
 import net.minecraft.src.betatweaks.RenderBlocksLogoFunc;
+import net.minecraft.src.betatweaks.Utils;
 import net.minecraft.src.betatweaks.config.Config;
 
 import org.lwjgl.opengl.GL11;
@@ -35,6 +36,10 @@ public class GuiMainMenuCustom extends GuiMainMenu
     
     public GuiMainMenuCustom()
     {
+    	if (configLogoFile.exists()) {
+    		readCustomLogoConfig();
+			timeStamp = configLogoFile.lastModified();
+		}
         updateCounter = 0.0F;
         splashText = "missingno";
         try
@@ -285,7 +290,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
                 {
                     GL11.glRotatef(-90.0F, 1.0F, 0.0F, 0.0F);
                 }
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture(logoPanoramaFolder + panoramaFilePaths[var10]));
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, this.mc.renderEngine.getTexture(Utils.getResourceAbsolute(new StringBuilder().append(logoPanoramaFolder).append(panoramaFilePaths[var10]).toString())));
 	            var4.startDrawingQuads();
                 var4.setColorRGBA_I(16777215, 255 / (var6 + 1));
                 float var11 = 0.0F;
@@ -706,7 +711,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 					+ System.getProperty("line.separator") + "SplashTextEnabled=true"
 					+ System.getProperty("line.separator") + "SplashTextOffsetX=-15.0"
 					+ System.getProperty("line.separator") + "SplashTextOffsetY=-10.0"
-					+ System.getProperty("line.separator") + "PanoramaFolder=" + mod_BetaTweaks.resources + "/panorama");
+					+ System.getProperty("line.separator") + "PanoramaFolder=" + Utils.resourcesFolder + "panorama");
 			/*
 				Field[] myFields = mod_BetaTweaks.class.getFields();
 				for (int i = 0; i < myFields.length; i++) {
@@ -746,7 +751,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 	public static Boolean logoSplashTextEnabled = true;
 	public static float logoSplashTextOffsetX = 0;
 	public static float logoSplashTextOffsetY = 0;
-	public static String logoPanoramaFolder = mod_BetaTweaks.resources + "/panorama";
+	public static String logoPanoramaFolder = Utils.resourcesFolder + "panorama";
     
     public static File configLogoFile = new File((Minecraft.getMinecraftDir()) + "/config/OldCustomLogo.cfg");
 	private static Long timeStamp = configLogoFile.lastModified();
