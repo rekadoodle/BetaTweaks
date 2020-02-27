@@ -12,6 +12,7 @@ public class ConcreteHandler extends HandlerAether {
 	
 	public ConcreteHandler() {
 		this.sheepuffExists = Utils.classExists("EntitySheepuff");
+		GuiMainMenu.renderOption = mod_Aether.worldMenu;
 	}
 
 	@Override

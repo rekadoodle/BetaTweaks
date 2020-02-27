@@ -13,7 +13,7 @@ import org.lwjgl.input.Keyboard;
 public class mod_BetaTweaks extends BaseMod {
 	
 	public String Version() {
-		return "v1.2.3";
+		return "v1.27 PRE";
 	}
 	
 	//Info for mine_diver's mod menu
@@ -51,8 +51,8 @@ public class mod_BetaTweaks extends BaseMod {
 		ModLoader.SetInGameHook(this, true, false);
 		ModLoader.SetInGUIHook(this, true, false);
 
-		if ((cfg.logoStyle.getValue() != 0 || cfg.mainmenuPanorama.isEnabled()) && Utils.mc.currentScreen == null)
-			Utils.mc.currentScreen = new GuiInitialHijack();
+		//if ((cfg.logoStyle.getValue() != 0 || cfg.mainmenuPanorama.isEnabled()) && Utils.mc.currentScreen == null)
+			//Utils.mc.currentScreen = new GuiInitialHijack();
 		
 		if(!cfg.disableEntityRendererOverride.isEnabled()) {
 			if(!Utils.isInstalled(Utils.optifineHandler)) ModLoader.RegisterKey(this, zoom, false);

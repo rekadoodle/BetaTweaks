@@ -202,7 +202,10 @@ public class Utils {
 	}
 	
 	public static void modsLoaded() {
-		String modpackage = mod_BetaTweaks.class.getPackage().getName() + '.';
+		String modpackage = "";
+		if(mod_BetaTweaks.class.getPackage() != null) {
+			modpackage = mod_BetaTweaks.class.getPackage().getName() + '.';
+		}
 		if(ModLoader.isModLoaded(modpackage + "mod_HowManyItems")) {
 			hmiHandler = (HandlerHMI) getHandler("hmi");
 		}
