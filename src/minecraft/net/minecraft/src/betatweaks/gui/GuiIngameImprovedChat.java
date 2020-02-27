@@ -12,6 +12,7 @@ import net.minecraft.src.GuiChat;
 import net.minecraft.src.GuiIngame;
 import net.minecraft.src.ScaledResolution;
 import net.minecraft.src.betatweaks.ChatLineImproved;
+import net.minecraft.src.betatweaks.Utils;
 import net.minecraft.src.betatweaks.config.Config;
 
 public class GuiIngameImprovedChat extends GuiIngame {
@@ -103,6 +104,15 @@ public class GuiIngameImprovedChat extends GuiIngame {
 	
 	public void renderGameOverlay(float f, boolean flag, int i, int j)
     {
+		if(Utils.isInstalled(Utils.aetherHandler) && Utils.aetherHandler.simulatedWorldMenu()) {
+			GL11.glViewport(0, 0, mc.displayWidth, mc.displayHeight);
+            GL11.glMatrixMode(5889 /*GL_PROJECTION*/);
+            GL11.glLoadIdentity();
+            GL11.glMatrixMode(5888 /*GL_MODELVIEW0_ARB*/);
+            GL11.glLoadIdentity();
+            mc.entityRenderer.setupOverlayRendering();
+            return;
+		}
 		super.renderGameOverlay(f, flag, i, j);
 		
 		int visibleChatLineCount = ingameChatHeight;

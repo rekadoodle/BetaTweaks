@@ -2,18 +2,23 @@ package net.minecraft.src.betatweaks.references.aether;
 
 import java.util.Random;
 
-import net.minecraft.src.Block;
-import net.minecraft.src.Entity;
-import net.minecraft.src.EntityItem;
-import net.minecraft.src.EntitySheepuff;
-import net.minecraft.src.ItemStack;
+import net.minecraft.src.*;
 import net.minecraft.src.betatweaks.Utils;
 import net.minecraft.src.betatweaks.dummy.HandlerAether;
 
 public class ConcreteHandler extends HandlerAether {
+	
+	private final boolean sheepuffExists;
+	
+	public ConcreteHandler() {
+		this.sheepuffExists = Utils.classExists("EntitySheepuff");
+	}
 
 	@Override
 	public void shearSheepuff(Entity entity) {
+		if(!this.sheepuffExists) {
+			return;
+		}
 		if(entity instanceof EntitySheepuff) {
 			EntitySheepuff sheep = (EntitySheepuff) entity;
 			
@@ -35,6 +40,11 @@ public class ConcreteHandler extends HandlerAether {
 		}
 		
 		
+	}
+
+	@Override
+	public boolean simulatedWorldMenu() {
+		return GuiMainMenu.mmactive;
 	}
 
 }

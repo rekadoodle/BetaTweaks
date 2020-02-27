@@ -6,10 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -187,9 +184,6 @@ public class Utils {
 				}
 			}).start();
 		}
-		if(classExists("EntitySheepuff")) {
-			aetherHandler = (HandlerAether) getHandler("aether");
-		}
 		if(classExists("forge.ForgeHooksClient")) {
 			forgeHandler = (HandlerForge) getHandler("forge");
 		}
@@ -214,6 +208,9 @@ public class Utils {
 		}
 		if(ModLoader.isModLoaded(modpackage + "mod_MineColony")) {
 			minecolonyHandler = (HandlerMineColony) getHandler("minecolony");
+		}
+		if(ModLoader.isModLoaded(modpackage + "mod_Aether")) {
+			aetherHandler = (HandlerAether) getHandler("aether");
 		}
 	}
 	
