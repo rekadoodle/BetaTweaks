@@ -18,10 +18,11 @@ public class ConcreteHandler extends HandlerModLoaderMp {
 	}
 
 	//Outgoing packet IDs
-	private final int PACKET_OUT_UPDATE_SETTINGS = 0;
-	private final int PACKET_OUT_LONGGRASS_DESTROYED = 1;
-	private final int PACKET_OUT_SHEEP_PUNCHED = 2;
-	private final int PACKET_OUT_GRASS_HOED = 3;
+	final int PACKET_OUT_UPDATE_SETTINGS = 0;
+	final int PACKET_OUT_LONGGRASS_DESTROYED = 1;
+	final int PACKET_OUT_SHEEP_PUNCHED = 2;
+	final int PACKET_OUT_GRASS_HOED = 3;
+	final int PACKET_OUT_CHECK_IF_OP = 4;
 
 	@Override
 	public void sheepPunched(int entityid) {
@@ -36,6 +37,13 @@ public class ConcreteHandler extends HandlerModLoaderMp {
 	@Override
 	public void longGrassDestroyed(int x, int y, int z) {
 		sendIntPacket(PACKET_OUT_LONGGRASS_DESTROYED, x, y, z);
+	}
+
+	@Override
+	public void checkIfOp() {
+		Packet230ModLoader packet = new Packet230ModLoader();
+		packet.packetType = PACKET_OUT_CHECK_IF_OP;
+		ModLoaderMp.SendPacket(packetHandler, packet);
 	}
 
 	@Override

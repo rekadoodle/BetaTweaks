@@ -14,6 +14,8 @@ public abstract class HandlerGuiAPI {
 	
 	public abstract boolean isGuiModScreen(GuiScreen guiscreen);
 	
+	public abstract boolean isGuiModSelectScreen(GuiScreen guiscreen);
+	
 	public abstract boolean settingsChanged(GuiScreen guiscreen);
 
 	public abstract void loadSettings();

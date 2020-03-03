@@ -35,4 +35,5 @@ public abstract class HandlerModLoaderMp {
 	public abstract void grassHoed(int x, int y, int z);
 	public abstract void longGrassDestroyed(int x, int y, int z);
 	public abstract void updateServerSettings(boolean[] newOptions, String newMOTD);
+	public abstract void checkIfOp();
 }

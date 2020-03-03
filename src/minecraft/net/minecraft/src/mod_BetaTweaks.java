@@ -136,6 +136,9 @@ public class mod_BetaTweaks extends BaseMod {
 			firstGuiScreenAfterHijack = null;
 		} else if (Utils.isInstalled(Utils.guiapihandler) && Utils.guiapihandler.isGuiModScreen(guiscreen)) {
 			Utils.guiapihandler.handleTooltip(guiscreen, Utils.cursorX(), Utils.cursorY());
+			if(Utils.isInstalled(Utils.mpHandler) && Utils.mpHandler.serverModInstalled && Utils.guiapihandler.isGuiModSelectScreen(guiscreen) && Utils.getParentScreen() != guiscreen) {
+				Utils.mpHandler.checkIfOp();
+			}
 			if (Utils.guiapihandler.settingsChanged(guiscreen)) {
 				Boolean temp1 = cfg.indevStorageBlocks.isEnabled();
 				Boolean temp2 = cfg.hideLongGrass.isEnabled();

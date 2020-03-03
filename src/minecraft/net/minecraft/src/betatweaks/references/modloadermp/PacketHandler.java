@@ -25,13 +25,11 @@ public class PacketHandler extends BaseModMp {
 	
 	//used to match the mod id of the server mod
 	public String toString() {
-		return "BetaTweaksMP v1";
-		//replace with this if working with source
-        //return "net.minecraft.src.BetaTweaksMP v1";
+		return "BetaTweaksMP " + this.Version();
     }
 	
 	public String Version() {
-		return "v1";
+		return "v1.28 PRE";
 	}
 
 	//Info for mine_diver's mod menu

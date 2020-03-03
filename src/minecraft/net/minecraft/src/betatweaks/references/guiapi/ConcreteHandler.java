@@ -342,4 +342,9 @@ public class ConcreteHandler extends HandlerGuiAPI {
 		}
 	}
 
+	@Override
+	public boolean isGuiModSelectScreen(GuiScreen guiscreen) {
+		return guiscreen instanceof GuiModSelect;
+	}
+
 }

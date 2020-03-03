@@ -1,45 +1,40 @@
 package net.minecraft.src;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import net.minecraft.src.betatweaks.JsonServer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.src.betatweaks.*;
 
 public class mod_BetaTweaks extends BaseModMp{
 
 	@Override
 	public String Version() {
-		return "v1";
-	}
-
-	mod_BetaTweaks(){
-
-		Packet.addIdClassMapping(254, false, true, net.minecraft.src.betatweaks.Packet254ServerPing.class);
-		//JsonServer.main();
-			ClassLoader classloader = (net.minecraft.src.ModLoader.class).getClassLoader();
-			Method addmodMethod;
-			try {
-				addmodMethod = ModLoader.class.getDeclaredMethod("addMod", ClassLoader.class, String.class);
-				addmodMethod.setAccessible(true);
-				try {
-					addmodMethod.invoke(null, new Object[] {
-							classloader, "BetaTweaksMP.class"
-						});
-				} 
-				catch (IllegalAccessException e) { e.printStackTrace(); } 
-				catch (IllegalArgumentException e) { e.printStackTrace(); }
-				catch (InvocationTargetException e) { e.printStackTrace(); }
-			} 
-			catch (NoSuchMethodException e1) { e1.printStackTrace(); } 
-			catch (SecurityException e1) { e1.printStackTrace(); }
-			
+		return Main.INSTANCE.version();
 	}
 	
+	@Override
+	public String toString() {
+		return Main.INSTANCE.getModID();
+	}
 
-	public boolean hasClientSide()
-	{
-		  return false;
+	public mod_BetaTweaks(){
+		Main.INSTANCE.init(this);
+		Packet.addIdClassMapping(254, false, true, Packet254ServerPing.class);
+		
+		ModLoader.SetInGameHook(this, true, false);
+	}
+	
+	@Override
+	public void OnTickInGame(MinecraftServer mc) {
+		Main.INSTANCE.onTickInGame(mc);
+	}
+	
+	@Override
+	public void HandleLogin(EntityPlayerMP player) {
+		Main.INSTANCE.handleLogin(player);
+	}
+	
+	@Override
+	public void HandlePacket(Packet230ModLoader packet, EntityPlayerMP player) {
+		Main.INSTANCE.handlePacket(packet, player);
 	}
 	
 	public static void setFallDistance(Entity entity, float f) {
