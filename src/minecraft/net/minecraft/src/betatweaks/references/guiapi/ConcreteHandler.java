@@ -73,7 +73,7 @@ public class ConcreteHandler extends HandlerGuiAPI {
             
             SimpleButtonModel model = new SimpleButtonModel();
     		model.addActionCallback(new ModAction(
-            		Utils.class, "toggleFullscreen", "Toggle Fullscreen Button"));
+    				CustomFullscreenRes.class, "toggle", "Toggle Fullscreen Button"));
             Button button = new Button(model);
             button.setText("Toggle Custom Fullscreen");
             widgetClientside.add(button);
