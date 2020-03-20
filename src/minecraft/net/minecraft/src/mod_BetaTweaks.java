@@ -29,8 +29,6 @@ public class mod_BetaTweaks extends BaseMod {
 		return Utils.getResource("modMenu1.png");
 	}
 	
-	public static GuiScreen firstGuiScreenAfterHijack;
-	
 	private World currentWorld = null;
 
 	private final int guiOptionsButtonCount;
@@ -131,10 +129,7 @@ public class mod_BetaTweaks extends BaseMod {
 		if(guiOverrides.containsKey(guiscreen.getClass()) && !dontOverride) {
 			Utils.overrideCurrentScreen(guiOverrides.get(guiscreen.getClass()));
 		}
-		if (firstGuiScreenAfterHijack != null) {
-			Utils.overrideCurrentScreen(firstGuiScreenAfterHijack);
-			firstGuiScreenAfterHijack = null;
-		} else if (Utils.isInstalled(Utils.guiapihandler) && Utils.guiapihandler.isGuiModScreen(guiscreen)) {
+		if (Utils.isInstalled(Utils.guiapihandler) && Utils.guiapihandler.isGuiModScreen(guiscreen)) {
 			Utils.guiapihandler.handleTooltip(guiscreen, Utils.cursorX(), Utils.cursorY());
 			if(Utils.isInstalled(Utils.mpHandler) && Utils.mpHandler.serverModInstalled && Utils.guiapihandler.isGuiModSelectScreen(guiscreen) && Utils.getParentScreen() != guiscreen) {
 				Utils.mpHandler.checkIfOp();
