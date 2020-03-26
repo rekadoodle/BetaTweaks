@@ -18,8 +18,8 @@ public abstract class HandlerGuiAPI {
 	
 	public abstract boolean settingsChanged(GuiScreen guiscreen);
 
-	public abstract void loadSettings();
+	public abstract void loadSettingsToGUI();
 	
-	public abstract void updateSettings();
+	public abstract void loadSettingsFromGUI();
 	
 }

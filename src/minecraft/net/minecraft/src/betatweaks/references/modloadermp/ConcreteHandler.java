@@ -86,14 +86,14 @@ public class ConcreteHandler extends HandlerModLoaderMp {
 				motd.setValue(packet.dataString[0]);
 				maxPlayers = packet.dataInt[packet.dataInt.length - 1];
 				if(Utils.isInstalled(Utils.guiapihandler))
-					Utils.guiapihandler.loadSettings();
+					Utils.guiapihandler.loadSettingsToGUI();
 				break;
 			}
 			case PACKET_IN_OPPED_OR_DEOPPED:
 			{
 				isOp = packet.dataInt[0] == 1;
 				if(Utils.isInstalled(Utils.guiapihandler))
-					Utils.guiapihandler.loadSettings();
+					Utils.guiapihandler.loadSettingsToGUI();
 				break;
 			}
 			

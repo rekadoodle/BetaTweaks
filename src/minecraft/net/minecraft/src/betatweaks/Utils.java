@@ -217,7 +217,7 @@ public class Utils {
 		}
 	}
 	
-	private static Object getHandler(String path) {
+	public static Object getHandler(String path) {
 		try { 
 			return Utils.class.getClassLoader().loadClass(Utils.class.getPackage().getName() + ".references." + path + ".ConcreteHandler").newInstance(); 
 		}
