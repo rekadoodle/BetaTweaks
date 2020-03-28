@@ -58,7 +58,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         {
         	fov *= 60.0F / 70.0F;
         }
-        if((!optifine && (mc.gameSettings.smoothCamera = Keyboard.isKeyDown(mod_BetaTweaks.zoom.keyCode) && ModLoader.isGUIOpen(null)))
+        if((!optifine && (mc.gameSettings.smoothCamera = Keyboard.isKeyDown(BetaTweaks.zoom.keyCode) && ModLoader.isGUIOpen(null)))
         		|| (optifine && Utils.optifineHandler.zoomKeyHeld()))
         {
             if(!zoomMode)

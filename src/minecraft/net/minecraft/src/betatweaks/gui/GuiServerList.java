@@ -17,6 +17,7 @@ import net.minecraft.src.NBTTagList;
 import net.minecraft.src.Packet;
 import net.minecraft.src.StringTranslate;
 import net.minecraft.src.mod_BetaTweaks;
+import net.minecraft.src.betatweaks.BetaTweaks;
 import net.minecraft.src.betatweaks.CompressedStreamToolsMP;
 import net.minecraft.src.betatweaks.ServerData;
 import net.minecraft.src.betatweaks.Utils;
@@ -34,7 +35,7 @@ public class GuiServerList extends GuiScreen
 
     public GuiServerList(GuiScreen parentScreen) {
     	this.parentScreen = parentScreen;
-    	mod_BetaTweaks.dontOverride = true;
+    	BetaTweaks.dontOverride = true;
     	NBTTagCompound nbt = null;
     	try {
             nbt = CompressedStreamToolsMP.func_35622_a(new File(Minecraft.getMinecraftDir(), "servers.dat"));
@@ -125,7 +126,7 @@ public class GuiServerList extends GuiScreen
             mc.displayGuiScreen(new GuiAddServer(this, new ServerData(serverToEdit)));
         } 
         else if(guibutton.id == 0) {
-        	mod_BetaTweaks.dontOverride = false;
+        	BetaTweaks.dontOverride = false;
             mc.displayGuiScreen(parentScreen);
         }
         else if(guibutton.id == 8) {
@@ -165,7 +166,7 @@ public class GuiServerList extends GuiScreen
         	actionPerformed((GuiButton)controlList.get(2));
         }
         else {
-        	if(i == 1) mod_BetaTweaks.dontOverride = false;
+        	if(i == 1) BetaTweaks.dontOverride = false;
         	super.keyTyped(c, i);
         }
     }
@@ -230,7 +231,7 @@ public class GuiServerList extends GuiScreen
     
     public void joinServer(String address)
     {
-    	mod_BetaTweaks.dontOverride = false;
+    	BetaTweaks.dontOverride = false;
     	String[] ip = splitIP(address);
         mc.displayGuiScreen(new GuiConnecting(mc, ip[0], Integer.parseInt(ip[1])));
     }
