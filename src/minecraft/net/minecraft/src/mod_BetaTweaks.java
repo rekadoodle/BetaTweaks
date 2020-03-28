@@ -13,7 +13,7 @@ import org.lwjgl.input.Keyboard;
 public class mod_BetaTweaks extends BaseMod {
 	
 	public String Version() {
-		return "v1.27 PRE";
+		return "v1.34 PRE";
 	}
 	
 	//Info for mine_diver's mod menu
@@ -138,7 +138,7 @@ public class mod_BetaTweaks extends BaseMod {
 				Boolean temp1 = cfg.indevStorageBlocks.isEnabled();
 				Boolean temp2 = cfg.hideLongGrass.isEnabled();
 				Boolean temp3 = cfg.hideDeadBush.isEnabled();
-				Utils.guiapihandler.updateSettings();
+				Utils.guiapihandler.loadSettingsFromGUI();
 				initSettings();
 				if (temp1 != cfg.indevStorageBlocks.isEnabled() || temp2 != cfg.hideLongGrass.isEnabled()
 						|| temp3 != cfg.hideDeadBush.isEnabled()) {
@@ -178,7 +178,7 @@ public class mod_BetaTweaks extends BaseMod {
 			if (Utils.isInstalled(Utils.guiapihandler)
 					&& (currentWorld == null || !currentWorld.multiplayerWorld) != (mc.theWorld == null
 							|| !mc.theWorld.multiplayerWorld)) {
-				Utils.guiapihandler.loadSettings();
+				Utils.guiapihandler.loadSettingsToGUI();
 			}
 			currentWorld = mc.theWorld;
 		}
