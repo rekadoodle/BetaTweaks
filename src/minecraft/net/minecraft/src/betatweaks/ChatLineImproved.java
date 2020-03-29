@@ -16,7 +16,7 @@ public class ChatLineImproved extends ChatLine {
 		initialised = true;
 		lines.clear();
 		int kk;
-		Minecraft mc = Utils.mc;
+		Minecraft mc = Utils.MC;
 		String s = message;
     	while(mc.fontRenderer.getStringWidth(s) > 0) {
     		int lastSpace = -1;

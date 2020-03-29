@@ -17,10 +17,10 @@ public class GuiAchievementNull extends GuiAchievement
     	//Do nothing
     }
     
-    private static final GuiAchievement vanilla = Utils.mc.guiAchievement; 
+    private static final GuiAchievement vanilla = Utils.MC.guiAchievement; 
     private static final GuiAchievementNull hidden = new GuiAchievementNull();
     
     public static void setVisible(boolean isVisible) {
-    	Utils.mc.guiAchievement = isVisible ? vanilla : hidden;
+    	Utils.MC.guiAchievement = isVisible ? vanilla : hidden;
     }
 }

@@ -132,7 +132,7 @@ public class ConcreteHandler extends HandlerShaders {
 
 	@Override
 	public void confusingShaderStuff() {
-		Minecraft mc = Utils.mc;
+		Minecraft mc = Utils.MC;
 		GL11.glFrontFace(2305 /*GL_CCW*/);
         GL11.glPushMatrix();
         water.bind();

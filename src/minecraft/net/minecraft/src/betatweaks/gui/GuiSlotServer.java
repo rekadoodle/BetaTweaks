@@ -21,7 +21,7 @@ public class GuiSlotServer extends GuiSlot
 
 	public GuiSlotServer(GuiServerList guimultiplayer)
     {
-        super(Utils.mc, guimultiplayer.width, guimultiplayer.height, 32, guimultiplayer.height - 64, 36);
+        super(Utils.MC, guimultiplayer.width, guimultiplayer.height, 32, guimultiplayer.height - 64, 36);
         menu = guimultiplayer;
     }
 	
@@ -88,12 +88,12 @@ public class GuiSlotServer extends GuiSlot
                 }
             }
     	}
-        menu.drawString(Utils.mc.fontRenderer, server.name, j + 2, k + 1, 0xffffff);
-        menu.drawString(Utils.mc.fontRenderer, server.status, j + 2, k + 12, 0x808080);
-        menu.drawString(Utils.mc.fontRenderer, server.playerCount, (j + 215) - Utils.mc.fontRenderer.getStringWidth(server.playerCount), k + 12, 0x808080);
-        menu.drawString(Utils.mc.fontRenderer, server.ip, j + 2, k + 12 + 11, 0x303030);
+        menu.drawString(Utils.MC.fontRenderer, server.name, j + 2, k + 1, 0xffffff);
+        menu.drawString(Utils.MC.fontRenderer, server.status, j + 2, k + 12, 0x808080);
+        menu.drawString(Utils.MC.fontRenderer, server.playerCount, (j + 215) - Utils.MC.fontRenderer.getStringWidth(server.playerCount), k + 12, 0x808080);
+        menu.drawString(Utils.MC.fontRenderer, server.ip, j + 2, k + 12 + 11, 0x303030);
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        Utils.mc.renderEngine.bindTexture(Utils.mc.renderEngine.getTexture(Utils.getResource("icons.png")));
+        Utils.MC.renderEngine.bindTexture(Utils.MC.renderEngine.getTexture(Utils.getResource("icons.png")));
         int i1 = 0;
         int j1 = 0;
         String s = null;

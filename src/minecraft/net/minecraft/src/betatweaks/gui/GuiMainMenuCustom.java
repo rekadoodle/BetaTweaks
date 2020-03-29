@@ -711,7 +711,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 					+ System.getProperty("line.separator") + "SplashTextEnabled=true"
 					+ System.getProperty("line.separator") + "SplashTextOffsetX=-15.0"
 					+ System.getProperty("line.separator") + "SplashTextOffsetY=-10.0"
-					+ System.getProperty("line.separator") + "PanoramaFolder=" + Utils.resourcesFolder + "panorama");
+					+ System.getProperty("line.separator") + "PanoramaFolder=" + Utils.RESOURCES_PATH + "panorama");
 			/*
 				Field[] myFields = mod_BetaTweaks.class.getFields();
 				for (int i = 0; i < myFields.length; i++) {
@@ -751,7 +751,7 @@ public class GuiMainMenuCustom extends GuiMainMenu
 	public static Boolean logoSplashTextEnabled = true;
 	public static float logoSplashTextOffsetX = 0;
 	public static float logoSplashTextOffsetY = 0;
-	public static String logoPanoramaFolder = Utils.resourcesFolder + "panorama";
+	public static String logoPanoramaFolder = Utils.RESOURCES_PATH + "panorama";
     
     public static File configLogoFile = new File((Minecraft.getMinecraftDir()) + "/config/OldCustomLogo.cfg");
 	private static Long timeStamp = configLogoFile.lastModified();

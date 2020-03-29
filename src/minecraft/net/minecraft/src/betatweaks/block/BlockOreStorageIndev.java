@@ -42,7 +42,7 @@ public class BlockOreStorageIndev extends BlockOreStorage {
 		new BlockOreStorageIndev(Block.blockGold, new String[] {"blockGold", "ai"}, Utils.getResource("goldSide.png"), Utils.getResource("goldBottom.png"));
 		new BlockOreStorageIndev(Block.blockDiamond, new String[] {"blockDiamond", "ay"}, Utils.getResource("diamondSide.png"), Utils.getResource("diamondBottom.png"));
 		
-		ModLoader.RegisterAllTextureOverrides(Utils.mc.renderEngine);
+		ModLoader.RegisterAllTextureOverrides(Utils.MC.renderEngine);
 		
 		Utils.EasyField<Block[]> blocksEffectiveAgainstField = new Utils.EasyField<Block[]>(ItemTool.class, "blocksEffectiveAgainst", "bk");
 		

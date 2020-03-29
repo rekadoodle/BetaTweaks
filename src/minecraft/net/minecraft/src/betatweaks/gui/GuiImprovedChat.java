@@ -48,8 +48,8 @@ public class GuiImprovedChat extends GuiChat {
 		}
 		options[0].enabled = Config.getInstance().improvedChatInvisibleToggleButton.isEnabled();
 		
-		if(Utils.mc.ingameGUI instanceof GuiIngameImprovedChat) {
-			gui = (GuiIngameImprovedChat) Utils.mc.ingameGUI;
+		if(Utils.MC.ingameGUI instanceof GuiIngameImprovedChat) {
+			gui = (GuiIngameImprovedChat) Utils.MC.ingameGUI;
 			//gui.scroll = 0;
 		}
 		onChatSettingChanged();
@@ -79,15 +79,15 @@ public class GuiImprovedChat extends GuiChat {
 
 	public static void onChatSettingChanged() {
 		try {
-			((GuiIngameImprovedChat) Utils.mc.ingameGUI).init();
-			((GuiImprovedChat) Utils.mc.currentScreen).init();
+			((GuiIngameImprovedChat) Utils.MC.ingameGUI).init();
+			((GuiImprovedChat) Utils.MC.currentScreen).init();
 		} 
 		catch (Exception e) { /* do nothing */ }
 	}
 	
 	public static void drawChatBoxArea() {
 		try {
-			((GuiIngameImprovedChat) Utils.mc.ingameGUI).drawDebugChat();
+			((GuiIngameImprovedChat) Utils.MC.ingameGUI).drawDebugChat();
 		} 
 		catch (Exception e) { /* do nothing */ }
 	}
@@ -484,7 +484,7 @@ public class GuiImprovedChat extends GuiChat {
 		super.mouseClicked(cursorX, cursorY, k);
 		if (k == 0) {
 			for (Object obj : controlList) {
-				if (obj instanceof GuiButton && ((GuiButton) obj).mousePressed(Utils.mc, cursorX, cursorY)) {
+				if (obj instanceof GuiButton && ((GuiButton) obj).mousePressed(Utils.MC, cursorX, cursorY)) {
 					return;
 				}
 			}

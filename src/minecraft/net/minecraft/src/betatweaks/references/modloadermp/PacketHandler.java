@@ -51,8 +51,8 @@ public class PacketHandler extends BaseModMp {
 	
 	public boolean OnTickInGame(Minecraft mc) {
 		if (handler.serverModInstalled && handler.playerListAllowed.isEnabled()
-				&& Keyboard.isKeyDown(playerListKey.keyCode) && Utils.mc.currentScreen == null) {
-			int kx = new ScaledResolution(Utils.mc.gameSettings, Utils.mc.displayWidth, Utils.mc.displayHeight).getScaledWidth();
+				&& Keyboard.isKeyDown(playerListKey.keyCode) && Utils.MC.currentScreen == null) {
+			int kx = new ScaledResolution(Utils.MC.gameSettings, Utils.MC.displayWidth, Utils.MC.displayHeight).getScaledWidth();
 			int j3 = handler.maxPlayers;
 			int i4 = j3;
 			int k4 = 1;
@@ -76,7 +76,7 @@ public class PacketHandler extends BaseModMp {
 				if (k7 >= handler.playerList.size()) {
 					continue;
 				}
-				Utils.mc.fontRenderer.drawStringWithShadow(handler.playerList.get(k7), i8, l8, 0xffffff);
+				Utils.MC.fontRenderer.drawStringWithShadow(handler.playerList.get(k7), i8, l8, 0xffffff);
 			}
 		}
 		return true;

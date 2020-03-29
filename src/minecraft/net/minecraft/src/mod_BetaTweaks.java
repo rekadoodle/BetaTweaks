@@ -1,8 +1,5 @@
 package net.minecraft.src;
 
-import java.nio.FloatBuffer;
-import java.util.List;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.betatweaks.*;
 
@@ -14,7 +11,7 @@ public class mod_BetaTweaks extends BaseMod {
 	
 	@Override
 	public String Version() {
-		return BetaTweaks.INSTANCE.version();
+		return ModInfo.VERSION;
 	}
 	
 	@Override
@@ -45,7 +42,7 @@ public class mod_BetaTweaks extends BaseMod {
 		Graphics.gui.drawRect(i, j, k, l, colour);
 	}
 	
-	public static FloatBuffer fogColorBuffer(EntityRenderer entityrenderer) {
+	public static java.nio.FloatBuffer fogColorBuffer(EntityRenderer entityrenderer) {
 		return entityrenderer.fogColorBuffer;
 	}
 	
@@ -73,20 +70,20 @@ public class mod_BetaTweaks extends BaseMod {
 		return container.ySize;
 	}
 	
-	public static List<?> controlList(GuiScreen guiscreen) {
+	public static java.util.List<?> controlList(GuiScreen guiscreen) {
 		return guiscreen.controlList;
 	}
-	
+
 	//Info for mine_diver's mod menu
-	public String Description() {
-		return BetaTweaks.INSTANCE.modMenuDescription();
+	public String Name() {
+		return ModInfo.MODMENU_NAME;
 	}
 	
-	public String Name() {
-		return BetaTweaks.INSTANCE.modMenuName();
+	public String Description() {
+		return ModInfo.MODMENU_DESC;
 	}
 	
 	public String Icon() {
-		return BetaTweaks.INSTANCE.modMenuIcon();
+		return ModInfo.MODMENU_ICON;
 	}
 }

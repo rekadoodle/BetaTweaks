@@ -23,7 +23,7 @@ public class ConcreteHandler extends HandlerAether {
 		if(entity instanceof EntitySheepuff) {
 			EntitySheepuff sheep = (EntitySheepuff) entity;
 			
-			if (!Utils.mc.theWorld.multiplayerWorld && sheep.beenAttacked) {
+			if (!Utils.MC.theWorld.multiplayerWorld && sheep.beenAttacked) {
 				if (!sheep.getSheared()) {
 
 					sheep.setSheared(true);

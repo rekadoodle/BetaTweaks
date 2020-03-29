@@ -30,11 +30,11 @@ public class ConcreteHandler extends HandlerOptifine {
 	
 	@Override
 	public boolean zoomKeyHeld() {
-		return Keyboard.isKeyDown(Utils.mc.gameSettings.ofKeyBindZoom.keyCode);
+		return Keyboard.isKeyDown(Utils.MC.gameSettings.ofKeyBindZoom.keyCode);
 	}
 
 	@Override
 	public int renderAllSortedRenders(float f) {
-		return Utils.mc.renderGlobal.renderAllSortedRenderers(1, f);
+		return Utils.MC.renderGlobal.renderAllSortedRenderers(1, f);
 	}
 }

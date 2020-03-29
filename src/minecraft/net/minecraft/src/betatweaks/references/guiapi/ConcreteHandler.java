@@ -137,7 +137,7 @@ public class ConcreteHandler extends HandlerGuiAPI {
 		Setting<?> setting = null;
 		if(sbase instanceof SBoolean) {
 			SBoolean sbool = (SBoolean)sbase;
-			setting = settings.addSetting(parentGui, sbool.getDisplayString(), sbool.name, sbool.defaultValue);
+			setting = settings.addSetting(parentGui, sbool.getDisplayString(), sbool.name, sbool.defaultValue, "ON", "OFF");
 		}
 		else if(sbase instanceof SOrdinal) {
 			SOrdinal sord = (SOrdinal)sbase;
@@ -265,7 +265,7 @@ public class ConcreteHandler extends HandlerGuiAPI {
 			}
 		}
 		
-		World world = Utils.mc.theWorld;
+		World world = Utils.MC.theWorld;
 		boolean clientside = world == null || !world.multiplayerWorld;
 		boolean serverMod = Utils.mpHandler.serverModInstalled;
 		widgetGameplay.setEnabled(clientside || serverMod);
@@ -318,7 +318,7 @@ public class ConcreteHandler extends HandlerGuiAPI {
 			}
 		}
 		
-		World world = Utils.mc.theWorld;
+		World world = Utils.MC.theWorld;
 		boolean clientside = world == null || !world.multiplayerWorld;
 		HandlerModLoaderMp mpHandler = Utils.mpHandler;
 		if (clientside) {

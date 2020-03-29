@@ -17,9 +17,8 @@ import net.minecraft.src.betatweaks.dummy.*;
 
 public class Utils {
 
-	public static final Minecraft mc = ModLoader.getMinecraftInstance();
+	public static final Minecraft MC = ModLoader.getMinecraftInstance();
 	private static GuiScreen parentScreen;
-	private static final EasyField<Timer> timerField = new EasyField<Timer>(Minecraft.class, "timer", "T");
 	private static final EasyField<GuiButton> selectedButtonField = new EasyField<GuiButton>(GuiScreen.class, "selectedButton", "a");
 	private static Timer timer;
 	private static int lastMouseX;
@@ -29,7 +28,7 @@ public class Utils {
     
     private static final List<String> loadedResources = new ArrayList<String>();
 	private static final List<String> missingResources = new ArrayList<String>();
-	public static final String resourcesFolder = "/betatweaks/resources/";
+	public static final String RESOURCES_PATH = "/betatweaks/resources/";
 
 	// Used for easy reflection with obfuscated or regular methods
 	public static final Method getMethod(Class<?> target, Class<?> types[], String ...names) {
@@ -55,7 +54,7 @@ public class Utils {
 	}
 	
 	public static void updateParentScreen() {
-		parentScreen = mc.currentScreen;
+		parentScreen = MC.currentScreen;
 	}
 	
 	public static GuiScreen getParentScreen() {
@@ -71,33 +70,36 @@ public class Utils {
 		return id;
 	}
 	
+	public static void replaceBlock(Block newBlock, Block oldBlock) {
+		replaceBlock(newBlock, new EasyField<Block>(oldBlock, Block.class));
+	}
+	
 	public static void replaceBlock(Block newBlock, String ...fields) {
-		EasyField<Block> blockField = new EasyField<Block>(Block.class, fields);
+		replaceBlock(newBlock, new EasyField<Block>(Block.class, fields));
+	}
+	
+	public static void replaceBlock(Block newBlock, EasyField<Block> blockField) {
 		blockField.removeFinalModifier();
 		blockField.set(newBlock);
 		Block.blocksList[newBlock.blockID] = newBlock;
 	}
 	
 	public static int cursorX() {
-        return (Mouse.getX() * mc.currentScreen.width) / mc.displayWidth;
+        return (Mouse.getX() * MC.currentScreen.width) / MC.displayWidth;
 	}
 	
 	public static int cursorY() {
-        return mc.currentScreen.height - (Mouse.getY() * mc.currentScreen.height) / Utils.mc.displayHeight - 1;
-	}
-	
-	public static float renderPartialTicks() {
-		if(timer == null) {
-			timer = timerField.get(Utils.mc);
-		}
-		return timer.renderPartialTicks;
+        return MC.currentScreen.height - (Mouse.getY() * MC.currentScreen.height) / MC.displayHeight - 1;
 	}
 	
 	//Used to draw a screen on the first frame it is overrided
 	public static void overrideCurrentScreen(GuiScreen guiscreen) {
-		mc.displayGuiScreen(guiscreen);
+		MC.displayGuiScreen(guiscreen);
 		GL11.glClear(256);
-		guiscreen.drawScreen(cursorY(), cursorX(), renderPartialTicks());
+		if(timer == null) {
+			timer = new EasyField<Timer>(Minecraft.class, "timer", "T").get(MC);
+		}
+		guiscreen.drawScreen(cursorY(), cursorX(), timer.renderPartialTicks);
 	}
 		
 	public static void overrideCurrentScreen(Class<? extends GuiScreen> guiscreenClass) {
@@ -108,7 +110,7 @@ public class Utils {
 	}
 	
 	public static boolean buttonClicked(GuiButton button) {
-		if(selectedButtonField.get(mc.currentScreen) == button) 
+		if(selectedButtonField.get(MC.currentScreen) == button) 
 			return true;
 		return false;
 	}
@@ -137,13 +139,13 @@ public class Utils {
 	}
 	
 	public static boolean mouseIsStill(int cursorX, int cursorY) {
-		if(Math.abs(cursorX - lastMouseX) > 5 || Math.abs(cursorY - lastMouseY) > 5 || mc.currentScreen != currentScreen)
+		if(Math.abs(cursorX - lastMouseX) > 5 || Math.abs(cursorY - lastMouseY) > 5 || MC.currentScreen != currentScreen)
         {
             lastMouseX = cursorX;
             lastMouseY = cursorY;
             
             resetMouseStillTime();
-            currentScreen = mc.currentScreen;
+            currentScreen = MC.currentScreen;
             return false;
         }
         if(System.currentTimeMillis() < mouseStillTime + (long)700)
@@ -233,7 +235,7 @@ public class Utils {
 	}
 	
 	public static URL getResourceURL(String resource) {
-		return getResourceURLAbsolute(new StringBuilder().append(resourcesFolder).append(resource).toString());
+		return getResourceURLAbsolute(new StringBuilder().append(RESOURCES_PATH).append(resource).toString());
 	}
 	
 	private static URL getResourceURLAbsolute(String resource) {
@@ -246,11 +248,11 @@ public class Utils {
 	}
 	
 	public static String getResource(String resource) {
-		return getResourceAbsolute(new StringBuilder().append(resourcesFolder).append(resource).toString());
+		return getResourceAbsolute(new StringBuilder().append(RESOURCES_PATH).append(resource).toString());
 	}
 	
 	public static boolean resourceExists(String resource) {
-		return resourceExistsAbsolute(new StringBuilder().append(resourcesFolder).append(resource).toString());
+		return resourceExistsAbsolute(new StringBuilder().append(RESOURCES_PATH).append(resource).toString());
 	}
 	
 	public static boolean resourceExistsAbsolute(String resource) {
@@ -283,6 +285,27 @@ public class Utils {
 		private static final EasyField<Integer> modifiersField = new EasyField<Integer>(Field.class, "modifiers");
 		public final Field field;
 		
+		public EasyField(Object value, Class<?> target) {
+			this(value, target, null);
+		}
+		
+		public EasyField(Object value, Class<?> target, Object instance) {
+			Field correctField = null;
+			for (Field field : target.getDeclaredFields()) {
+				try {
+					if(field.get(instance) == value) {
+						field.setAccessible(true);
+						correctField = field;
+						break;
+					}
+				} 
+				catch (Exception e) { } 
+			}
+			this.field = correctField;
+			if(this.field == null)
+			logError("Failed to locate field " + value.getClass().getSimpleName() + " in class " + target.getSimpleName());
+		}
+		
 		public EasyField(Class<?> target, String... names) {
 			for (Field field : target.getDeclaredFields()) {
 				for (String name : names) {
@@ -294,7 +317,7 @@ public class Utils {
 				}
 			}
 			this.field = null;
-			logError("Failed to located field " + names[0] + " in class " + target.getSimpleName());
+			logError("Failed to locate field " + names[0] + " in class " + target.getSimpleName());
 		}
 		
 		public boolean exists() {

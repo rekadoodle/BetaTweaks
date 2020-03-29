@@ -35,7 +35,7 @@ public class GuiControlsScrollable extends GuiScreen
 	public GuiControlsScrollable()
 	{
 		parentScreen = Utils.getParentScreen();
-		options = Utils.mc.gameSettings;
+		options = Utils.MC.gameSettings;
 		
 		left = 0;
         top = 32;

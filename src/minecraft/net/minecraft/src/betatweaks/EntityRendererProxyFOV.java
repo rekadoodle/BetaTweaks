@@ -25,7 +25,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
 	private final Utils.EasyField<Integer> rendererUpdateCountField = new Utils.EasyField<Integer>(EntityRenderer.class, "rendererUpdateCount", "l");
 	
 	public EntityRendererProxyFOV() {
-		this(Utils.mc);
+		this(Utils.MC);
 	}
 	
     public EntityRendererProxyFOV(Minecraft minecraft)

@@ -10,7 +10,7 @@ public class Graphics {
 	
 	public static final Gui gui = new Gui();
 	public static final RenderItem itemRenderer = new RenderItem();
-	private static final Minecraft mc = Utils.mc;
+	private static final Minecraft mc = Utils.MC;
 	private static boolean itemLighting;
 	private static boolean preRender;
 	public static Boolean lighting;

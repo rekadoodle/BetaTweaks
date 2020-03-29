@@ -29,8 +29,12 @@ public class CustomFullscreenRes {
 	private static final Utils.EasyField<Integer> canvasHeightField = new Utils.EasyField<Integer>(Component.class, "height");
 	public static final KeyBinding toggleKeybind = new KeyBinding("Custom Fullscreen", Keyboard.KEY_F8);
 	private static boolean fullscreenKeyHeld = false;
+	private static List<DisplayMode> modes;
 	
 	public static List<DisplayMode> getResolutions() {
+		if(modes != null) {
+			return modes;
+		}
 		List<DisplayMode> modesFiltered = new ArrayList<DisplayMode>();
 		try {
 			DisplayMode[] allModes = Display.getAvailableDisplayModes();
@@ -52,6 +56,7 @@ public class CustomFullscreenRes {
 			}
 		} 
 		catch (LWJGLException e) { e.printStackTrace(); }
+		modes = modesFiltered;
 		return modesFiltered;
 	}
 	
@@ -98,7 +103,7 @@ public class CustomFullscreenRes {
 	}
 	
 	public static void setFullscreen(boolean fullscreen) {
-		Minecraft mc = Utils.mc;
+		Minecraft mc = Utils.MC;
 		isFullscreen = fullscreen;
 		try
 		{

@@ -29,23 +29,6 @@ public class BetaTweaks {
 	private HashMap<Class<? extends GuiScreen>, Class<? extends GuiScreen>> guiOverrides = new HashMap<Class<? extends GuiScreen>, Class<? extends GuiScreen>>();
 	public static boolean dontOverride = false;
 	
-	public String version() {
-		return "v1.35 PRE";
-	}
-	
-	//Info for mine_diver's mod menu
-	public String modMenuName() {
-		return "BetaTweaks" + this.version();
-	}
-	
-	public String modMenuDescription() {
-		return "Beta but better";
-	}
-	
-	public String modMenuIcon() {
-		return Utils.getResource("modMenu1.png");
-	}
-	
 	public void modsLoaded() {
 		Utils.modsLoaded();
 	}
@@ -59,7 +42,7 @@ public class BetaTweaks {
 		
 		if(!cfg.disableEntityRendererOverride.isEnabled()) {
 			if(!Utils.isInstalled(Utils.optifineHandler)) ModLoader.RegisterKey(basemod, zoom, false);
-			Utils.mc.entityRenderer = new EntityRendererProxyFOV();
+			Utils.MC.entityRenderer = new EntityRendererProxyFOV();
 		}
 		try {
 			guiOptionsButtonCount = new Utils.EasyField<EnumOptions[]>(GuiOptions.class, "field_22135_k", "l").get().length;
@@ -76,12 +59,12 @@ public class BetaTweaks {
 	public void initSettings() {
 		overrideIngameChat = true;
 		GuiMainMenuCustom.resetLogo = true;
-		Utils.mc.hideQuitButton = !cfg.mainmenuQuitButton.isEnabled();
+		Utils.MC.hideQuitButton = !cfg.mainmenuQuitButton.isEnabled();
 
 		if (cfg.lightTNTwithFist.isEnabled() && Block.tnt.getClass() == BlockTNT.class) new BlockTNTPunchable();
 		if (cfg.indevStorageBlocks.isEnabled() && Block.blockSteel.getClass() == BlockOreStorage.class) BlockOreStorageIndev.init();
-		BlockTallGrassHidden.setVisible(!cfg.hideLongGrass.isEnabled());
-		BlockDeadBushHidden.setVisible(!cfg.hideDeadBush.isEnabled());
+		HideBlocks.setLongGrassVisible(!cfg.hideLongGrass.isEnabled());
+		HideBlocks.setDeadBushVisible(!cfg.hideDeadBush.isEnabled());
 		GuiAchievementNull.setVisible(!cfg.hideAchievementNotifications.isEnabled());
 		
 		guiOverrides.clear();
@@ -97,9 +80,9 @@ public class BetaTweaks {
 		}
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void onTickInGUI(Minecraft mc, GuiScreen guiscreen) {
-		List controlList = mod_BetaTweaks.controlList(guiscreen);
+		@SuppressWarnings("unchecked")
+		List<GuiButton> controlList = (List<GuiButton>) mod_BetaTweaks.controlList(guiscreen);
 		if(overrideIngameChat || guiscreen instanceof GuiConnecting) {
 			if(cfg.improvedChat.isEnabled()) {
 				if(!(mc.ingameGUI instanceof GuiIngameImprovedChat)) {
@@ -154,7 +137,7 @@ public class BetaTweaks {
 			
 		} else if (guiscreen instanceof GuiTexturePacks) {
 			if(initialTexturePack == null) {
-				initialTexturePack = Utils.mc.texturePackList.selectedTexturePack;
+				initialTexturePack = Utils.MC.texturePackList.selectedTexturePack;
 			}
 			
 		}
@@ -193,7 +176,7 @@ public class BetaTweaks {
 		
 		//Reload world if texture pack changed in game
 		if(initialTexturePack != null && !(mc.currentScreen instanceof GuiTexturePacks)) {
-			if(initialTexturePack != Utils.mc.texturePackList.selectedTexturePack && mc.theWorld != null) {
+			if(initialTexturePack != Utils.MC.texturePackList.selectedTexturePack && mc.theWorld != null) {
 				mc.renderGlobal.loadRenderers();
 			}	
 			initialTexturePack = null;
@@ -222,7 +205,7 @@ public class BetaTweaks {
 			HoeGrassForSeeds.onTick(mc, serverModEnabled);
 		}
 		if ((cfg.hideLongGrass.isEnabled() || cfg.hideDeadBush.isEnabled())) {
-			BlockTallGrassHidden.onTick(mc, spWorld, serverModEnabled);
+			HideBlocks.onTick(mc, spWorld, serverModEnabled);
 		}
 	}
 	
