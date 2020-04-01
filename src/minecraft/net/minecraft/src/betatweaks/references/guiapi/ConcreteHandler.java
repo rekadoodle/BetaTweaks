@@ -21,6 +21,7 @@ import net.minecraft.src.WidgetSinglecolumn;
 import net.minecraft.src.WidgetSlider;
 import net.minecraft.src.GuiModSelect;
 import net.minecraft.src.World;
+import net.minecraft.src.betatweaks.BetaTweaks;
 import net.minecraft.src.betatweaks.CustomFullscreenRes;
 import net.minecraft.src.betatweaks.Graphics;
 import net.minecraft.src.betatweaks.Utils;
@@ -137,7 +138,7 @@ public class ConcreteHandler extends HandlerGuiAPI {
 		Setting<?> setting = null;
 		if(sbase instanceof SBoolean) {
 			SBoolean sbool = (SBoolean)sbase;
-			setting = settings.addSetting(parentGui, sbool.getDisplayString(), sbool.name, sbool.defaultValue, "ON", "OFF");
+			setting = settings.addSetting(parentGui, sbool.getDisplayString(), sbool.name, sbool.defaultValue, sbool.trueName, sbool.falseName);
 		}
 		else if(sbase instanceof SOrdinal) {
 			SOrdinal sord = (SOrdinal)sbase;
@@ -186,7 +187,12 @@ public class ConcreteHandler extends HandlerGuiAPI {
 	}
 	
 	@Override
-	public void handleTooltip(GuiScreen guiscreen, int posX, int posY) {
+	public void handleTooltip(GuiScreen guiscreen) {
+		if(!(guiscreen instanceof GuiModScreen)) {
+			return;
+		}
+		int posX = Utils.cursorX();
+		int posY = Utils.cursorY();
 		GuiModScreen guimodscreen = (GuiModScreen) guiscreen;
 		if((hoveredButton == null && !isWidgetHovered(guimodscreen, posX, posY)) || !hoveredButton.isInside(posX, posY)) {
 			hoveredButton = null;
@@ -243,18 +249,24 @@ public class ConcreteHandler extends HandlerGuiAPI {
 	}
 
 	@Override
-	public boolean isGuiModScreen(GuiScreen guiscreen) {
-		return guiscreen instanceof GuiModScreen;
-	}
-
-	@Override
-	public boolean isGuiModSelectScreen(GuiScreen guiscreen) {
-		return guiscreen instanceof GuiModSelect;
-	}
-
-	@Override
-	public boolean settingsChanged(GuiScreen guiscreen) {
-		return Utils.getParentScreen() != guiscreen && guiscreen instanceof GuiModSelect && Utils.getParentScreen() instanceof GuiModScreen;
+	public void onGuiScreenChanged(GuiScreen guiscreen) {
+		if(guiscreen instanceof GuiModSelect) {
+			if(Utils.getParentScreen() instanceof GuiModScreen) {
+				boolean temp1 = cfg.indevStorageBlocks.isEnabled();
+				boolean temp2 = cfg.hideLongGrass.isEnabled();
+				boolean temp3 = cfg.hideDeadBush.isEnabled();
+				loadSettingsFromGUI();
+				BetaTweaks.INSTANCE.initSettings();
+				if (temp1 != cfg.indevStorageBlocks.isEnabled() || temp2 != cfg.hideLongGrass.isEnabled()
+						|| temp3 != cfg.hideDeadBush.isEnabled()) {
+					if (Utils.MC.theWorld != null)
+						Utils.MC.renderGlobal.loadRenderers();
+				}
+			}
+			else {
+				Utils.mpHandler.checkIfOp();
+			}
+		}
 	}
 
 	@Override

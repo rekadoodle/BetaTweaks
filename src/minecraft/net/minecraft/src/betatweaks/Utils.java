@@ -1,12 +1,21 @@
 package net.minecraft.src.betatweaks;
 
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.imageio.ImageIO;
+
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
@@ -53,8 +62,8 @@ public class Utils {
 		return true;
 	}
 	
-	public static void updateParentScreen() {
-		parentScreen = MC.currentScreen;
+	public static void setParentScreen(GuiScreen guiscreen) {
+		parentScreen = guiscreen;
 	}
 	
 	public static GuiScreen getParentScreen() {
@@ -93,20 +102,21 @@ public class Utils {
 	}
 	
 	//Used to draw a screen on the first frame it is overrided
-	public static void overrideCurrentScreen(GuiScreen guiscreen) {
+	public static GuiScreen overrideCurrentScreen(GuiScreen guiscreen) {
 		MC.displayGuiScreen(guiscreen);
 		GL11.glClear(256);
 		if(timer == null) {
 			timer = new EasyField<Timer>(Minecraft.class, "timer", "T").get(MC);
 		}
 		guiscreen.drawScreen(cursorY(), cursorX(), timer.renderPartialTicks);
+		return guiscreen;
 	}
 		
-	public static void overrideCurrentScreen(Class<? extends GuiScreen> guiscreenClass) {
+	public static GuiScreen overrideCurrentScreen(Class<? extends GuiScreen> guiscreenClass) {
 		try {
-			overrideCurrentScreen(guiscreenClass.newInstance());
+			return overrideCurrentScreen(guiscreenClass.newInstance());
 		} 
-		catch (Exception e) { e.printStackTrace(); }
+		catch (Exception e) { return null; }
 	}
 	
 	public static boolean buttonClicked(GuiButton button) {
@@ -198,6 +208,9 @@ public class Utils {
 		if(classExists("ModLoaderMp")) {
 			mpHandler = (HandlerModLoaderMp) getHandler("modloadermp");
 		}
+		else {
+			mpHandler = new DummyHandlerModLoaderMp();
+		}
 		if(classExists("org.json.JSONObject")) {
 			jsonHandler = (HandlerJSON) getHandler("json");
 		}
@@ -278,6 +291,44 @@ public class Utils {
 			}
 			return false;
 		}
+	}
+	
+	private static String getMissingTexture() {
+		BufferedImage missingTexture = new BufferedImage(16, 16, 2);
+		Graphics g = missingTexture.getGraphics();
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, 16, 16);
+        g.setColor(Color.BLACK);
+        g.drawString("missingtex", 1, 10);
+        g.dispose();
+		URL jarURL = mod_BetaTweaks.class.getResource(".");
+		if(jarURL.getPath().contains("net/minecraft/src")) {
+			try {
+				jarURL = jarURL.toURI().resolve("..").resolve("..").resolve("..").toURL();
+			} 
+			catch (Exception e) { e.printStackTrace(); }
+		}
+		File outputfile = new File(jarURL.getPath() + RESOURCES_PATH + "missingTexture.png");
+		if(outputfile.getParentFile() != null) {
+			outputfile.getParentFile().mkdirs();
+		}
+		try {
+			ImageIO.write(missingTexture, "png", outputfile);
+		} 
+		catch (IOException e) { e.printStackTrace(); }
+		return RESOURCES_PATH + "missingTexture.png";
+	}
+	
+	private static int blockMissingTextureIndex = 0;
+	
+	public static int getBlockTexture(String texturePath) {
+		if(resourceExists(texturePath)) {
+			return ModLoader.addOverride("/terrain.png", getResource(texturePath));
+		}
+		if(blockMissingTextureIndex == 0) {
+			blockMissingTextureIndex = ModLoader.addOverride("/terrain.png", getMissingTexture());
+		}
+		return blockMissingTextureIndex;
 	}
 	
 	public static class EasyField<T> {

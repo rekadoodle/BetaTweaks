@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 import net.minecraft.src.betatweaks.block.*;
@@ -36,7 +35,7 @@ public class BetaTweaks {
 	public void init(mod_BetaTweaks basemod) {
 		Utils.init();
 		initSettings();
-
+		
 		ModLoader.SetInGameHook(basemod, true, false);
 		ModLoader.SetInGUIHook(basemod, true, false);
 		
@@ -97,51 +96,33 @@ public class BetaTweaks {
 			overrideIngameChat = false;
 		}
 		
-		if(guiOverrides.containsKey(guiscreen.getClass()) && !dontOverride) {
-			Utils.overrideCurrentScreen(guiOverrides.get(guiscreen.getClass()));
-		}
-		if (Utils.isInstalled(Utils.guiapihandler) && Utils.guiapihandler.isGuiModScreen(guiscreen)) {
-			Utils.guiapihandler.handleTooltip(guiscreen, Utils.cursorX(), Utils.cursorY());
-			if(Utils.isInstalled(Utils.mpHandler) && Utils.mpHandler.serverModInstalled && Utils.guiapihandler.isGuiModSelectScreen(guiscreen) && Utils.getParentScreen() != guiscreen) {
-				Utils.mpHandler.checkIfOp();
-			}
-			if (Utils.guiapihandler.settingsChanged(guiscreen)) {
-				Boolean temp1 = cfg.indevStorageBlocks.isEnabled();
-				Boolean temp2 = cfg.hideLongGrass.isEnabled();
-				Boolean temp3 = cfg.hideDeadBush.isEnabled();
-				Utils.guiapihandler.loadSettingsFromGUI();
-				initSettings();
-				if (temp1 != cfg.indevStorageBlocks.isEnabled() || temp2 != cfg.hideLongGrass.isEnabled()
-						|| temp3 != cfg.hideDeadBush.isEnabled()) {
-					if (mc.theWorld != null)
-						mc.renderGlobal.loadRenderers();
-				}
-			}
-		} else if (cfg.ingameTexurePackButton.isEnabled() && guiscreen instanceof GuiIngameMenu) {
+		
+		if (Utils.isInstalled(Utils.guiapihandler)) {
+			Utils.guiapihandler.handleTooltip(guiscreen);
+		} 
+		else if (cfg.ingameTexurePackButton.isEnabled() && guiscreen instanceof GuiIngameMenu) {
 			if(buttonCount == -1 || controlList.size() == buttonCount) {
 				buttonCount = controlList.size();
 				texturePackButton = new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs");
 				texturePackButton.drawButton(mc, Utils.cursorX(), Utils.cursorY());
 				controlList.add(texturePackButton);
-				
 			}
 			if(Utils.buttonClicked(texturePackButton)) {
 				mc.displayGuiScreen(new GuiTexturePacks(guiscreen));
 			}
-		} else if (guiscreen instanceof GuiOptions && !cfg.disableEntityRendererOverride.isEnabled()) {
+		} 
+		else if (guiscreen instanceof GuiOptions && !cfg.disableEntityRendererOverride.isEnabled()) {
 			if(cfg.fovSlider.isEnabled() && (buttonCount2 == -1 || controlList.size() == buttonCount2)) {
 				buttonCount2 = controlList.size();
 				controlList.add(new GuiSliderBT(guiscreen.width / 2 - 155 + guiOptionsButtonCount % 2 * 160, guiscreen.height / 6 + 24 * (guiOptionsButtonCount >> 1), cfg.fov));
 				((GuiButton)controlList.get(buttonCount2)).drawButton(mc, Utils.cursorX(), Utils.cursorY());
 			}
 			
-		} else if (guiscreen instanceof GuiTexturePacks) {
-			if(initialTexturePack == null) {
-				initialTexturePack = Utils.MC.texturePackList.selectedTexturePack;
-			}
 			
 		}
-		Utils.updateParentScreen();
+		if(guiscreen != Utils.getParentScreen()) {
+			this.onGuiScreenChanged(mc, guiscreen);
+		}
 		if (mc.theWorld != currentWorld) {
 			if (Utils.isInstalled(Utils.mpHandler) && mc.theWorld == null) {
 				Utils.mpHandler.serverModInstalled = false;
@@ -159,6 +140,19 @@ public class BetaTweaks {
 		if (cfg.draggingShortcuts.isEnabled()) {
 			DraggingShortcuts.onGuiTick(mc, guiscreen);
 		}
+	}
+	
+	public void onGuiScreenChanged(Minecraft mc, GuiScreen guiscreen) {
+		if(guiOverrides.containsKey(guiscreen.getClass()) && !dontOverride) {
+			guiscreen = Utils.overrideCurrentScreen(guiOverrides.get(guiscreen.getClass()));
+		}
+		if (guiscreen instanceof GuiTexturePacks) {
+			initialTexturePack = Utils.MC.texturePackList.selectedTexturePack;
+		}
+		if (Utils.isInstalled(Utils.guiapihandler)) {
+			Utils.guiapihandler.onGuiScreenChanged(guiscreen);
+		}
+		Utils.setParentScreen(guiscreen);
 	}
 	
 	public void onTickInGame(Minecraft mc) {

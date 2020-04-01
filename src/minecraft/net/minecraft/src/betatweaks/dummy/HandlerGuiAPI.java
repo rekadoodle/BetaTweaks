@@ -10,13 +10,9 @@ public abstract class HandlerGuiAPI {
 	
 	public abstract void init(List<DisplayMode> resolutions);
 	
-	public abstract void handleTooltip(GuiScreen guiscreen, int posX, int posY);
+	public abstract void handleTooltip(GuiScreen guiscreen);
 	
-	public abstract boolean isGuiModScreen(GuiScreen guiscreen);
-	
-	public abstract boolean isGuiModSelectScreen(GuiScreen guiscreen);
-	
-	public abstract boolean settingsChanged(GuiScreen guiscreen);
+	public abstract void onGuiScreenChanged(GuiScreen guiscreen);
 
 	public abstract void loadSettingsToGUI();
 	

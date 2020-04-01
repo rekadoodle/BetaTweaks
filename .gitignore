@@ -40,6 +40,7 @@ hs_err_pid*
 !/eclipse/Client/bin
 /eclipse/Client/bin/*
 !/eclipse/Client/bin/betatweaks
+/eclipse/Client/bin/betatweaks/resources/missingTexture.png
 
 
 # MC Forge

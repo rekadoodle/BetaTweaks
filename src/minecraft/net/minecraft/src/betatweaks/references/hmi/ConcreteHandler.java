@@ -1,6 +1,6 @@
 package net.minecraft.src.betatweaks.references.hmi;
 
-import hmi.GuiRecipeViewer;
+import net.minecraft.src.hmi.GuiRecipeViewer;
 import net.minecraft.src.GuiScreen;
 import net.minecraft.src.betatweaks.dummy.HandlerHMI;
 

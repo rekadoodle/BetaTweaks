@@ -192,20 +192,18 @@ public class SettingInfo {
 				"This was removed in Beta 1.6"
 		    };
 		}
-		if(Utils.isInstalled(Utils.mpHandler)) {
-			if(setting == Utils.mpHandler.playerListAllowed) {
-				return new String[] {
-					"Enable Player List",
-					"Should players be able to use the player list that was",
-					"introduced in Beta 1.8"
-				};
-			}
-			if(setting == Utils.mpHandler.motd) {
-				return new String[] {
-					"MOTD",
-					"The server description displayed in the server browser."
-				};
-			}
+		if(setting == Utils.mpHandler.playerListAllowed) {
+			return new String[] {
+				"Enable Player List",
+				"Should players be able to use the player list that was",
+				"introduced in Beta 1.8"
+			};
+		}
+		if(setting == Utils.mpHandler.motd) {
+			return new String[] {
+				"MOTD",
+				"The server description displayed in the server browser."
+			};
 		}
 		if(setting == cfg.customFullscreenRes) {
 			return new String[] {

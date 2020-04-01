@@ -15,8 +15,8 @@ public class BlockOreStorageIndev extends BlockOreStorage {
         setBlockName(block.getBlockName().replaceFirst("tile.", ""));
 		setResistance(10F);
 		setStepSound(soundMetalFootstep);
-        this.sideTexture = ModLoader.addOverride("/terrain.png", sideTexture);
-        this.bottomTexture = ModLoader.addOverride("/terrain.png", bottomTexture);
+        this.sideTexture = Utils.getBlockTexture(sideTexture);
+        this.bottomTexture = Utils.getBlockTexture(bottomTexture);
         Utils.replaceBlock(this, fields);
     }
     
@@ -38,9 +38,9 @@ public class BlockOreStorageIndev extends BlockOreStorage {
     }
     
     public static void init() {
-		new BlockOreStorageIndev(Block.blockSteel, new String[] {"blockSteel", "aj"}, Utils.getResource("steelSide.png"), Utils.getResource("steelBottom.png"));
-		new BlockOreStorageIndev(Block.blockGold, new String[] {"blockGold", "ai"}, Utils.getResource("goldSide.png"), Utils.getResource("goldBottom.png"));
-		new BlockOreStorageIndev(Block.blockDiamond, new String[] {"blockDiamond", "ay"}, Utils.getResource("diamondSide.png"), Utils.getResource("diamondBottom.png"));
+		new BlockOreStorageIndev(Block.blockSteel, new String[] {"blockSteel", "aj"}, "steelSide.png", "steelBottom.png");
+		new BlockOreStorageIndev(Block.blockGold, new String[] {"blockGold", "ai"}, "goldSide.png", "goldBottom.png");
+		new BlockOreStorageIndev(Block.blockDiamond, new String[] {"blockDiamond", "ay"}, "diamondSide.png", "diamondBottom.png");
 		
 		ModLoader.RegisterAllTextureOverrides(Utils.MC.renderEngine);
 		
