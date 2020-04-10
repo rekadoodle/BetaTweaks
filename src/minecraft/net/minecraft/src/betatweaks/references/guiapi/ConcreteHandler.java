@@ -96,7 +96,6 @@ public class ConcreteHandler extends HandlerGuiAPI {
         	
         	settingMap.put(cfg.customFullscreenRes, resSetting);
         	reverseSettingMap.put(resSetting, cfg.customFullscreenRes);
-            resSetting.setTooltipContent(cfg.customFullscreenRes);
             
             widgetClientside.add(createButton("Toggle Custom Fullscreen", new Runnable() {
 
@@ -148,7 +147,6 @@ public class ConcreteHandler extends HandlerGuiAPI {
 			SString sstring = (SString)sbase;
 			setting = settings.addSetting(parentGui, sstring.getDisplayString(), sstring.name, sstring.defaultValue);
 		}
-		setting.setTooltipContent(sbase);
 		settingMap.put(sbase, setting);
 		reverseSettingMap.put(setting, sbase);
 		return setting;

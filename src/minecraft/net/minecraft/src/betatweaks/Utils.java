@@ -182,8 +182,15 @@ public class Utils {
 	public static HandlerOptifine optifineHandler;
 	public static HandlerModLoaderMp mpHandler;
 	public static HandlerJSON jsonHandler;
+	public static HandlerGuiAPI modoptionsapiHandler;
 	
 	public static void init() {
+		if(classExists("ModLoaderMp")) {
+			mpHandler = (HandlerModLoaderMp) getHandler("modloadermp");
+		}
+		else {
+			mpHandler = new DummyHandlerModLoaderMp();
+		}
 		if(classExists("ModSettings")) {
 			guiapihandler = (HandlerGuiAPI) getHandler("guiapi");
 			
@@ -196,6 +203,10 @@ public class Utils {
 				}
 			}).start();
 		}
+		if(classExists("modoptionsapi.ModOptionsAPI")) {
+			//modoptionsapiHandler = (HandlerGuiAPI) getHandler("modoptionsapi");
+			//modoptionsapiHandler.init(null);
+		}
 		if(classExists("forge.ForgeHooksClient")) {
 			forgeHandler = (HandlerForge) getHandler("forge");
 		}
@@ -204,12 +215,6 @@ public class Utils {
 		}
 		if(classExists("GuiDetailSettingsOF")) {
 			optifineHandler = (HandlerOptifine) getHandler("optifine");
-		}
-		if(classExists("ModLoaderMp")) {
-			mpHandler = (HandlerModLoaderMp) getHandler("modloadermp");
-		}
-		else {
-			mpHandler = new DummyHandlerModLoaderMp();
 		}
 		if(classExists("org.json.JSONObject")) {
 			jsonHandler = (HandlerJSON) getHandler("json");

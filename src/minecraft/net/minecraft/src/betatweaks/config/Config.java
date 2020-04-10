@@ -33,8 +33,8 @@ public class Config {
 			writer.println("#Clientside Settings");
 			writer.printSettings(optionsClient);
 			writer.println();
-			writer.println("#Clientside Settings");
-			writer.printSettings(optionsClient);
+			writer.println("#Singleplayer Only Settings");
+			writer.printSettings(optionsGameplay);
 		} 
 		catch (IOException e) { e.printStackTrace(); }
 		finally {

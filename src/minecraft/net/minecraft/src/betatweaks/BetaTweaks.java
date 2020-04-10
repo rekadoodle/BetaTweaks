@@ -62,8 +62,8 @@ public class BetaTweaks {
 
 		if (cfg.lightTNTwithFist.isEnabled() && Block.tnt.getClass() == BlockTNT.class) new BlockTNTPunchable();
 		if (cfg.indevStorageBlocks.isEnabled() && Block.blockSteel.getClass() == BlockOreStorage.class) BlockOreStorageIndev.init();
-		HideBlocks.setLongGrassVisible(!cfg.hideLongGrass.isEnabled());
-		HideBlocks.setDeadBushVisible(!cfg.hideDeadBush.isEnabled());
+		if (cfg.hideLongGrass.isEnabled() && Block.tallGrass.getClass() == BlockTallGrass.class) HideBlocks.setLongGrassVisible(!cfg.hideLongGrass.isEnabled());
+		if (cfg.hideDeadBush.isEnabled() && Block.deadBush.getClass() == BlockDeadBush.class) HideBlocks.setDeadBushVisible(!cfg.hideDeadBush.isEnabled());
 		GuiAchievementNull.setVisible(!cfg.hideAchievementNotifications.isEnabled());
 		
 		guiOverrides.clear();

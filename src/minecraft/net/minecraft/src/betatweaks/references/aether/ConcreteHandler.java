@@ -12,7 +12,10 @@ public class ConcreteHandler extends HandlerAether {
 	
 	public ConcreteHandler() {
 		this.sheepuffExists = Utils.classExists("EntitySheepuff");
-		GuiMainMenu.renderOption = mod_Aether.worldMenu;
+		try {
+			GuiMainMenu.renderOption = mod_Aether.worldMenu;
+		}
+		catch(NoSuchFieldError e) { }
 	}
 
 	@Override
@@ -45,7 +48,10 @@ public class ConcreteHandler extends HandlerAether {
 
 	@Override
 	public boolean simulatedWorldMenu() {
-		return GuiMainMenu.mmactive;
+		try {
+			return GuiMainMenu.mmactive;
+		}
+		catch(NoSuchFieldError e) { return false; }
 	}
 
 }
