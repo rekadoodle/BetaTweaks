@@ -1,4 +1,4 @@
-package net.minecraft.server;
+package net.minecraft.server.betatweaks;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -12,6 +12,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
+
+import net.minecraft.server.AxisAlignedBB;
+import net.minecraft.server.BaseModMp;
+import net.minecraft.server.Block;
+import net.minecraft.server.Entity;
+import net.minecraft.server.EntityBoat;
+import net.minecraft.server.EntityItem;
+import net.minecraft.server.EntityLiving;
+import net.minecraft.server.EntityMinecart;
+import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.EntitySheep;
+import net.minecraft.server.Item;
+import net.minecraft.server.ItemStack;
+import net.minecraft.server.Material;
+import net.minecraft.server.MathHelper;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ModLoader;
+import net.minecraft.server.ModLoaderMp;
+import net.minecraft.server.Packet;
+import net.minecraft.server.Packet230ModLoader;
 
 
 
@@ -39,7 +59,7 @@ public class BetaTweaksMP extends BaseModMp {
 	}
 
 	BetaTweaksMP() {
-		Packet.a(254, false, true, net.minecraft.server.Packet254ServerPing.class);
+		Packet.a(254, false, true, net.minecraft.server.betatweaks.Packet254ServerPing.class);
 		try {
 			configFile = new File(new File(".").getCanonicalPath(), "/config/BetaTweaks.cfg");
 		} catch (IOException e1) {

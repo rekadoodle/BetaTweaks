@@ -50,21 +50,28 @@ hs_err_pid*
 /src/*
 !/src/minecraft
 !/src/minecraft_server
-!/src/bukkit_server
+!/src/minecraft_bukkit
 /src/minecraft/*
 /src/minecraft_server/*
+/src/minecraft_bukkit/*
 
 !/src/minecraft/net
 !/src/minecraft_server/net
+!/src/minecraft_bukkit/net
 /src/minecraft/net/minecraft/*
 /src/minecraft_server/net/minecraft/*
+/src/minecraft_bukkit/net/minecraft/*
 
 !/src/minecraft/net/minecraft/src
 !/src/minecraft_server/net/minecraft/src
+!/src/minecraft_bukkit/net/minecraft/server
 /src/minecraft/net/minecraft/src/*
 /src/minecraft_server/net/minecraft/src/*
+/src/minecraft_bukkit/net/minecraft/server/*
 
 !/src/minecraft/net/minecraft/src/mod_BetaTweaks.java
 !/src/minecraft_server/net/minecraft/src/mod_BetaTweaks.java
 !/src/minecraft/net/minecraft/src/betatweaks
 !/src/minecraft_server/net/minecraft/src/betatweaks
+!/src/minecraft_bukkit/net/minecraft/server/mod_BetaTweaks.java
+!/src/minecraft_bukkit/net/minecraft/server/betatweaks

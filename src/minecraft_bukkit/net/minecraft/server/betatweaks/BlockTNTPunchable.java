@@ -2,11 +2,17 @@
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
-package net.minecraft.server;
+package net.minecraft.server.betatweaks;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Random;
+
+import net.minecraft.server.Block;
+import net.minecraft.server.BlockTNT;
+import net.minecraft.server.EntityTNTPrimed;
+import net.minecraft.server.ItemStack;
+import net.minecraft.server.World;
 
 // Referenced classes of package net.minecraft.src:
 //            Block, Material, World, EntityTNTPrimed, 

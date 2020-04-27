@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
 import net.minecraft.src.betatweaks.block.*;
@@ -62,8 +64,8 @@ public class BetaTweaks {
 
 		if (cfg.lightTNTwithFist.isEnabled() && Block.tnt.getClass() == BlockTNT.class) new BlockTNTPunchable();
 		if (cfg.indevStorageBlocks.isEnabled() && Block.blockSteel.getClass() == BlockOreStorage.class) BlockOreStorageIndev.init();
-		if (cfg.hideLongGrass.isEnabled() && Block.tallGrass.getClass() == BlockTallGrass.class) HideBlocks.setLongGrassVisible(!cfg.hideLongGrass.isEnabled());
-		if (cfg.hideDeadBush.isEnabled() && Block.deadBush.getClass() == BlockDeadBush.class) HideBlocks.setDeadBushVisible(!cfg.hideDeadBush.isEnabled());
+		if (cfg.hideLongGrass.isEnabled() || Block.tallGrass.getClass() != BlockTallGrass.class) HideBlocks.setLongGrassVisible(!cfg.hideLongGrass.isEnabled());
+		if (cfg.hideDeadBush.isEnabled() || Block.deadBush.getClass() != BlockDeadBush.class) HideBlocks.setDeadBushVisible(!cfg.hideDeadBush.isEnabled());
 		GuiAchievementNull.setVisible(!cfg.hideAchievementNotifications.isEnabled());
 		
 		guiOverrides.clear();
@@ -79,7 +81,17 @@ public class BetaTweaks {
 		}
 	}
 	
+	int key;
+	
 	public void onTickInGUI(Minecraft mc, GuiScreen guiscreen) {
+		//while(Keyboard.next()) {
+			//System.out.println(Keyboard.getKeyName(Keyboard.getEventKey()));
+		//}
+		if(key != Keyboard.getEventKey()) {
+			key = Keyboard.getEventKey();
+			System.out.println(Keyboard.getKeyName(key));
+		}
+		
 		@SuppressWarnings("unchecked")
 		List<GuiButton> controlList = (List<GuiButton>) mod_BetaTweaks.controlList(guiscreen);
 		if(overrideIngameChat || guiscreen instanceof GuiConnecting) {

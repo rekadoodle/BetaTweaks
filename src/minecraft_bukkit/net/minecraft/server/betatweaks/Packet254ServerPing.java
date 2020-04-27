@@ -2,12 +2,18 @@
 // Jad home page: http://www.kpdus.com/jad.html
 // Decompiler options: packimports(3) braces deadcode 
 
-package net.minecraft.server;
+package net.minecraft.server.betatweaks;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.lang.reflect.Field;
 import java.net.Socket;
+
+import net.minecraft.server.ModLoader;
+import net.minecraft.server.NetHandler;
+import net.minecraft.server.NetLoginHandler;
+import net.minecraft.server.Packet;
+import net.minecraft.server.Packet255KickDisconnect;
 
 // Referenced classes of package net.minecraft.src:
 //            Packet, NetHandler
