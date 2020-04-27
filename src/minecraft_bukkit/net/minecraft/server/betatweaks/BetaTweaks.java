@@ -3,6 +3,9 @@ package net.minecraft.server.betatweaks;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.bukkit.craftbukkit.TextWrapper;
+
 import net.minecraft.server.*;
 import net.minecraft.server.betatweaks.BlockTNTPunchable;
 import net.minecraft.server.betatweaks.config.Config;
@@ -27,13 +30,17 @@ public class BetaTweaks {
 	
 	public void init(mod_BetaTweaks basemod) {
 		this.basemod = basemod;
-    	
     	loadOptions();
         initSettings();
+        
+        //disable bukkit chat spacing
+		Utils.EasyField<Integer> chatboxSizeField = new Utils.EasyField<Integer>(TextWrapper.class, "CHAT_WINDOW_WIDTH");
+		chatboxSizeField.removeFinalModifier();
+		chatboxSizeField.set(99999);
 	}
 	
 	public String version() {
-		return "v1.28 PRE";
+		return "PRE c43";
 	}
 	
 	public String getModID() {
@@ -202,7 +209,6 @@ public class BetaTweaks {
 			Packet230ModLoader packet = new Packet230ModLoader();
 			packet.packetType = PACKET_OUT_PLAYERLIST;
 			
-			@SuppressWarnings("unchecked")
 			List<EntityPlayer> playerList = mc.serverConfigurationManager.players;
 			
 			packet.dataString = new String[playerList.size()];

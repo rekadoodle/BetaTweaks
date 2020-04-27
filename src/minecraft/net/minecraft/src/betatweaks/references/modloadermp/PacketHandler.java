@@ -29,7 +29,7 @@ public class PacketHandler extends BaseModMp {
     }
 	
 	public String Version() {
-		return "v1.28 PRE";
+		return "PRE c43";
 	}
 
 	//Info for mine_diver's mod menu

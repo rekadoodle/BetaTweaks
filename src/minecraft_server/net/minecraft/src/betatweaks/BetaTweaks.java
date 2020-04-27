@@ -33,7 +33,7 @@ public class BetaTweaks {
 	}
 	
 	public String version() {
-		return "v1.28 PRE";
+		return "PRE c43";
 	}
 	
 	public String getModID() {
