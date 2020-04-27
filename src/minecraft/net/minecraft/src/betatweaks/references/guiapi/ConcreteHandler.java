@@ -119,9 +119,16 @@ public class ConcreteHandler extends HandlerGuiAPI {
 		
 		//SERVER SETTINGS
 		if (Utils.isInstalled(Utils.mpHandler)) {
-			for(SBase<?> setting : Utils.mpHandler.opOptions) {
+			HandlerModLoaderMp mp = Utils.mpHandler;
+			for(SBase<?> setting : mp.opOptions) {
 				createSetting(setting, widgetServer);
 			}
+			settingMap.put(mp.boatElevators, settingMap.get(cfg.boatElevators));
+			settingMap.put(mp.hoeGrassForSeeds, settingMap.get(cfg.hoeGrassForSeeds));
+			settingMap.put(mp.ladderGaps, settingMap.get(cfg.ladderGaps));
+			settingMap.put(mp.lightTNTwithFist, settingMap.get(cfg.lightTNTwithFist));
+			settingMap.put(mp.minecartBoosters, settingMap.get(cfg.minecartBoosters));
+			settingMap.put(mp.punchSheepForWool, settingMap.get(cfg.punchSheepForWool));
 		}
 		
 		loadSettingsToGUI();

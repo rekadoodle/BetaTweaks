@@ -84,13 +84,6 @@ public class BetaTweaks {
 	int key;
 	
 	public void onTickInGUI(Minecraft mc, GuiScreen guiscreen) {
-		//while(Keyboard.next()) {
-			//System.out.println(Keyboard.getKeyName(Keyboard.getEventKey()));
-		//}
-		if(key != Keyboard.getEventKey()) {
-			key = Keyboard.getEventKey();
-			System.out.println(Keyboard.getKeyName(key));
-		}
 		
 		@SuppressWarnings("unchecked")
 		List<GuiButton> controlList = (List<GuiButton>) mod_BetaTweaks.controlList(guiscreen);

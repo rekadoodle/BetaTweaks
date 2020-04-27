@@ -8,7 +8,7 @@ import net.minecraft.src.*;
 import net.minecraft.src.betatweaks.config.Config;
 import net.minecraft.src.betatweaks.config.SBoolean;
 
-public class Main {
+public class BetaTweaks {
 
 	private static List<Integer> options = new ArrayList<Integer>();
 	private int playerCount;
@@ -22,7 +22,7 @@ public class Main {
 			cfg.allowPlayerList
 	};
 	
-	public static final Main INSTANCE = new Main();
+	public static final BetaTweaks INSTANCE = new BetaTweaks();
 	private BaseModMp basemod;
 	
 	public void init(mod_BetaTweaks basemod) {

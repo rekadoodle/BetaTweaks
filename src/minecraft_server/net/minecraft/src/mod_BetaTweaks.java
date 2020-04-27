@@ -7,16 +7,16 @@ public class mod_BetaTweaks extends BaseModMp{
 
 	@Override
 	public String Version() {
-		return Main.INSTANCE.version();
+		return BetaTweaks.INSTANCE.version();
 	}
 	
 	@Override
 	public String toString() {
-		return Main.INSTANCE.getModID();
+		return BetaTweaks.INSTANCE.getModID();
 	}
 
 	public mod_BetaTweaks(){
-		Main.INSTANCE.init(this);
+		BetaTweaks.INSTANCE.init(this);
 		Packet.addIdClassMapping(254, false, true, Packet254ServerPing.class);
 		
 		ModLoader.SetInGameHook(this, true, false);
@@ -24,17 +24,17 @@ public class mod_BetaTweaks extends BaseModMp{
 	
 	@Override
 	public void OnTickInGame(MinecraftServer mc) {
-		Main.INSTANCE.onTickInGame(mc);
+		BetaTweaks.INSTANCE.onTickInGame(mc);
 	}
 	
 	@Override
 	public void HandleLogin(EntityPlayerMP player) {
-		Main.INSTANCE.handleLogin(player);
+		BetaTweaks.INSTANCE.handleLogin(player);
 	}
 	
 	@Override
 	public void HandlePacket(Packet230ModLoader packet, EntityPlayerMP player) {
-		Main.INSTANCE.handlePacket(packet, player);
+		BetaTweaks.INSTANCE.handlePacket(packet, player);
 	}
 	
 	public static void setFallDistance(Entity entity, float f) {

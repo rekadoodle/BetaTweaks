@@ -1,45 +1,43 @@
 package net.minecraft.server;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.betatweaks.*;
 
 public class mod_BetaTweaks extends BaseModMp{
 
 	@Override
 	public String Version() {
-		return "v1";
-	}
-
-	mod_BetaTweaks(){
-			ClassLoader classloader = (net.minecraft.server.ModLoader.class).getClassLoader();
-			Method addmodMethod;
-			try {
-				addmodMethod = ModLoader.class.getDeclaredMethod("addMod", ClassLoader.class, String.class);
-				addmodMethod.setAccessible(true);
-				try {
-					addmodMethod.invoke(null, new Object[] {
-							classloader, "BetaTweaksMP.class"
-						});
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					e.printStackTrace();
-				}
-			} catch (NoSuchMethodException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (SecurityException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
+		return BetaTweaks.INSTANCE.version();
 	}
 	
+	@Override
+	public String toString() {
+		return BetaTweaks.INSTANCE.getModID();
+	}
 
-	public boolean hasClientSide()
-	{
-		  return false;
+	public mod_BetaTweaks(){
+		BetaTweaks.INSTANCE.init(this);
+		Packet.a(254, false, true, Packet254ServerPing.class);
+		
+		ModLoader.SetInGameHook(this, true, false);
+	}
+	
+	@Override
+	public void OnTickInGame(MinecraftServer mc) {
+		BetaTweaks.INSTANCE.onTickInGame(mc);
+	}
+	
+	@Override
+	public void HandleLogin(EntityPlayer player) {
+		BetaTweaks.INSTANCE.handleLogin(player);
+	}
+	
+	@Override
+	public void HandlePacket(Packet230ModLoader packet, EntityPlayer player) {
+		BetaTweaks.INSTANCE.handlePacket(packet, player);
+	}
+	
+	public static void setFallDistance(Entity entity, float f) {
+		entity.fallDistance = f;
 	}
 }
