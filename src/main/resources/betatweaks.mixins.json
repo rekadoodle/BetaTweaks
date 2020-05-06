@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "betatweaks.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "MixinMinecraft",
+    "MixinMinecraftAccessor",
+    "MixinThreadDownloadResources",
+    "MixinGuiScreen",
+    "MixinGuiControls2"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

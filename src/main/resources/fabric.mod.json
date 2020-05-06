@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "betatweaks",
+  "version": "${version}",
+
+  "name": "Example Mod",
+  "description": "An Example Mod for Alpha",
+  "authors": [
+    "Earthcomputer"
+  ],
+  "contact": {
+    "homepage": "https://earthcomputer.net/",
+    "sources": "https://github.com/pack-png-mods/alpha-example-mod"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/examplemod/icon.png",
+
+  "environment": "*",
+  "mixins": [
+    "betatweaks.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.7.4"
+  }
+}

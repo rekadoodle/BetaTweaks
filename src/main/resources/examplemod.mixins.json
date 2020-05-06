@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "net.earthcomputer.examplemod.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+  ],
+  "client": [
+    "MixinMinecraft",
+    "MixinGuiMainMenu"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

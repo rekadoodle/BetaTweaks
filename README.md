@@ -1,19 +1,16 @@
-# BetaTweaks
-Quality of Life mod for Legacy versions of Minecraft
+# Fabric Example Mod
 
-## Features
+## Setup
 
-TODO
+1. Edit build.gradle and mod.json to suit your needs.
+    * The "mixins" object can be removed from mod.json if you do not need to use mixins.
+    * Please replace all occurences of "modid" with your own mod ID - sometimes, a different string may also suffice.
+2. Run the following command:
 
-## Installation
-
-TODO
-
-## Development Setup
-1. Setup an MCP workspace.
-2. Extract the contents of the repo into the root of your MCP workspace folder.
-3. Delete the references package or a number of its subpackages if you don't have each dependency setup.
+```
+./gradlew idea
+```
 
 ## License
 
-TODO
+This template is available under the CC0 license. Feel free to learn from it and incorporate it in your own projects.
