@@ -32,7 +32,7 @@ public class ConcreteHandler extends HandlerShaders {
 	}
 	
 	private <T> T getValue(Class<T> type, String... names) {
-		return new Utils.EasyField<T>(EntityRenderer.class, "framebuffer").get(renderer);
+		return new Utils.EasyField<T>(EntityRenderer.class, names).get(renderer);
 	}
 	
 	private EntityRenderer renderer;

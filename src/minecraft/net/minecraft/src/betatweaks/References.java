@@ -80,7 +80,11 @@ public class References {
 		try { 
 			return Utils.class.getClassLoader().loadClass(Utils.class.getPackage().getName() + ".references." + path + ".ConcreteHandler").newInstance(); 
 		}
-		catch (Throwable e) { e.printStackTrace(); return null; } 
+		catch (Throwable e) { 
+			Utils.logError("Failed to load mod compatibility for: " + path);
+			e.printStackTrace();
+			return null;
+		} 
 	}
 	
 	public static boolean isInstalled(Object handler) {
