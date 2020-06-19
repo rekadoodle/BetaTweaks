@@ -232,13 +232,31 @@ public class Utils {
 	}
 	
 	private static String getMissingTexture() {
-		BufferedImage missingTexture = new BufferedImage(16, 16, 2);
-		Graphics g = missingTexture.getGraphics();
-        g.setColor(Color.WHITE);
-        g.fillRect(0, 0, 16, 16);
-        g.setColor(Color.BLACK);
-        g.drawString("missingtex", 1, 10);
-        g.dispose();
+		BufferedImage missingTexture = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+		Graphics graphic = missingTexture.getGraphics();
+        graphic.setColor(Color.BLACK);
+        graphic.fillRect(0, 0, 16, 16);
+        graphic.setColor(Color.RED);
+        //N
+        graphic.drawLine(2, 2, 2, 8);
+        graphic.drawLine(6, 2, 6, 8);
+        graphic.drawLine(3, 3, 4, 5);
+        graphic.drawLine(4, 6, 6, 7);
+        //O
+        graphic.drawLine(8, 2, 8, 8);
+        graphic.drawLine(11, 2, 11, 8);
+        graphic.drawLine(9, 2, 10, 2);
+        graphic.drawLine(9, 8, 10, 8);
+        //EYES
+        graphic.drawLine(5, 10, 5, 11);
+        graphic.drawLine(8, 10, 8, 11);
+        //MOUTH
+        graphic.drawLine(3, 15, 3, 15);
+        graphic.drawLine(4, 14, 5, 14);
+        graphic.drawLine(6, 13, 7, 13);
+        graphic.drawLine(8, 14, 9, 14);
+        graphic.drawLine(10, 15, 10, 15);
+        graphic.dispose();
 		URL jarURL = mod_BetaTweaks.class.getResource(".");
 		if(jarURL.getPath().contains("net/minecraft/src")) {
 			try {
