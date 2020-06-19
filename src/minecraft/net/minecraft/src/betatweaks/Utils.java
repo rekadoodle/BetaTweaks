@@ -21,6 +21,7 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
+import net.minecraft.src.betatweaks.config.Config;
 import net.minecraft.src.betatweaks.config.SBase;
 import net.minecraft.src.betatweaks.dummy.*;
 
@@ -193,13 +194,14 @@ public class Utils {
 	public static HandlerGuiAPI modoptionsapiHandler;
 	
 	public static void init() {
-		if(nmsClassExists("ModLoaderMp")) {
+		Config cfg = Config.getInstance();
+		if(cfg.modloadermp.isEnabled() && nmsClassExists("ModLoaderMp")) {
 			mpHandler = (HandlerModLoaderMp) getHandler("modloadermp");
 		}
 		else {
 			mpHandler = new DummyHandlerModLoaderMp();
 		}
-		if(nmsClassExists("ModSettings")) {
+		if(cfg.guiapi.isEnabled() && nmsClassExists("ModSettings")) {
 			guiapihandler = (HandlerGuiAPI) getHandler("guiapi");
 			
 			//One of the settings in GuiAPI is the custom resolution
@@ -215,28 +217,29 @@ public class Utils {
 			//modoptionsapiHandler = (HandlerGuiAPI) getHandler("modoptionsapi");
 			//modoptionsapiHandler.init(null);
 		}
-		if(nmsClassExists("forge.ForgeHooksClient")) {
+		if(cfg.forge.isEnabled() && nmsClassExists("forge.ForgeHooksClient")) {
 			forgeHandler = (HandlerForge) getHandler("forge");
 		}
-		if(nmsClassExists("Shader")) {
+		if(cfg.shaders.isEnabled() && nmsClassExists("Shader")) {
 			shadersHandler = (HandlerShaders) getHandler("shaders");
 		}
-		if(nmsClassExists("GuiDetailSettingsOF")) {
+		if(cfg.optifine.isEnabled() && nmsClassExists("GuiDetailSettingsOF")) {
 			optifineHandler = (HandlerOptifine) getHandler("optifine");
 		}
-		if(classExists("org.json.JSONObject")) {
+		if(cfg.json.isEnabled() && classExists("org.json.JSONObject")) {
 			jsonHandler = (HandlerJSON) getHandler("json");
 		}
 	}
 	
 	public static void modsLoaded() {
-		if(isModLoaded("mod_HowManyItems")) {
+		Config cfg = Config.getInstance();
+		if(cfg.hmi.isEnabled() && isModLoaded("mod_HowManyItems")) {
 			hmiHandler = (HandlerHMI) getHandler("hmi");
 		}
-		if(isModLoaded("mod_MineColony")) {
+		if(cfg.minecolony.isEnabled() && isModLoaded("mod_MineColony")) {
 			minecolonyHandler = (HandlerMineColony) getHandler("minecolony");
 		}
-		if(isModLoaded("mod_Aether")) {
+		if(cfg.aether.isEnabled() && isModLoaded("mod_Aether")) {
 			aetherHandler = (HandlerAether) getHandler("aether");
 		}
 	}

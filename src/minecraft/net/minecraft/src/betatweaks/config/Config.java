@@ -204,6 +204,17 @@ public class Config {
 	public SBoolean hideLongGrass = new SBoolean("hideLongGrass", false, true);
 	public SBoolean hideDeadBush = new SBoolean("hideDeadBush", false, true);
 	public SString customFullscreenRes = new SString("customFullscreenRes", "");
+	
+	public SBoolean modloadermp = new SBoolean("enableModLoaderMpCompatibility", true);
+	public SBoolean guiapi = new SBoolean("enableGuiAPICompatibility", true);
+	public SBoolean forge = new SBoolean("enableForgeCompatibility", true);
+	public SBoolean shaders = new SBoolean("enableShadersCompatibility", true);
+	public SBoolean optifine = new SBoolean("enableOptifineCompatibility", true);
+	public SBoolean json = new SBoolean("enableJSONCompatibility", true);
+	public SBoolean hmi = new SBoolean("enableHowManyItemsCompatibility", true);
+	public SBoolean minecolony = new SBoolean("enableMineColonyCompatibility", true);
+	public SBoolean aether = new SBoolean("enableAetherCompatibility", true);
+	
 	public SBoolean punchSheepForWool = new SBoolean("punchSheepForWool", true, true);
 	public SBoolean ladderGaps = new SBoolean("ladderGaps", true, true);
 	public SBoolean lightTNTwithFist = new SBoolean("lightTNTwithFist", true, true);
@@ -216,7 +227,8 @@ public class Config {
 			improvedChatWidthPercentage, improvedChatIngameHeightOffset, improvedChatHorizontalGap, improvedChatIngameHeightPercentage,
 			improvedChatMaxScrollableMessages, improvedChatIndicator, improvedChatInvisibleToggleButton, scrollableControls, ingameTexurePackButton,
 			hideAchievementNotifications, disableEntityRendererOverride, fovSlider, fov, indevStorageBlocks, hideLongGrass, hideDeadBush,
-			customFullscreenRes
+			customFullscreenRes,
+			modloadermp, guiapi, forge, shaders, optifine, json, hmi, minecolony, aether
 	};
 	
 	public final SBase<?>[] optionsGameplay = {
