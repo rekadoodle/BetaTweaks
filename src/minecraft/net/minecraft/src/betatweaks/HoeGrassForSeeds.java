@@ -26,7 +26,7 @@ public class HoeGrassForSeeds {
 			if(lastTickHoeDamage == heldItem.getItemDamage() - 1) {
 				lastTickHoeDamage = -1;
 				if (serverModEnabled) {
-					Utils.mpHandler.grassHoed(lastTickHoeX, lastTickHoeY, lastTickHoeZ);
+					References.mpHandler.grassHoed(lastTickHoeX, lastTickHoeY, lastTickHoeZ);
 				} else {
 					Random rand = new Random();
 					int i;

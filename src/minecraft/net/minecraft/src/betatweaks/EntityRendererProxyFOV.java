@@ -38,10 +38,10 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         cameraYaw = 0.0D;
         cameraPitch = 0.0D;
         mc = minecraft;
-        optifine = Utils.isInstalled(Utils.optifineHandler);
-        if(shadersInstalled = Utils.isInstalled(Utils.shadersHandler)) {
-        	Utils.shadersHandler.init(this);
-        	second_renderpass = Utils.shadersHandler.second_renderpass;
+        optifine = References.isInstalled(References.optifineHandler);
+        if(shadersInstalled = References.isInstalled(References.shadersHandler)) {
+        	References.shadersHandler.init(this);
+        	second_renderpass = References.shadersHandler.second_renderpass;
         	matrixbuffer = ByteBuffer.allocateDirect(64);
             projectionmatrixbuffer = ByteBuffer.allocateDirect(64);
         }
@@ -59,7 +59,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         	fov *= 60.0F / 70.0F;
         }
         if((!optifine && (mc.gameSettings.smoothCamera = Keyboard.isKeyDown(BetaTweaks.zoom.keyCode) && ModLoader.isGUIOpen(null)))
-        		|| (optifine && Utils.optifineHandler.zoomKeyHeld()))
+        		|| (optifine && References.optifineHandler.zoomKeyHeld()))
         {
             if(!zoomMode)
             {
@@ -133,7 +133,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
     
     public void renderWorld(float f, long l)
     {
-    	boolean shader = shadersInstalled && optifine && Utils.optifineHandler.isWaterFancy();
+    	boolean shader = shadersInstalled && optifine && References.optifineHandler.isWaterFancy();
     	second_renderpass = shader;
         GL11.glEnable(2884 /*GL_CULL_FACE*/);
         GL11.glEnable(2929 /*GL_DEPTH_TEST*/);
@@ -158,9 +158,9 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         }
         boolean flag = false;
         if(shader) {
-        	Utils.shadersHandler.updateFBOSize(mc.displayWidth, mc.displayHeight);
+        	References.shadersHandler.updateFBOSize(mc.displayWidth, mc.displayHeight);
         }
-        for(int i = 0; (!shader && i < 2) || (shader && i < Utils.shadersHandler.getWaterRenderMode()); i++)
+        for(int i = 0; (!shader && i < 2) || (shader && i < References.shadersHandler.getWaterRenderMode()); i++)
         {
             if(mc.gameSettings.anaglyph)
             {
@@ -176,7 +176,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             }
             if(second_renderpass)
             {
-            	Utils.shadersHandler.bind(i);
+            	References.shadersHandler.bind(i);
                 if(i == 1)
                 {
                     flag = true;
@@ -253,7 +253,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                 setupCameraTransform(f, i);
                 ClippingHelperImpl.getInstance();
             }
-            if(mc.gameSettings.renderDistance < 2 || (optifine && Utils.optifineHandler.isFarView()))
+            if(mc.gameSettings.renderDistance < 2 || (optifine && References.optifineHandler.isFarView()))
             {
                 setupFog(-1, f);
                 renderglobal.renderSky(f);
@@ -296,25 +296,25 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             RenderHelper.disableStandardItemLighting();
             if(flag)
             {
-            	Utils.shadersHandler.bindBlack();
+            	References.shadersHandler.bindBlack();
             }
-            else if(optifine && Utils.optifineHandler.isUseAlphaFunc())		
+            else if(optifine && References.optifineHandler.isUseAlphaFunc())		
             {		
-                GL11.glAlphaFunc(516, Utils.optifineHandler.getAlphaFuncLevel());		
+                GL11.glAlphaFunc(516, References.optifineHandler.getAlphaFuncLevel());		
             }
             renderglobal.sortAndRender(entityliving, 0, f);
             GL11.glShadeModel(7424 /*GL_FLAT*/);
             RenderHelper.enableStandardItemLighting();
-            if(shader && (Utils.shadersHandler.getWaterReflectiveItems() || i != 2) && !mc.gameSettings.anaglyph)
+            if(shader && (References.shadersHandler.getWaterReflectiveItems() || i != 2) && !mc.gameSettings.anaglyph)
             {
             	boolean third_person = false;
-                if(Utils.shadersHandler.getWaterReflectivePlayer() && i == 2)
+                if(References.shadersHandler.getWaterReflectivePlayer() && i == 2)
                 {
                     third_person = mc.gameSettings.thirdPersonView;
                     mc.gameSettings.thirdPersonView = true;
                 }
                 renderglobal.renderEntities(entityliving.getPosition(f), frustrum, f);
-                if(Utils.shadersHandler.getWaterReflectivePlayer() && i == 2)
+                if(References.shadersHandler.getWaterReflectivePlayer() && i == 2)
                 {
                     mc.gameSettings.thirdPersonView = third_person;
                 }
@@ -336,7 +336,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                 {
                 	EntityPlayer entityplayer = (EntityPlayer)entityliving;
                     GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                    if(!Utils.isInstalled(Utils.forgeHandler) || !Utils.forgeHandler.onBlockHighlight(renderglobal,entityplayer,
+                    if(!References.isInstalled(References.forgeHandler) || !References.forgeHandler.onBlockHighlight(renderglobal,entityplayer,
                 			mc.objectMouseOver,0,
                 			entityplayer.inventory.getCurrentItem(),f)) {
                         renderglobal.drawBlockBreaking(entityplayer, mc.objectMouseOver, 0, entityplayer.inventory.getCurrentItem(), f);
@@ -349,7 +349,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             }
             if(flag)
             {
-            	Utils.shadersHandler.unbindBlack();
+            	References.shadersHandler.unbindBlack();
             }
             GL11.glEnable(3042 /*GL_BLEND*/);
             GL11.glDisable(2884 /*GL_CULL_FACE*/);
@@ -357,17 +357,17 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             if(flag)
             {
                 GL11.glEnable(3553 /*GL_TEXTURE_2D*/);
-                Utils.shadersHandler.bindWhite(entityliving);
+                References.shadersHandler.bindWhite(entityliving);
             }
             
             if(!shader || (i == 0 || i == 1))
             {
                 if(second_renderpass && i == 0)
                 {
-                    Utils.shadersHandler.bindTransparency();
+                    References.shadersHandler.bindTransparency();
                 }
                 if(!shader) {
-                	if((!optifine && mc.gameSettings.fancyGraphics) || (optifine && Utils.optifineHandler.isWaterFancy()))
+                	if((!optifine && mc.gameSettings.fancyGraphics) || (optifine && References.optifineHandler.isWaterFancy()))
                     {
                         if(mc.gameSettings.ambientOcclusion)
                         {
@@ -375,7 +375,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                         }
                         GL11.glColorMask(false, false, false, false);
                         int i1;
-                        if(optifine) i1 = Utils.optifineHandler.renderAllSortedRenders(f);
+                        if(optifine) i1 = References.optifineHandler.renderAllSortedRenders(f);
                         else i1 = renderglobal.sortAndRender(entityliving, 1, f);
                         if(mc.gameSettings.anaglyph)
                         {
@@ -392,7 +392,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                         }
                         if(i1 > 0)
                         {
-                        	if(optifine) Utils.optifineHandler.renderAllSortedRenders(f);
+                        	if(optifine) References.optifineHandler.renderAllSortedRenders(f);
                         	else renderglobal.renderAllRenderLists(1, f);
                         }
                         GL11.glShadeModel(7424 /*GL_FLAT*/);
@@ -403,18 +403,18 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                     }
                 }
                 else {
-                	Utils.optifineHandler.renderAllSortedRenders(f);
+                	References.optifineHandler.renderAllSortedRenders(f);
                 }
                 
                 if(second_renderpass && i == 0)
                 {
-                	Utils.shadersHandler.unbindTransparency();
+                	References.shadersHandler.unbindTransparency();
                 }
             }
             if(i == 1 && flag)
             {
-            	Utils.shadersHandler.unbindWhite();
-            	Utils.shadersHandler.bindBlack();
+            	References.shadersHandler.unbindWhite();
+            	References.shadersHandler.bindBlack();
             }
             GL11.glDepthMask(true);
             GL11.glEnable(2884 /*GL_CULL_FACE*/);
@@ -423,7 +423,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
             {
                 EntityPlayer entityplayer1 = (EntityPlayer)entityliving;
                 GL11.glDisable(3008 /*GL_ALPHA_TEST*/);
-                if(!Utils.isInstalled(Utils.forgeHandler) || !Utils.forgeHandler.onBlockHighlight(renderglobal,entityplayer1,
+                if(!References.isInstalled(References.forgeHandler) || !References.forgeHandler.onBlockHighlight(renderglobal,entityplayer1,
             			mc.objectMouseOver,0,
             			entityplayer1.inventory.getCurrentItem(),f)) {
                     renderglobal.drawBlockBreaking(entityplayer1, mc.objectMouseOver, 0, entityplayer1.inventory.getCurrentItem(), f);
@@ -444,7 +444,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                 if((!optifine && pointedEntity == null) || (optifine && pointedEntity != null));
                 setupFog(0, f);
             }
-            if(!shader || (Utils.shadersHandler.getWaterReflectiveClouds() || i != 2)) {
+            if(!shader || (References.shadersHandler.getWaterReflectiveClouds() || i != 2)) {
                 GL11.glEnable(2912 /*GL_FOG*/);
                 renderglobal.renderClouds(f);
                 GL11.glDisable(2912 /*GL_FOG*/);
@@ -464,12 +464,12 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
                 {
                     if(flag)
                     {
-                    	Utils.shadersHandler.unbindBlack();
+                    	References.shadersHandler.unbindBlack();
                     }
                     GL11.glEnable(3553 /*GL_TEXTURE_2D*/);
                     flag = false;
                 }
-                Utils.shadersHandler.unbind();
+                References.shadersHandler.unbind();
                 if(i == 2)
                 {
                     GL11.glPopMatrix();
@@ -483,7 +483,7 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         }
         if(second_renderpass)
         {
-            Utils.shadersHandler.confusingShaderStuff();
+            References.shadersHandler.confusingShaderStuff();
         } else
         {
             GL11.glColorMask(true, true, true, false);

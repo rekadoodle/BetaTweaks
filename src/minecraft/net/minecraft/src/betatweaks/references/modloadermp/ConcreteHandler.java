@@ -3,6 +3,7 @@ package net.minecraft.src.betatweaks.references.modloadermp;
 import java.util.LinkedList;
 
 import net.minecraft.src.*;
+import net.minecraft.src.betatweaks.References;
 import net.minecraft.src.betatweaks.Utils;
 import net.minecraft.src.betatweaks.config.SBoolean;
 import net.minecraft.src.betatweaks.dummy.HandlerModLoaderMp;
@@ -85,15 +86,15 @@ public class ConcreteHandler extends HandlerModLoaderMp {
 				}
 				motd.setValue(packet.dataString[0]);
 				maxPlayers = packet.dataInt[packet.dataInt.length - 1];
-				if(Utils.isInstalled(Utils.guiapihandler))
-					Utils.guiapihandler.loadSettingsToGUI();
+				if(References.isInstalled(References.guiapihandler))
+					References.guiapihandler.loadSettingsToGUI();
 				break;
 			}
 			case PACKET_IN_OPPED_OR_DEOPPED:
 			{
 				isOp = packet.dataInt[0] == 1;
-				if(Utils.isInstalled(Utils.guiapihandler))
-					Utils.guiapihandler.loadSettingsToGUI();
+				if(References.isInstalled(References.guiapihandler))
+					References.guiapihandler.loadSettingsToGUI();
 				break;
 			}
 			

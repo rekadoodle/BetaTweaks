@@ -20,7 +20,7 @@ public class PunchSheepForWool {
 			if (entity instanceof EntitySheep) {
 				EntitySheep sheep = (EntitySheep) entity;
 				if (serverModEnabled) {
-					Utils.mpHandler.sheepPunched(sheep.entityId);
+					References.mpHandler.sheepPunched(sheep.entityId);
 				} else if (sheep.beenAttacked && !sheep.getSheared()) {
 					sheep.setSheared(true);
 					Random rand = new Random();
@@ -33,8 +33,8 @@ public class PunchSheepForWool {
 						wool.motionZ += (rand.nextFloat() - rand.nextFloat()) * 0.1F;
 					}
 				}
-			} else if (Utils.isInstalled(Utils.aetherHandler)) {
-				Utils.aetherHandler.shearSheepuff(entity);
+			} else if (References.isInstalled(References.aetherHandler)) {
+				References.aetherHandler.shearSheepuff(entity);
 			}
 		}
 	}

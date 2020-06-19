@@ -227,12 +227,12 @@ public class GuiImprovedChat extends GuiChat {
 			int lastSpaceIndex = message.substring(0, markerIndex).lastIndexOf(" ") + 1;
 			if(lastSpaceIndex < message.length()) {
 				String filter = message.substring(lastSpaceIndex, markerIndex);
-				if(Utils.isInstalled(Utils.mpHandler)) {
-					for(String playerName : Utils.mpHandler.playerList) {
+				if(References.isInstalled(References.mpHandler)) {
+					for(String playerName : References.mpHandler.playerList) {
 						if(playerName.toUpperCase().contains(filter.toUpperCase())) {
 							typeInChat(playerName.substring(filter.length()));
-							Utils.mpHandler.playerList.remove(playerName);
-							Utils.mpHandler.playerList.add(0, playerName);
+							References.mpHandler.playerList.remove(playerName);
+							References.mpHandler.playerList.add(0, playerName);
 							break;
 						}
 					}

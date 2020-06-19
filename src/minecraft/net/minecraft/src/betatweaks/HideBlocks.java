@@ -93,7 +93,7 @@ public class HideBlocks {
 			if (((hoveredBlock == Block.tallGrass && !longGrassVisible)
 					|| (hoveredBlock == Block.deadBush && !deadBushVisible))) {
 				if (serverModEnabled) {
-					Utils.mpHandler.longGrassDestroyed(x, y, z);
+					References.mpHandler.longGrassDestroyed(x, y, z);
 				} 
 				else if (!spWorld) {
 					mc.playerController.clickBlock(x, y, z, 0);

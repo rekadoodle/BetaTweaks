@@ -37,9 +37,9 @@ public class ThreadPollProxy extends Thread{
 				inputstream = new URL(proxyUrl + server.proxyName).openStream();
 				BufferedReader rd = new BufferedReader(new InputStreamReader(inputstream, Charset.forName("UTF-8")));
 				String jsonText = readAll(rd);
-				if(Utils.isInstalled(Utils.jsonHandler)) {
+				if(References.isInstalled(References.jsonHandler)) {
 					try {
-						int playerCount = Utils.jsonHandler.getPlayerCount(jsonText);
+						int playerCount = References.jsonHandler.getPlayerCount(jsonText);
 						server.playerCount = new StringBuilder("\2477").append(playerCount).append("\2478/\2477?").toString();
 						server.status = "Server Online";
 						server.responseTime = ServerData.ONLINE;

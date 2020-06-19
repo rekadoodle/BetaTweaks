@@ -31,18 +31,18 @@ public class BetaTweaks {
 	public static boolean dontOverride = false;
 	
 	public void modsLoaded() {
-		Utils.modsLoaded();
+		References.onModsLoaded();
 	}
 	
 	public void init(mod_BetaTweaks basemod) {
-		Utils.init();
+		References.init();
 		initSettings();
 		
 		ModLoader.SetInGameHook(basemod, true, false);
 		ModLoader.SetInGUIHook(basemod, true, false);
 		
 		if(!cfg.disableEntityRendererOverride.isEnabled()) {
-			if(!Utils.isInstalled(Utils.optifineHandler)) ModLoader.RegisterKey(basemod, zoom, false);
+			if(!References.isInstalled(References.optifineHandler)) ModLoader.RegisterKey(basemod, zoom, false);
 			Utils.MC.entityRenderer = new EntityRendererProxyFOV();
 		}
 		try {
@@ -102,8 +102,8 @@ public class BetaTweaks {
 		}
 		
 		
-		if (Utils.isInstalled(Utils.guiapihandler)) {
-			Utils.guiapihandler.handleTooltip(guiscreen);
+		if (References.isInstalled(References.guiapihandler)) {
+			References.guiapihandler.handleTooltip(guiscreen);
 		} 
 		else if (cfg.ingameTexurePackButton.isEnabled() && guiscreen instanceof GuiIngameMenu) {
 			if(buttonCount == -1 || controlList.size() == buttonCount) {
@@ -129,13 +129,13 @@ public class BetaTweaks {
 			this.onGuiScreenChanged(mc, guiscreen);
 		}
 		if (mc.theWorld != currentWorld) {
-			if (Utils.isInstalled(Utils.mpHandler) && mc.theWorld == null) {
-				Utils.mpHandler.serverModInstalled = false;
+			if (References.isInstalled(References.mpHandler) && mc.theWorld == null) {
+				References.mpHandler.serverModInstalled = false;
 			}
-			if (Utils.isInstalled(Utils.guiapihandler)
+			if (References.isInstalled(References.guiapihandler)
 					&& (currentWorld == null || !currentWorld.multiplayerWorld) != (mc.theWorld == null
 							|| !mc.theWorld.multiplayerWorld)) {
-				Utils.guiapihandler.loadSettingsToGUI();
+				References.guiapihandler.loadSettingsToGUI();
 			}
 			currentWorld = mc.theWorld;
 		}
@@ -154,8 +154,8 @@ public class BetaTweaks {
 		if (guiscreen instanceof GuiTexturePacks) {
 			initialTexturePack = Utils.MC.texturePackList.selectedTexturePack;
 		}
-		if (Utils.isInstalled(Utils.guiapihandler)) {
-			Utils.guiapihandler.onGuiScreenChanged(guiscreen);
+		if (References.isInstalled(References.guiapihandler)) {
+			References.guiapihandler.onGuiScreenChanged(guiscreen);
 		}
 		Utils.setParentScreen(guiscreen);
 	}
@@ -186,12 +186,12 @@ public class BetaTweaks {
 			DraggingShortcuts.onTick(mc);
 		}
 		boolean spWorld = !mc.theWorld.multiplayerWorld;
-		boolean serverModEnabled = !spWorld && Utils.isInstalled(Utils.mpHandler) && Utils.mpHandler.serverModInstalled;
+		boolean serverModEnabled = !spWorld && References.isInstalled(References.mpHandler) && References.mpHandler.serverModInstalled;
 
-		if ((spWorld && cfg.ladderGaps.isEnabled()) || (serverModEnabled && Utils.mpHandler.ladderGaps.isEnabled())) {
+		if ((spWorld && cfg.ladderGaps.isEnabled()) || (serverModEnabled && References.mpHandler.ladderGaps.isEnabled())) {
 			LadderGaps.onTick(mc);
 		}
-		if ((spWorld && cfg.punchSheepForWool.isEnabled()) || (serverModEnabled && Utils.mpHandler.punchSheepForWool.isEnabled())) {
+		if ((spWorld && cfg.punchSheepForWool.isEnabled()) || (serverModEnabled && References.mpHandler.punchSheepForWool.isEnabled())) {
 			PunchSheepForWool.onTick(mc, serverModEnabled);
 		}
 		if (spWorld && cfg.minecartBoosters.isEnabled()) {
@@ -200,7 +200,7 @@ public class BetaTweaks {
 		if (spWorld && cfg.boatElevators.isEnabled()) {
 			BoatElevators.onTick(mc);
 		}
-		if ((spWorld && cfg.hoeGrassForSeeds.isEnabled()) || (serverModEnabled && Utils.mpHandler.hoeGrassForSeeds.isEnabled())) {
+		if ((spWorld && cfg.hoeGrassForSeeds.isEnabled()) || (serverModEnabled && References.mpHandler.hoeGrassForSeeds.isEnabled())) {
 			HoeGrassForSeeds.onTick(mc, serverModEnabled);
 		}
 		if ((cfg.hideLongGrass.isEnabled() || cfg.hideDeadBush.isEnabled())) {

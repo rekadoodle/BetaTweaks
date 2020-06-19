@@ -3,7 +3,7 @@ package net.minecraft.src.betatweaks.config;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.src.betatweaks.CustomFullscreenRes;
-import net.minecraft.src.betatweaks.Utils;
+import net.minecraft.src.betatweaks.References;
 
 public class SettingInfo {
 	
@@ -192,14 +192,14 @@ public class SettingInfo {
 				"This was removed in Beta 1.6"
 		    };
 		}
-		if(setting == Utils.mpHandler.playerListAllowed) {
+		if(setting == References.mpHandler.playerListAllowed) {
 			return new String[] {
 				"Enable Player List",
 				"Should players be able to use the player list that was",
 				"introduced in Beta 1.8"
 			};
 		}
-		if(setting == Utils.mpHandler.motd) {
+		if(setting == References.mpHandler.motd) {
 			return new String[] {
 				"MOTD",
 				"The server description displayed in the server browser."

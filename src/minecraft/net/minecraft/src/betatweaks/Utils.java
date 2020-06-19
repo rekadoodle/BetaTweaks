@@ -21,7 +21,6 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.src.*;
-import net.minecraft.src.betatweaks.config.Config;
 import net.minecraft.src.betatweaks.config.SBase;
 import net.minecraft.src.betatweaks.dummy.*;
 
@@ -176,79 +175,6 @@ public class Utils {
 	
 	public static void resetMouseStillTime() {
 		mouseStillTime = System.currentTimeMillis();
-	}
-	
-	public static boolean isInstalled(Object handler) {
-		return handler != null;
-	}
-	
-	public static HandlerGuiAPI guiapihandler;
-	public static HandlerAether aetherHandler;
-	public static HandlerHMI hmiHandler;
-	public static HandlerMineColony minecolonyHandler;
-	public static HandlerForge forgeHandler;
-	public static HandlerShaders shadersHandler;
-	public static HandlerOptifine optifineHandler;
-	public static HandlerModLoaderMp mpHandler;
-	public static HandlerJSON jsonHandler;
-	public static HandlerGuiAPI modoptionsapiHandler;
-	
-	public static void init() {
-		Config cfg = Config.getInstance();
-		if(cfg.modloadermp.isEnabled() && nmsClassExists("ModLoaderMp")) {
-			mpHandler = (HandlerModLoaderMp) getHandler("modloadermp");
-		}
-		else {
-			mpHandler = new DummyHandlerModLoaderMp();
-		}
-		if(cfg.guiapi.isEnabled() && nmsClassExists("ModSettings")) {
-			guiapihandler = (HandlerGuiAPI) getHandler("guiapi");
-			
-			//One of the settings in GuiAPI is the custom resolution
-			//Loading all the system resolutions takes a couple of seconds so this happens on another thread
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					guiapihandler.init(CustomFullscreenRes.getResolutions());
-				}
-			}).start();
-		}
-		if(nmsClassExists("modoptionsapi.ModOptionsAPI")) {
-			//modoptionsapiHandler = (HandlerGuiAPI) getHandler("modoptionsapi");
-			//modoptionsapiHandler.init(null);
-		}
-		if(cfg.forge.isEnabled() && nmsClassExists("forge.ForgeHooksClient")) {
-			forgeHandler = (HandlerForge) getHandler("forge");
-		}
-		if(cfg.shaders.isEnabled() && nmsClassExists("Shader")) {
-			shadersHandler = (HandlerShaders) getHandler("shaders");
-		}
-		if(cfg.optifine.isEnabled() && nmsClassExists("GuiDetailSettingsOF")) {
-			optifineHandler = (HandlerOptifine) getHandler("optifine");
-		}
-		if(cfg.json.isEnabled() && classExists("org.json.JSONObject")) {
-			jsonHandler = (HandlerJSON) getHandler("json");
-		}
-	}
-	
-	public static void modsLoaded() {
-		Config cfg = Config.getInstance();
-		if(cfg.hmi.isEnabled() && isModLoaded("mod_HowManyItems")) {
-			hmiHandler = (HandlerHMI) getHandler("hmi");
-		}
-		if(cfg.minecolony.isEnabled() && isModLoaded("mod_MineColony")) {
-			minecolonyHandler = (HandlerMineColony) getHandler("minecolony");
-		}
-		if(cfg.aether.isEnabled() && isModLoaded("mod_Aether")) {
-			aetherHandler = (HandlerAether) getHandler("aether");
-		}
-	}
-	
-	public static Object getHandler(String path) {
-		try { 
-			return Utils.class.getClassLoader().loadClass(Utils.class.getPackage().getName() + ".references." + path + ".ConcreteHandler").newInstance(); 
-		}
-		catch (Throwable e) { e.printStackTrace(); return null; } 
 	}
 	
 	public static void logError(String... lines) {

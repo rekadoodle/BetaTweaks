@@ -24,6 +24,7 @@ import net.minecraft.src.World;
 import net.minecraft.src.betatweaks.BetaTweaks;
 import net.minecraft.src.betatweaks.CustomFullscreenRes;
 import net.minecraft.src.betatweaks.Graphics;
+import net.minecraft.src.betatweaks.References;
 import net.minecraft.src.betatweaks.Utils;
 import net.minecraft.src.betatweaks.config.Config;
 import net.minecraft.src.betatweaks.config.SBase;
@@ -35,7 +36,7 @@ import net.minecraft.src.betatweaks.dummy.HandlerModLoaderMp;
 
 public class ConcreteHandler extends HandlerGuiAPI {
 
-	final HandlerVersionSpecificVariables HANDLER = (HandlerVersionSpecificVariables) Utils.getHandler("guiapi" + (Utils.classExists("GuiApiHelper") ? ".v11" : ".v10"));
+	final HandlerVersionSpecificVariables HANDLER = (HandlerVersionSpecificVariables) References.getHandler("guiapi" + (Utils.classExists("GuiApiHelper") ? ".v11" : ".v10"));
 	
 	private Config cfg = Config.getInstance();
 	
@@ -118,8 +119,8 @@ public class ConcreteHandler extends HandlerGuiAPI {
 		}
 		
 		//SERVER SETTINGS
-		if (Utils.isInstalled(Utils.mpHandler)) {
-			HandlerModLoaderMp mp = Utils.mpHandler;
+		if (References.isInstalled(References.mpHandler)) {
+			HandlerModLoaderMp mp = References.mpHandler;
 			for(SBase<?> setting : mp.opOptions) {
 				createSetting(setting, widgetServer);
 			}
@@ -269,7 +270,7 @@ public class ConcreteHandler extends HandlerGuiAPI {
 				}
 			}
 			else {
-				Utils.mpHandler.checkIfOp();
+				References.mpHandler.checkIfOp();
 			}
 		}
 	}
@@ -284,7 +285,7 @@ public class ConcreteHandler extends HandlerGuiAPI {
 		
 		World world = Utils.MC.theWorld;
 		boolean clientside = world == null || !world.multiplayerWorld;
-		boolean serverMod = Utils.mpHandler.serverModInstalled;
+		boolean serverMod = References.mpHandler.serverModInstalled;
 		widgetGameplay.setEnabled(clientside || serverMod);
 		if(clientside) {
 			for(int i = 0; i < widgetGameplay.getNumChildren(); i++) {
@@ -299,8 +300,8 @@ public class ConcreteHandler extends HandlerGuiAPI {
 		}
 		else {
 			if (serverMod) {
-				setServerSettingsVisibility(Utils.mpHandler.isOp);
-				for(SBase<?> setting : Utils.mpHandler.options) {
+				setServerSettingsVisibility(References.mpHandler.isOp);
+				for(SBase<?> setting : References.mpHandler.options) {
 					loadSettingToGUI(setting);
 				}
 			} 
@@ -337,7 +338,7 @@ public class ConcreteHandler extends HandlerGuiAPI {
 		
 		World world = Utils.MC.theWorld;
 		boolean clientside = world == null || !world.multiplayerWorld;
-		HandlerModLoaderMp mpHandler = Utils.mpHandler;
+		HandlerModLoaderMp mpHandler = References.mpHandler;
 		if (clientside) {
 			for(SBase<?> setting : cfg.optionsGameplay) {
 				if(setting.hasGuiAPI())

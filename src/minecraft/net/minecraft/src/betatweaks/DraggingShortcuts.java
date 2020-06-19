@@ -38,13 +38,13 @@ public class DraggingShortcuts {
 		if(!(guiscreen instanceof GuiContainer)) {
 			return;
 		}
-		if(Utils.isInstalled(Utils.hmiHandler) && Utils.hmiHandler.isGuiRecipeViewer(guiscreen)) {
+		if(References.isInstalled(References.hmiHandler) && References.hmiHandler.isGuiRecipeViewer(guiscreen)) {
 			return;
 		}
 		GuiContainer container = (GuiContainer)guiscreen;
 		
-		if(Utils.isInstalled(Utils.minecolonyHandler)) {
-			if(Utils.minecolonyHandler.disallowDraggingShortcuts(container)) {
+		if(References.isInstalled(References.minecolonyHandler)) {
+			if(References.minecolonyHandler.disallowDraggingShortcuts(container)) {
 				return;
 			}
 		}
