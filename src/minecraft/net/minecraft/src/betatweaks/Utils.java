@@ -62,6 +62,14 @@ public class Utils {
 		return true;
 	}
 	
+	public static boolean nmsClassExists(String className) {
+		return classExists(className) || classExists("net.minecraft.src." + className);
+	}
+	
+	public static boolean isModLoaded(String modName) {
+		return ModLoader.isModLoaded(modName) || ModLoader.isModLoaded("net.minecraft.src." + modName);
+	}
+	
 	public static void setParentScreen(GuiScreen guiscreen) {
 		parentScreen = guiscreen;
 	}
@@ -185,13 +193,13 @@ public class Utils {
 	public static HandlerGuiAPI modoptionsapiHandler;
 	
 	public static void init() {
-		if(classExists("ModLoaderMp")) {
+		if(nmsClassExists("ModLoaderMp")) {
 			mpHandler = (HandlerModLoaderMp) getHandler("modloadermp");
 		}
 		else {
 			mpHandler = new DummyHandlerModLoaderMp();
 		}
-		if(classExists("ModSettings")) {
+		if(nmsClassExists("ModSettings")) {
 			guiapihandler = (HandlerGuiAPI) getHandler("guiapi");
 			
 			//One of the settings in GuiAPI is the custom resolution
@@ -203,17 +211,17 @@ public class Utils {
 				}
 			}).start();
 		}
-		if(classExists("modoptionsapi.ModOptionsAPI")) {
+		if(nmsClassExists("modoptionsapi.ModOptionsAPI")) {
 			//modoptionsapiHandler = (HandlerGuiAPI) getHandler("modoptionsapi");
 			//modoptionsapiHandler.init(null);
 		}
-		if(classExists("forge.ForgeHooksClient")) {
+		if(nmsClassExists("forge.ForgeHooksClient")) {
 			forgeHandler = (HandlerForge) getHandler("forge");
 		}
-		if(classExists("Shader")) {
+		if(nmsClassExists("Shader")) {
 			shadersHandler = (HandlerShaders) getHandler("shaders");
 		}
-		if(classExists("GuiDetailSettingsOF")) {
+		if(nmsClassExists("GuiDetailSettingsOF")) {
 			optifineHandler = (HandlerOptifine) getHandler("optifine");
 		}
 		if(classExists("org.json.JSONObject")) {
@@ -222,17 +230,13 @@ public class Utils {
 	}
 	
 	public static void modsLoaded() {
-		String modpackage = "";
-		if(mod_BetaTweaks.class.getPackage() != null) {
-			modpackage = mod_BetaTweaks.class.getPackage().getName() + '.';
-		}
-		if(ModLoader.isModLoaded(modpackage + "mod_HowManyItems")) {
+		if(isModLoaded("mod_HowManyItems")) {
 			hmiHandler = (HandlerHMI) getHandler("hmi");
 		}
-		if(ModLoader.isModLoaded(modpackage + "mod_MineColony")) {
+		if(isModLoaded("mod_MineColony")) {
 			minecolonyHandler = (HandlerMineColony) getHandler("minecolony");
 		}
-		if(ModLoader.isModLoaded(modpackage + "mod_Aether")) {
+		if(isModLoaded("mod_Aether")) {
 			aetherHandler = (HandlerAether) getHandler("aether");
 		}
 	}
