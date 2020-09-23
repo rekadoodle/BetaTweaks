@@ -169,7 +169,7 @@ public class DraggingShortcuts {
 			}
 			else if(Mouse.isButtonDown(0)) {
 				if (spreading) {
-					if(!slot.getHasStack() && slot.isItemValid(player.inventory.getItemStack())) {
+					if(!slot.getHasStack() && player.inventory.getItemStack() != null && slot.isItemValid(player.inventory.getItemStack())) {
 						if(spreadCount == -1) {
 							spreadCount = player.inventory.getItemStack().stackSize;
 						}
