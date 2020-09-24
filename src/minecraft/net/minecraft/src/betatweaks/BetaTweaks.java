@@ -42,7 +42,8 @@ public class BetaTweaks {
 		ModLoader.SetInGUIHook(basemod, true, false);
 		
 		if(!cfg.disableEntityRendererOverride.isEnabled()) {
-			if(!References.isInstalled(References.optifineHandler)) ModLoader.RegisterKey(basemod, zoom, false);
+			if(!References.isInstalled(References.optifineHandler))
+				ModLoader.RegisterKey(basemod, zoom, false);
 			Utils.MC.entityRenderer = new EntityRendererProxyFOV();
 		}
 		try {
@@ -101,11 +102,10 @@ public class BetaTweaks {
 			overrideIngameChat = false;
 		}
 		
-		
 		if (References.isInstalled(References.guiapihandler)) {
 			References.guiapihandler.handleTooltip(guiscreen);
 		} 
-		else if (cfg.ingameTexurePackButton.isEnabled() && guiscreen instanceof GuiIngameMenu) {
+		if (cfg.ingameTexurePackButton.isEnabled() && guiscreen instanceof GuiIngameMenu) {
 			if(buttonCount == -1 || controlList.size() == buttonCount) {
 				buttonCount = controlList.size();
 				texturePackButton = new GuiButton(137, guiscreen.width / 2 - 100, guiscreen.height / 4 + 72 + (byte)-16, "Mods and Texture Packs");
