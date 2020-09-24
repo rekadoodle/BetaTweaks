@@ -1,16 +1,7 @@
 package net.minecraft.src.betatweaks;
 
 import net.minecraft.src.betatweaks.config.Config;
-import net.minecraft.src.betatweaks.dummy.DummyHandlerModLoaderMp;
-import net.minecraft.src.betatweaks.dummy.HandlerAether;
-import net.minecraft.src.betatweaks.dummy.HandlerForge;
-import net.minecraft.src.betatweaks.dummy.HandlerGuiAPI;
-import net.minecraft.src.betatweaks.dummy.HandlerHMI;
-import net.minecraft.src.betatweaks.dummy.HandlerJSON;
-import net.minecraft.src.betatweaks.dummy.HandlerMineColony;
-import net.minecraft.src.betatweaks.dummy.HandlerModLoaderMp;
-import net.minecraft.src.betatweaks.dummy.HandlerOptifine;
-import net.minecraft.src.betatweaks.dummy.HandlerShaders;
+import net.minecraft.src.betatweaks.dummy.*;
 
 public class References {
 
@@ -24,6 +15,7 @@ public class References {
 	public static HandlerModLoaderMp mpHandler;
 	public static HandlerJSON jsonHandler;
 	public static HandlerGuiAPI modoptionsapiHandler;
+	public static HandlerOAPI oapiHandler;
 	
 	public static void init() {
 		Config cfg = Config.getInstance();
@@ -60,6 +52,9 @@ public class References {
 		}
 		if(cfg.json.isEnabled() && Utils.classExists("org.json.JSONObject")) {
 			jsonHandler = (HandlerJSON) References.getHandler("json");
+		}
+		if(cfg.oapi.isEnabled() && Utils.nmsClassExists("overrideapi.OverrideAPI")) {
+			oapiHandler = (HandlerOAPI) References.getHandler("oapi");
 		}
 	}
 	

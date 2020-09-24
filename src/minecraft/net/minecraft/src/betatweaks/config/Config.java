@@ -214,6 +214,7 @@ public class Config {
 	public SBoolean hmi = new SBoolean("enableHowManyItemsCompatibility", true);
 	public SBoolean minecolony = new SBoolean("enableMineColonyCompatibility", true);
 	public SBoolean aether = new SBoolean("enableAetherCompatibility", true);
+	public SBoolean oapi = new SBoolean("enableOAPICompatibility", true);
 	
 	public SBoolean punchSheepForWool = new SBoolean("punchSheepForWool", true, true);
 	public SBoolean ladderGaps = new SBoolean("ladderGaps", true, true);
@@ -228,7 +229,7 @@ public class Config {
 			improvedChatMaxScrollableMessages, improvedChatIndicator, improvedChatInvisibleToggleButton, scrollableControls, ingameTexurePackButton,
 			hideAchievementNotifications, disableEntityRendererOverride, fovSlider, fov, indevStorageBlocks, hideLongGrass, hideDeadBush,
 			customFullscreenRes,
-			modloadermp, guiapi, forge, shaders, optifine, json, hmi, minecolony, aether
+			modloadermp, guiapi, forge, shaders, optifine, json, hmi, minecolony, aether, oapi
 	};
 	
 	public final SBase<?>[] optionsGameplay = {

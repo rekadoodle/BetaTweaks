@@ -45,7 +45,15 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
         	matrixbuffer = ByteBuffer.allocateDirect(64);
             projectionmatrixbuffer = ByteBuffer.allocateDirect(64);
         }
+        oapi = References.isInstalled(References.oapiHandler) && this.getClass() == EntityRendererProxyFOV.class;
     }
+    
+    @Override
+	public void updateCameraAndRender(float f) {
+	    if (oapi)
+	        References.oapiHandler.updateCameraAndRender(f);
+        super.updateCameraAndRender(f);
+	}
     
     private float getFOVModifier(float f, boolean isHand) {
     	EntityLiving entityliving = mc.renderViewEntity;
@@ -815,5 +823,6 @@ public class EntityRendererProxyFOV extends EntityRendererProxy
     private double cameraZoom;
     private double cameraYaw;
     private double cameraPitch;
+    boolean oapi;
 
 }
