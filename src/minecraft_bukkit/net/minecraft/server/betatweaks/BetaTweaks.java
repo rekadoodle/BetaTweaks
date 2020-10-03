@@ -35,9 +35,11 @@ public class BetaTweaks {
         initSettings();
         
         //disable bukkit chat spacing
-		Utils.EasyField<Integer> chatboxSizeField = new Utils.EasyField<Integer>(TextWrapper.class, "CHAT_WINDOW_WIDTH");
-		chatboxSizeField.removeFinalModifier();
-		chatboxSizeField.set(99999);
+        if(cfg.disableBukkitChatSpacing.isEnabled()) {
+    		Utils.EasyField<Integer> chatboxSizeField = new Utils.EasyField<Integer>(TextWrapper.class, "CHAT_WINDOW_WIDTH");
+    		chatboxSizeField.removeFinalModifier();
+    		chatboxSizeField.set(99999);
+        }
 	}
 	
 	public String version() {

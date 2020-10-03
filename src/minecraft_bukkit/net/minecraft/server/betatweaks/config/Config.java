@@ -88,9 +88,10 @@ public class Config {
 	
 	public SBoolean allowPlayerList = new SBoolean("allowPlayerList", true);
 	public SString serverMOTD = new SString("serverMOTD", "A Minecraft Server");
+	public SBoolean disableBukkitChatSpacing = new SBoolean("disableBukkitChatSpacing", true);
 	
 	public final SBase<?>[] options = {
 			punchSheepForWool, ladderGaps, lightTNTwithFist, hoeGrassForSeeds, minecartBoosters, boatElevators,
-			allowPlayerList, serverMOTD
+			allowPlayerList, serverMOTD, disableBukkitChatSpacing
 	};
 }
