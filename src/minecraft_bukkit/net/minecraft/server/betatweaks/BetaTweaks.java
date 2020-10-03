@@ -19,6 +19,7 @@ public class BetaTweaks {
 	
 	private final int PACKET_OUT_PLAYERLIST = 2;
 	private final int PACKET_OUT_IS_OP = 1;
+	private final int PACKET_OUT_LOGIN = 0;
 	
 	private final SBoolean[] boolOptions = {
 			cfg.punchSheepForWool, cfg.ladderGaps, cfg.lightTNTwithFist, cfg.hoeGrassForSeeds, cfg.minecartBoosters, cfg.boatElevators,
@@ -62,13 +63,12 @@ public class BetaTweaks {
 	
 	public void handleLogin(EntityPlayer entityplayermp)
     {
-		this.playerCount++;
 		
 		int[] dataInt = new int[1];
 		dataInt[0] = Utils.mc.serverConfigurationManager.isOp(entityplayermp.name) ? 1 : 0;
 		
 		Packet230ModLoader packet = new Packet230ModLoader();
-		packet.packetType = 1;
+		packet.packetType = PACKET_OUT_IS_OP;
 		packet.dataInt = dataInt;
 		ModLoaderMp.SendPacketTo(basemod, entityplayermp, packet);
 		
@@ -83,7 +83,7 @@ public class BetaTweaks {
 		dataString[0] = cfg.serverMOTD.getValue();
 		
 		packet = new Packet230ModLoader();
-		packet.packetType = 0;
+		packet.packetType = PACKET_OUT_LOGIN;
 		packet.dataInt = dataInt;
 		packet.dataString = dataString;
 		ModLoaderMp.SendPacketTo(basemod, entityplayermp, packet);
