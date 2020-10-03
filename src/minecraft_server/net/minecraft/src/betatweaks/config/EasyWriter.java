@@ -10,6 +10,7 @@ public class EasyWriter implements AutoCloseable {
 	private final BufferedWriter bufferedWriter;
 	
 	public EasyWriter(File file) throws IOException {
+		file.getParentFile().mkdirs();
 		bufferedWriter = new BufferedWriter(new FileWriter(file));
 	}
 	
