@@ -31,6 +31,7 @@ public class DraggingShortcuts {
 	private static int lastSlotNo;
 	private static ArrayList<Integer> spreadSlots = new ArrayList<Integer>();
 	private static boolean rmbHeld;
+	private static ItemStack spreadingItem;
 
     private static final Method getSlot = Utils.getMethod(GuiContainer.class,  new Class<?>[] {int.class, int.class}, "getSlotAtPosition", "a");
 
@@ -86,6 +87,7 @@ public class DraggingShortcuts {
     			else if(Mouse.getEventButton() == 0 && !itemClickedOn && !slot.getHasStack()
     					&& player.inventory.getItemStack() != null) {
     				spreading = true;
+    				spreadingItem = player.inventory.getItemStack();
     			}
     			else if(Mouse.getEventButton() == 0
     					&& player.inventory.getItemStack() != null && slot.getHasStack()
@@ -169,7 +171,7 @@ public class DraggingShortcuts {
 			}
 			else if(Mouse.isButtonDown(0)) {
 				if (spreading) {
-					if(!slot.getHasStack() && player.inventory.getItemStack() != null && slot.isItemValid(player.inventory.getItemStack())) {
+					if(!slot.getHasStack() && slot.isItemValid(spreadingItem)) {
 						if(spreadCount == -1) {
 							spreadCount = player.inventory.getItemStack().stackSize;
 						}
