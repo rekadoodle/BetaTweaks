@@ -59,7 +59,7 @@ public class BetaTweaks {
 	
 	public void initSettings() {
 		if (cfg.lightTNTwithFist.isEnabled() && Block.TNT.getClass() == BlockTNT.class) {
-			Utils.replaceBlock(new BlockTNTPunchable(), "tnt", "an");
+			Utils.replaceBlock(new BlockTNTPunchable(), "TNT");
     	}
 	}
 	
