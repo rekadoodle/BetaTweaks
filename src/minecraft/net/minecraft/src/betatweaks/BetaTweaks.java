@@ -32,11 +32,11 @@ public class BetaTweaks {
 	
 	public void modsLoaded() {
 		References.onModsLoaded();
+		initSettings();
 	}
 	
 	public void init(mod_BetaTweaks basemod) {
 		References.init();
-		initSettings();
 		
 		ModLoader.SetInGameHook(basemod, true, false);
 		ModLoader.SetInGUIHook(basemod, true, false);
@@ -72,7 +72,11 @@ public class BetaTweaks {
 		guiOverrides.clear();
 		if(cfg.improvedChat.isEnabled()) guiOverrides.put(GuiChat.class, GuiImprovedChat.class);
 		if(cfg.scrollableControls.isEnabled()) guiOverrides.put(GuiControls.class, GuiControlsScrollable.class);
-		if(cfg.serverList.isEnabled()) guiOverrides.put(GuiMultiplayer.class, GuiServerList.class);
+		if(cfg.serverList.isEnabled()) {
+			guiOverrides.put(GuiMultiplayer.class, GuiServerList.class);
+			if(References.isInstalled(References.aetherHandler))
+				References.aetherHandler.registerGuiOverrides(guiOverrides);
+		}
 		
 		if (cfg.logoStyle.getValue() != 0 || cfg.mainmenuPanorama.isEnabled()) {
 			guiOverrides.put(GuiMainMenu.class, GuiMainMenuCustom.class);
@@ -81,8 +85,6 @@ public class BetaTweaks {
 			guiOverrides.put(GuiMainMenuCustom.class, GuiMainMenu.class);
 		}
 	}
-	
-	int key;
 	
 	public void onTickInGUI(Minecraft mc, GuiScreen guiscreen) {
 		
@@ -122,8 +124,6 @@ public class BetaTweaks {
 				controlList.add(new GuiSliderBT(guiscreen.width / 2 - 155 + guiOptionsButtonCount % 2 * 160, guiscreen.height / 6 + 24 * (guiOptionsButtonCount >> 1), cfg.fov));
 				((GuiButton)controlList.get(buttonCount2)).drawButton(mc, Utils.cursorX(), Utils.cursorY());
 			}
-			
-			
 		}
 		if(guiscreen != Utils.getParentScreen()) {
 			this.onGuiScreenChanged(mc, guiscreen);
@@ -149,7 +149,11 @@ public class BetaTweaks {
 	
 	public void onGuiScreenChanged(Minecraft mc, GuiScreen guiscreen) {
 		if(guiOverrides.containsKey(guiscreen.getClass()) && !dontOverride) {
+			if(References.isInstalled(References.aetherHandler))
+				References.aetherHandler.preGuiScreenOverride(guiscreen);
 			guiscreen = Utils.overrideCurrentScreen(guiOverrides.get(guiscreen.getClass()));
+			if(References.isInstalled(References.aetherHandler))
+				References.aetherHandler.postGuiScreenOverride(guiscreen);
 		}
 		if (guiscreen instanceof GuiTexturePacks) {
 			initialTexturePack = Utils.MC.texturePackList.selectedTexturePack;

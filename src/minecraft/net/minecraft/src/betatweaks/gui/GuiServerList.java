@@ -19,6 +19,7 @@ import net.minecraft.src.StringTranslate;
 import net.minecraft.src.mod_BetaTweaks;
 import net.minecraft.src.betatweaks.BetaTweaks;
 import net.minecraft.src.betatweaks.CompressedStreamToolsMP;
+import net.minecraft.src.betatweaks.References;
 import net.minecraft.src.betatweaks.ServerData;
 import net.minecraft.src.betatweaks.Utils;
 
@@ -28,6 +29,9 @@ import org.lwjgl.input.Mouse;
 public class GuiServerList extends GuiScreen
 {
 
+	public boolean aetherMainMenuBoolean = false;
+	public Integer aetherMainMenuMusicInt;
+	
     public GuiServerList()
     {
     	this(Utils.getParentScreen());
@@ -94,6 +98,9 @@ public class GuiServerList extends GuiScreen
     public void onGuiClosed()
     {
         Keyboard.enableRepeatEvents(false);
+        if(aetherMainMenuBoolean && References.isInstalled(References.aetherHandler) && aetherMainMenuMusicInt != null) {
+        	References.aetherHandler.onServerListClosed(aetherMainMenuMusicInt);
+        }
     }
 
     @Override
@@ -116,7 +123,12 @@ public class GuiServerList extends GuiScreen
         	joinServer(serverList.get(selectedServerIndex).ip);
         } 
         else if(guibutton.id == 4) {
-            mc.displayGuiScreen(new GuiMultiplayer(this));
+        	if(References.isInstalled(References.aetherHandler) && this.aetherMainMenuMusicInt != null) {
+        		References.aetherHandler.displayAetherMultiplayer(this, this.aetherMainMenuMusicInt);
+        	}
+        	else {
+                mc.displayGuiScreen(new GuiMultiplayer(this));
+        	}
         } 
         else if(guibutton.id == 3) {
             mc.displayGuiScreen(new GuiAddServer(this));
@@ -231,6 +243,7 @@ public class GuiServerList extends GuiScreen
     
     public void joinServer(String address)
     {
+    	aetherMainMenuBoolean = true;
     	BetaTweaks.dontOverride = false;
     	String[] ip = splitIP(address);
         mc.displayGuiScreen(new GuiConnecting(mc, ip[0], Integer.parseInt(ip[1])));
