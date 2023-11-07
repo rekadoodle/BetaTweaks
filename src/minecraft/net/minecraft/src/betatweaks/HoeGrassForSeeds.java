@@ -14,7 +14,7 @@ import net.minecraft.src.MovingObjectPosition;
 
 public class HoeGrassForSeeds {
 
-	private static int lastTickHoeDamage;
+	private static int lastTickHoeDamage = -1;
 	private static int lastTickHoeX;
 	private static int lastTickHoeY;
 	private static int lastTickHoeZ;
@@ -23,7 +23,7 @@ public class HoeGrassForSeeds {
 		ItemStack heldItem = mc.thePlayer.getCurrentEquippedItem();
 		MovingObjectPosition hoveredObj = mc.objectMouseOver;
 		if(heldItem != null && heldItem.getItem() instanceof ItemHoe) {
-			if(lastTickHoeDamage == heldItem.getItemDamage() - 1) {
+			if(lastTickHoeDamage >= 0 && lastTickHoeDamage == heldItem.getItemDamage() - 1) {
 				lastTickHoeDamage = -1;
 				if (serverModEnabled) {
 					References.mpHandler.grassHoed(lastTickHoeX, lastTickHoeY, lastTickHoeZ);
